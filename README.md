@@ -12,9 +12,9 @@ A Telegram bot that helps students discover fully-funded scholarships worldwide.
 4. Select your preferred region
 5. Get matching scholarships with deadlines, funding details, and direct links
 
-![Bot Interface](images/scholarfinder_start.jpg)
+![Bot Interface](images/IMG_2230.jpeg)
 
-![Search Results](images/scholarfinder_results.jpg)
+![Search Results](images/IMG_2232.jpeg)
 
 ## Features
 
