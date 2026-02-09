@@ -858,6 +858,58 @@
     // ==========================================
     // INIT
     // ==========================================
+    // ==========================================
+    // TYPEWRITER EFFECT
+    // ==========================================
+    function initTypewriter() {
+        const messages = [
+            "🔍 Search 151+ scholarships across 46 countries",
+            "🏫 Explore 86 top universities worldwide",
+            "🌍 Find internships, research programs & competitions",
+            "💰 Compare cost of living in 51+ cities",
+            "🛂 Get visa guides for 26 countries",
+            "📚 IELTS, TOEFL, SAT, GRE prep resources",
+            "📝 Essay templates & writing guides",
+            "🤖 Join our Telegram bot for personalized picks",
+            "🎓 Built by Scott Antwi — Alpha Global Minds",
+        ];
+        const el = document.getElementById('typewriterText');
+        if (!el) return;
+
+        let msgIndex = 0;
+        let charIndex = 0;
+        let deleting = false;
+        const typeSpeed = 40;
+        const deleteSpeed = 25;
+        const pauseAfterType = 2000;
+        const pauseAfterDelete = 400;
+
+        function tick() {
+            const currentMsg = messages[msgIndex];
+            if (!deleting) {
+                el.textContent = currentMsg.substring(0, charIndex + 1);
+                charIndex++;
+                if (charIndex === currentMsg.length) {
+                    deleting = true;
+                    setTimeout(tick, pauseAfterType);
+                    return;
+                }
+                setTimeout(tick, typeSpeed);
+            } else {
+                el.textContent = currentMsg.substring(0, charIndex - 1);
+                charIndex--;
+                if (charIndex === 0) {
+                    deleting = false;
+                    msgIndex = (msgIndex + 1) % messages.length;
+                    setTimeout(tick, pauseAfterDelete);
+                    return;
+                }
+                setTimeout(tick, deleteSpeed);
+            }
+        }
+        tick();
+    }
+
     async function init() {
         initNavigation();
 
@@ -870,6 +922,7 @@
 
         // Initialize all sections
         animateCounters();
+        initTypewriter();
         initGlobalSearch();
         initScholarships();
         initUniversities();
