@@ -1,0 +1,236 @@
+[
+  {
+    "country": "USA",
+    "visa_type": "F-1 Student Visa",
+    "documents": ["Valid passport", "Form I-20 from university", "DS-160 confirmation page", "SEVIS fee receipt ($350)", "Passport photos", "Financial proof (bank statements)", "Admission letter", "Academic transcripts", "English test scores", "Visa interview appointment"],
+    "processing_time": "3-8 weeks (book interview early)",
+    "cost_estimate": "$185 (visa fee) + $350 (SEVIS fee) = ~$535",
+    "embassy_link": "https://gh.usembassy.gov/visas/",
+    "tips": "Apply early (3-4 months before). Prepare for visa interview thoroughly. Show strong ties to Ghana. Demonstrate you have sufficient funding for entire program."
+  },
+  {
+    "country": "UK",
+    "visa_type": "Student Visa (Tier 4)",
+    "documents": ["Valid passport", "CAS number from university", "TB test results", "Financial proof (£1,334/month London or £1,023/month outside London)", "English language proof", "Academic documents", "Passport photos", "Immigration Health Surcharge payment"],
+    "processing_time": "3-6 weeks",
+    "cost_estimate": "£490 (visa fee) + £776/year (health surcharge) = ~£1,266 first year",
+    "embassy_link": "https://www.gov.uk/government/world/organisations/british-high-commission-accra",
+    "tips": "Apply up to 6 months before course start. You can work 20hrs/week during term. IHS (health surcharge) covers NHS access. Apply online then visit VFS Global in Accra."
+  },
+  {
+    "country": "Canada",
+    "visa_type": "Study Permit",
+    "documents": ["Valid passport", "Letter of acceptance from DLI", "Proof of funds (CAD $20,636/year + tuition)", "Passport photos", "Immigration medical exam", "Police clearance", "Letter of explanation", "Digital photo", "Biometrics"],
+    "processing_time": "4-12 weeks",
+    "cost_estimate": "CAD $150 (study permit) + CAD $85 (biometrics) = ~CAD $235",
+    "embassy_link": "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada.html",
+    "tips": "Apply online through IRCC. You can work 20hrs/week off-campus. Post-graduation work permit (PGWP) available. Start early — processing can be slow."
+  },
+  {
+    "country": "Germany",
+    "visa_type": "Student Visa (National Visa)",
+    "documents": ["Valid passport", "University admission letter", "Blocked account proof (€11,904/year)", "Health insurance", "Academic certificates", "Language proficiency proof", "Passport photos", "Motivation letter", "CV/resume"],
+    "processing_time": "4-12 weeks",
+    "cost_estimate": "€75 (visa fee)",
+    "embassy_link": "https://accra.diplo.de/gh-en",
+    "tips": "Open a blocked account (Expatrio or Fintiba) showing €11,904. No tuition at most public universities! Learn basic German even for English programs. Book embassy appointment early."
+  },
+  {
+    "country": "France",
+    "visa_type": "Long-Stay Student Visa (VLS-TS)",
+    "documents": ["Valid passport", "Campus France registration", "University acceptance letter", "Financial proof (€615/month minimum)", "Accommodation proof", "Health insurance", "Academic transcripts", "Language test results", "Passport photos"],
+    "processing_time": "2-6 weeks",
+    "cost_estimate": "€99 (visa fee) + €50 (Campus France fee)",
+    "embassy_link": "https://gh.ambafrance.org/",
+    "tips": "Register on Campus France (Études en France) first — mandatory step. Low tuition at public universities (~€243/year for EU rates with some scholarships). Student meals at CROUS for €3.30."
+  },
+  {
+    "country": "Netherlands",
+    "visa_type": "MVV + Residence Permit (Student)",
+    "documents": ["Valid passport", "University admission letter", "Proof of sufficient funds", "Health insurance", "Academic certificates", "Passport photos", "TB screening (if required)"],
+    "processing_time": "2-8 weeks (university usually sponsors MVV)",
+    "cost_estimate": "€210 (residence permit fee)",
+    "embassy_link": "https://www.netherlandsworldwide.nl/countries/ghana",
+    "tips": "Your university usually applies for your MVV on your behalf. Holland Scholarship (€5,000) available. English widely spoken. Cycling is the main transport!"
+  },
+  {
+    "country": "Sweden",
+    "visa_type": "Residence Permit for Studies",
+    "documents": ["Valid passport", "University admission letter", "Proof of funds (SEK 9,450/month)", "Health insurance", "Passport photos", "Proof of paid tuition"],
+    "processing_time": "4-8 weeks",
+    "cost_estimate": "SEK 1,500 (~$145)",
+    "embassy_link": "https://www.swedenabroad.se/en/embassies/ghana-accra/",
+    "tips": "Apply online at Migrationsverket. Swedish Institute Scholarship covers everything. Can work without restriction during studies."
+  },
+  {
+    "country": "Switzerland",
+    "visa_type": "Student Visa (National Visa D)",
+    "documents": ["Valid passport", "University acceptance letter", "Financial proof (CHF 21,000/year)", "Academic certificates", "CV/resume", "Motivation letter", "Health insurance", "Passport photos", "Criminal background check"],
+    "processing_time": "6-12 weeks",
+    "cost_estimate": "CHF 88 (~$95)",
+    "embassy_link": "https://www.eda.admin.ch/countries/ghana/en/home/representations/embassy.html",
+    "tips": "ETH Zurich and EPFL have very low tuition (~$1,500/year) but living costs are high. Apply to the Swiss embassy in Accra. Limited work hours (15hrs/week) during studies."
+  },
+  {
+    "country": "Australia",
+    "visa_type": "Student Visa (Subclass 500)",
+    "documents": ["Valid passport", "CoE from university", "GTE statement", "Financial proof (AUD 24,505/year)", "OSHC (health insurance)", "English test scores", "Academic documents", "Police clearance", "Health examination"],
+    "processing_time": "4-8 weeks",
+    "cost_estimate": "AUD $710 (~$470)",
+    "embassy_link": "https://ghana.embassy.gov.au/",
+    "tips": "Apply online via ImmiAccount. Can work up to 48 hours per fortnight. OSHC is mandatory. Post-study work visa available (2-4 years). Write a strong GTE statement."
+  },
+  {
+    "country": "Japan",
+    "visa_type": "Student Visa (College Student)",
+    "documents": ["Valid passport", "Certificate of Eligibility (CoE)", "Visa application form", "Passport photo", "University documents", "Financial proof"],
+    "processing_time": "1-3 weeks (after CoE, which takes 1-3 months)",
+    "cost_estimate": "Free for Ghanaians (visa fee waived)",
+    "embassy_link": "https://www.gh.emb-japan.go.jp/",
+    "tips": "Your university applies for CoE first, then you apply for visa. MEXT scholarship covers everything. Can work 28hrs/week on student visa. Japanese language helpful but not required for English programs."
+  },
+  {
+    "country": "South Korea",
+    "visa_type": "D-2 Student Visa",
+    "documents": ["Valid passport", "University admission letter", "Financial proof ($20,000+ in bank)", "Academic transcripts", "Passport photos", "Study plan", "Health certificate"],
+    "processing_time": "2-4 weeks",
+    "cost_estimate": "$60 (single entry) or $90 (multiple entry)",
+    "embassy_link": "https://overseas.mofa.go.kr/gh-en/index.do",
+    "tips": "KGSP provides visa support. Can work 20hrs/week after 6 months. Korean language course included with KGSP. Seoul is very affordable for students."
+  },
+  {
+    "country": "China",
+    "visa_type": "X1 Student Visa (>180 days) or X2 (<180 days)",
+    "documents": ["Valid passport", "JW201/JW202 form from university", "Admission notice", "Health examination record", "Passport photos", "Financial proof"],
+    "processing_time": "1-2 weeks",
+    "cost_estimate": "$140",
+    "embassy_link": "http://gh.china-embassy.gov.cn/",
+    "tips": "CSC scholarship handles most paperwork. Must convert X1 visa to residence permit within 30 days of arrival. Very affordable living costs. Learn basic Chinese — it helps a lot."
+  },
+  {
+    "country": "Turkey",
+    "visa_type": "Student Visa + Residence Permit",
+    "documents": ["Valid passport", "University acceptance letter", "Passport photos", "Health insurance", "Financial proof", "Return flight booking", "Accommodation proof"],
+    "processing_time": "2-8 weeks",
+    "cost_estimate": "$50-80 (varies)",
+    "embassy_link": "https://accra.be.mfa.gov.tr/",
+    "tips": "Turkiye Burslari handles visa process for scholarship recipients. Very affordable country. Learn Turkish — 1 year language prep included with TB scholarship."
+  },
+  {
+    "country": "UAE",
+    "visa_type": "Student Visa",
+    "documents": ["Valid passport", "University admission letter", "Passport photos", "Medical fitness test", "Emirates ID application", "Financial proof", "Health insurance"],
+    "processing_time": "2-4 weeks (university usually sponsors)",
+    "cost_estimate": "AED 500-1000 (~$135-270) — often covered by university",
+    "embassy_link": "https://www.mofaic.gov.ae/en/missions/accra",
+    "tips": "MBZUAI, NYUAD, and KAUST handle visa process for admitted students. No income tax in UAE. Very safe country. Hot climate — prepare for summer heat."
+  },
+  {
+    "country": "Saudi Arabia",
+    "visa_type": "Student Visa",
+    "documents": ["Valid passport", "University acceptance letter", "Medical report", "Police clearance", "Academic certificates (attested)", "Passport photos"],
+    "processing_time": "2-6 weeks",
+    "cost_estimate": "Usually free for scholarship students",
+    "embassy_link": "https://embassies.mofa.gov.sa/sites/Ghana/EN/Pages/default.aspx",
+    "tips": "KAUST and KFUPM handle everything for scholarship students. Very generous stipends. Segregated campuses but KAUST is liberal. Hot climate."
+  },
+  {
+    "country": "Singapore",
+    "visa_type": "Student's Pass",
+    "documents": ["Valid passport", "University admission letter (IPA letter)", "eForm 16", "Passport photos", "Medical examination", "Financial proof"],
+    "processing_time": "2-4 weeks",
+    "cost_estimate": "SGD $90 (~$65)",
+    "embassy_link": "https://www.mfa.gov.sg/Overseas-Mission/Accra",
+    "tips": "University applies through SOLAR system. Can work 16hrs/week during term. Very safe city. English is the main language. Hawker centres have cheap meals."
+  },
+  {
+    "country": "India",
+    "visa_type": "Student Visa",
+    "documents": ["Valid passport", "University admission letter", "Financial proof", "Passport photos", "Academic certificates", "Medical certificate", "Proof of accommodation"],
+    "processing_time": "1-3 weeks",
+    "cost_estimate": "$100-150",
+    "embassy_link": "https://www.hciaccra.gov.in/",
+    "tips": "ICCR scholarship handles visa. Very affordable country — $600/month is comfortable. IITs are world-class and very cheap. English widely spoken."
+  },
+  {
+    "country": "South Africa",
+    "visa_type": "Study Visa",
+    "documents": ["Valid passport", "University admission letter", "Medical/radiological reports", "Police clearance", "Financial proof", "Medical insurance", "Yellow fever vaccination certificate", "Passport photos"],
+    "processing_time": "4-8 weeks",
+    "cost_estimate": "ZAR 1,520 (~$80)",
+    "embassy_link": "https://www.dirco.gov.za/accra/",
+    "tips": "Apply at South African High Commission in Accra. Relatively affordable. UCT, Wits, and Stellenbosch are top universities. Can work 20hrs/week."
+  },
+  {
+    "country": "Hungary",
+    "visa_type": "Student Visa + Residence Permit",
+    "documents": ["Valid passport", "University admission letter", "Financial proof (HUF 200,000/month)", "Health insurance", "Accommodation proof", "Academic certificates", "Passport photos"],
+    "processing_time": "2-4 weeks",
+    "cost_estimate": "€60 (visa) + €110 (residence permit)",
+    "embassy_link": "https://accra.mfa.gov.hu/eng",
+    "tips": "Stipendium Hungaricum covers everything. Very affordable country (~$800/month). Budapest is a beautiful student city."
+  },
+  {
+    "country": "Ireland",
+    "visa_type": "Study Visa (Stamp 2)",
+    "documents": ["Valid passport", "University admission letter", "Proof of fees paid", "Financial proof (€10,000)", "Health insurance", "Academic certificates", "Passport photos", "English language proof"],
+    "processing_time": "4-8 weeks",
+    "cost_estimate": "€60 (visa) + €300 (IRP card)",
+    "embassy_link": "https://www.ireland.ie/en/ghana/",
+    "tips": "Can work 20hrs/week during term, 40hrs during holidays. 2-year stay-back option after graduation. English-speaking country."
+  },
+  {
+    "country": "Denmark",
+    "visa_type": "Residence Permit for Study",
+    "documents": ["Valid passport", "University admission letter", "Financial proof (DKK 7,000/month)", "Health insurance", "Passport photos", "Proof of accommodation", "Academic certificates"],
+    "processing_time": "4-8 weeks",
+    "cost_estimate": "DKK 2,340 (~$340)",
+    "embassy_link": "https://ghana.um.dk/",
+    "tips": "Danish Government Scholarship available. Can work 20hrs/week. Cycling culture. High quality of life."
+  },
+  {
+    "country": "Finland",
+    "visa_type": "Residence Permit for Studies",
+    "documents": ["Valid passport", "University admission letter", "Financial proof (€13,440/year)", "Health insurance", "Passport photos", "Academic certificates"],
+    "processing_time": "4-6 weeks",
+    "cost_estimate": "€450",
+    "embassy_link": "https://finlandabroad.fi/web/gha",
+    "tips": "Many universities offer full tuition waivers. Very safe country. Student meals at ~€2.60. Can work during studies."
+  },
+  {
+    "country": "Italy",
+    "visa_type": "Student Visa (Type D)",
+    "documents": ["Valid passport", "University admission letter", "Financial proof (€6,000/year minimum)", "Accommodation proof", "Health insurance or Form S1", "Academic certificates", "Passport photos"],
+    "processing_time": "2-6 weeks",
+    "cost_estimate": "€50",
+    "embassy_link": "https://ambaccra.esteri.it/",
+    "tips": "Low tuition at public universities. Politecnico di Milano and University of Bologna are top choices. DSU scholarships cover tuition + meals + housing."
+  },
+  {
+    "country": "Norway",
+    "visa_type": "Student Residence Permit",
+    "documents": ["Valid passport", "University admission letter", "Financial proof (NOK 137,907/year)", "Accommodation proof", "Health insurance", "Academic certificates", "Passport photos"],
+    "processing_time": "4-8 weeks",
+    "cost_estimate": "NOK 6,300 (~$580)",
+    "embassy_link": "https://www.norway.no/en/ghana/",
+    "tips": "NO TUITION FEES at public universities for all students! High living costs but free education makes it worthwhile. Can work 20hrs/week."
+  },
+  {
+    "country": "New Zealand",
+    "visa_type": "Student Visa",
+    "documents": ["Valid passport", "Offer of place from institution", "Financial proof (NZD 20,000/year)", "Return travel", "Health insurance", "Medical and chest X-ray certificates", "Police certificate", "Passport photos"],
+    "processing_time": "4-6 weeks",
+    "cost_estimate": "NZD $375 (~$230)",
+    "embassy_link": "https://www.immigration.govt.nz/",
+    "tips": "New Zealand Scholarships cover everything. Can work 20hrs/week. Post-study work visa available. Very safe and beautiful country."
+  },
+  {
+    "country": "Qatar",
+    "visa_type": "Student Visa",
+    "documents": ["Valid passport", "University admission letter", "Medical fitness certificate", "Police clearance", "Financial proof", "Passport photos"],
+    "processing_time": "2-4 weeks (university sponsors)",
+    "cost_estimate": "QAR 200 (~$55) — often covered by university",
+    "embassy_link": "https://www.mofa.gov.qa",
+    "tips": "University usually handles visa process. No income tax. Very safe country. Air-conditioned everywhere."
+  }
+]
