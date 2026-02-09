@@ -1,59 +1,132 @@
-# ScholarFinder Bot
+# 🎓 ScholarFinder Bot
 
-A Telegram bot that helps students discover fully-funded scholarships worldwide. Search by education level, field of study, and preferred region.
+**Your complete guide to studying abroad** — a Telegram bot with 25+ commands covering scholarships, universities, opportunities, visa guides, cost of living, test prep, essay help, and more.
 
-**Try it:** [@ScholarFinder_bot](https://t.me/ScholarFinder_bot)
+Built by **Scott | Alpha Global Minds**
 
-## How it works
+## 📊 Database
 
-1. Send `/start` to the bot
-2. Choose your education level (Undergraduate, Masters, PhD)
-3. Pick your field of study
-4. Select your preferred region
-5. Get matching scholarships with deadlines, funding details, and direct links
+| Category | Count |
+|----------|-------|
+| Scholarships | 151 |
+| Universities | 86 |
+| Opportunities | 62 |
+| Cost of Living Cities | 51 |
+| FAQ Q&A Pairs | 42 |
+| Visa Guides | 26 |
+| Test Prep Guides | 5 |
+| Essay Writing Guides | 6 |
 
-![Bot Interface](images/IMG_2230.jpeg)
+## 🚀 Features
 
-![Search Results](images/IMG_2232.jpeg)
+### 🔍 Scholarship Search
+- `/start` — Main menu with inline buttons for all features
+- `/search` — Interactive search: level → field → region → results
+- `/all` — List all 151 scholarships (chunked messages)
 
-## Features
+### 🏫 University Search
+- `/universities` — Interactive: region → field → results with ranking, tuition, website
 
-- 20+ verified scholarships from around the world
-- Filter by level, field, and region
-- Shows funding amount, deadlines, and application links
-- Includes scholarships specifically for African students
-- `/all` command to browse every scholarship in the database
+### 🌍 Opportunities Database (62 entries)
+- `/opportunities` — Browse by category (inline buttons)
+- `/internships` — Google STEP, Microsoft Explore, Meta University, Outreachy, GSoC, etc.
+- `/research` — MIT MSRP, Stanford SURF, Caltech SURF, CERN, DAAD RISE, etc.
+- `/competitions` — Kaggle, Zindi, ICPC, Google Code Jam, Hult Prize, etc.
+- `/fellowships` — MLH Fellowship, GitHub Campus Expert, GDSC Lead, Mandela Washington, etc.
+- `/summer` — DeepMind, Oxford ML, EPFL, Heidelberg Laureate Forum, etc.
+- `/exchange` — AFS, UWC, Kennedy-Lugar YES, Global UGRAD, Erasmus+, etc.
 
-## Scholarships include
+### 💰 Cost of Living
+- `/cost <city>` — Monthly breakdown (rent, food, transport, etc.)
+- `/compare <city1> vs <city2>` — Side-by-side comparison
 
-- MBZUAI (UAE) - Full tuition + stipend
-- MasterCard Foundation - Fully funded for African students
-- Chevening (UK) - Fully funded masters
-- DAAD (Germany) - Monthly stipend + tuition
-- Turkiye Burslari - Full tuition + accommodation + flights
-- KAUST (Saudi Arabia) - Full fellowship
-- And many more
+### 🛂 Visa Guide
+- `/visa <country>` — Documents, processing time, cost, tips (26 countries)
 
-## Run it yourself
+### 📚 Test Prep
+- `/tests` — Overview of all 5 tests (IELTS, TOEFL, Duolingo, SAT, GRE)
+- `/test <name>` — Detailed format, scoring, requirements, free resources, tips
 
-1. Create a Telegram bot via [@BotFather](https://t.me/BotFather)
-2. Clone this repo
-3. Replace the token in `bot.py` with your own
-4. Install dependencies: `pip install python-telegram-bot`
-5. Run: `python3 bot.py`
+### 🤖 AI Q&A
+- `/ask <question>` — Keyword-matched against 42 FAQ entries
+- Word overlap scoring, top 1-3 matches, topic suggestions
 
-## Built with
+### 📝 Essay & SOP Help
+- `/essay` — Menu with 6 comprehensive guides:
+  - Personal Statement Structure
+  - Statement of Purpose (SOP)
+  - Academic CV Format
+  - Activity List Tips
+  - Essay Dos & Don'ts
+  - Power Words for Applications
 
-- Python 3
-- python-telegram-bot library
-- JSON database for scholarship data
+### ✅ Application Checklist
+- `/checklist` — 9-item checklist with ✅/⬜ per user
+- `/check <number>` — Toggle items on/off
+- Items: Personal Statement, CV, Transcripts, Recommendations, Language Score, Passport, Application Form, Motivation Letter, Portfolio
 
-## What's next
+### ⏰ Deadline Reminders
+- `/subscribe <number>` — Subscribe to deadline alerts (number from `/all`)
+- `/unsubscribe <number>` — Remove subscription
+- `/reminders` — View my subscriptions with days remaining
+- **Automatic notifications** at 30, 7, and 1 days before deadlines (APScheduler)
 
-- Keyword search across all scholarships
-- Deadline alerts and notifications
-- Web scraping for live scholarship updates
-- User favorites and saved searches
+### 👤 Student Profile
+- `/setprofile` — Guided setup (name, country, level, GPA, field, career goals, financial need)
+- `/profile` — View saved profile
+- Data stored in SQLite
 
-Built by Scott | Alpha Global Minds
+### ⭐ Personalized Recommendations
+- `/recommend` — Based on your profile:
+  - Top 5 matching scholarships
+  - Top 3 matching universities
+  - Top 3 matching opportunities
+- Scoring considers level, field, region, financial need, tuition tier
 
+### 📖 Help
+- `/help` — All commands grouped by category
+
+## 🛠 Technical Stack
+
+- **Language:** Python 3
+- **Framework:** python-telegram-bot (v20+)
+- **Database:** SQLite (`users.db`)
+  - Tables: `subscriptions`, `checklist_progress`, `user_profiles`
+- **Scheduler:** APScheduler (daily deadline check)
+- **Data:** JSON files for all reference data
+
+## 📁 File Structure
+
+```
+scholarbot/
+├── bot.py                  # Main bot (all features)
+├── scholarships.json       # 151 scholarships
+├── universities.json       # 86 universities
+├── opportunities.json      # 62 opportunities
+├── cost_data.json          # 51 cities
+├── faq_data.json           # 42 Q&A pairs
+├── test_prep_data.json     # 5 standardized tests
+├── visa_data.json          # 26 countries
+├── essay_guides.json       # 6 writing guides
+├── users.db                # SQLite user data (auto-created)
+├── watchdog.sh             # Auto-restart watchdog
+└── README.md               # This file
+```
+
+## 🔧 Running
+
+```bash
+# Install dependencies
+pip install python-telegram-bot apscheduler
+
+# Run
+cd scholarbot
+python3 bot.py
+
+# Watchdog (auto-restart)
+bash watchdog.sh &
+```
+
+## 🌍 Region Coverage
+
+Africa • Europe • Middle East • Asia • North America • Oceania • South America — covering 46 countries.
