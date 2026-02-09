@@ -621,7 +621,7 @@ async def adm_visa_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ADM_VISA_COST
 
 async def adm_visa_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["adm_visa"]["cost"] = update.message.text
+    context.user_data["adm_visa"]["cost_estimate"] = update.message.text
     await update.message.reply_text("Embassy/application link:")
     return ADM_VISA_LINK
 
@@ -840,90 +840,102 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown"
         )
+    # Return CHOOSING_LEVEL so the conv stays active and menu_ callbacks get routed
+    return CHOOSING_LEVEL
 
 
 # ---------------------------------------------------------------------------
 # Menu callback router
 # ---------------------------------------------------------------------------
 async def menu_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle main menu button presses."""
+    """Handle main menu button presses (standalone, outside any ConversationHandler)."""
     query = update.callback_query
     await query.answer()
     data = query.data
     track_user(update, data.replace("menu_", ""))
 
-    if data == "menu_search":
-        # Start scholarship search flow
-        keyboard = [[InlineKeyboardButton(level.title(), callback_data="level_" + level)] for level in LEVELS]
-        await query.edit_message_text(
-            "🔍 *Scholarship Search*\n\nWhat level are you looking for?",
-            reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode="Markdown",
-        )
-        return CHOOSING_LEVEL
+    try:
+        if data == "menu_search":
+            # Start scholarship search flow — show level buttons
+            keyboard = [[InlineKeyboardButton(level.title(), callback_data="level_" + level)] for level in LEVELS]
+            await query.edit_message_text(
+                "🔍 *Scholarship Search*\n\nWhat level are you looking for?",
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                parse_mode="Markdown",
+            )
+            return CHOOSING_LEVEL
 
-    elif data == "menu_universities":
-        keyboard = [[InlineKeyboardButton(r, callback_data="uniregion_" + r)] for r in list(UNI_REGION_MAP.keys()) + ["All"]]
-        await query.edit_message_text(
-            "🏫 *University Search*\n\nPick a region:",
-            reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode="Markdown",
-        )
-        return UNI_REGION
+        elif data == "menu_universities":
+            # Start university search flow — show region buttons
+            keyboard = [[InlineKeyboardButton(r, callback_data="uniregion_" + r)] for r in list(UNI_REGION_MAP.keys()) + ["All"]]
+            await query.edit_message_text(
+                "🏫 *University Search*\n\nPick a region:",
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                parse_mode="Markdown",
+            )
+            return UNI_REGION
 
-    elif data == "menu_opportunities":
-        await show_opportunities_menu(query)
+        elif data == "menu_opportunities":
+            await show_opportunities_menu(query)
 
-    elif data == "menu_cost":
-        await query.edit_message_text(
-            "💰 *Cost of Living*\n\n"
-            "Use these commands:\n"
-            "• /cost <city> — Show monthly costs\n"
-            "• /compare <city1> vs <city2> — Side-by-side comparison\n\n"
-            f"📊 {len(COST_DATA)} cities in database.\n\n"
-            "Examples:\n"
-            "`/cost London`\n"
-            "`/compare Berlin vs Paris`",
-            parse_mode="Markdown",
-        )
+        elif data == "menu_cost":
+            await query.edit_message_text(
+                "💰 *Cost of Living*\n\n"
+                "Use these commands:\n"
+                "• /cost <city> — Show monthly costs\n"
+                "• /compare <city1> vs <city2> — Side-by-side comparison\n\n"
+                f"📊 {len(COST_DATA)} cities in database.\n\n"
+                "Examples:\n"
+                "`/cost London`\n"
+                "`/compare Berlin vs Paris`",
+                parse_mode="Markdown",
+            )
 
-    elif data == "menu_visa":
-        await query.edit_message_text(
-            "🛂 *Visa Guide*\n\n"
-            "Use: /visa <country>\n\n"
-            "Available countries: " + ", ".join(sorted(set(v["country"] for v in VISA_DATA))) + "\n\n"
-            "Example: `/visa Germany`",
-            parse_mode="Markdown",
-        )
+        elif data == "menu_visa":
+            countries_list = ", ".join(sorted(set(v["country"] for v in VISA_DATA)))
+            await query.edit_message_text(
+                "🛂 *Visa Guide*\n\n"
+                "Use: /visa <country>\n\n"
+                f"Available countries: {countries_list}\n\n"
+                "Example: `/visa Germany`",
+                parse_mode="Markdown",
+            )
 
-    elif data == "menu_tests":
-        await show_tests_overview(query)
+        elif data == "menu_tests":
+            await show_tests_overview(query)
 
-    elif data == "menu_ask":
-        await query.edit_message_text(
-            "🤖 *Ask a Question*\n\n"
-            "Use: /ask <your question>\n\n"
-            "Examples:\n"
-            "`/ask What GPA do I need?`\n"
-            "`/ask How to write personal statement?`\n"
-            "`/ask Cheapest countries to study`",
-            parse_mode="Markdown",
-        )
+        elif data == "menu_ask":
+            await query.edit_message_text(
+                "🤖 *Ask a Question*\n\n"
+                "Use: /ask <your question>\n\n"
+                "Examples:\n"
+                "`/ask What GPA do I need?`\n"
+                "`/ask How to write personal statement?`\n"
+                "`/ask Cheapest countries to study`",
+                parse_mode="Markdown",
+            )
 
-    elif data == "menu_essay":
-        await show_essay_menu(query)
+        elif data == "menu_essay":
+            await show_essay_menu(query)
 
-    elif data == "menu_checklist":
-        await show_checklist(query.message, update.effective_user.id, edit=query)
+        elif data == "menu_checklist":
+            await show_checklist(query.message, update.effective_user.id, edit=query)
 
-    elif data == "menu_reminders":
-        await show_reminders(query.message, update.effective_user.id, edit=query)
+        elif data == "menu_reminders":
+            await show_reminders(query.message, update.effective_user.id, edit=query)
 
-    elif data == "menu_profile":
-        await show_profile(query.message, update.effective_user.id, edit=query)
+        elif data == "menu_profile":
+            await show_profile(query.message, update.effective_user.id, edit=query)
 
-    elif data == "menu_recommend":
-        await show_recommendations(query.message, update.effective_user.id, edit=query)
+        elif data == "menu_recommend":
+            await show_recommendations(query.message, update.effective_user.id, edit=query)
+
+    except Exception as e:
+        logger.error(f"menu_router error for {data}: {e}")
+        try:
+            await query.message.reply_text(f"Something went wrong. Try /start to go back to the menu.")
+        except Exception:
+            pass
 
     return ConversationHandler.END
 
@@ -995,22 +1007,30 @@ async def region_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         text = f"🎓 Found *{len(results)}* scholarship(s) for {level.title()} in {field.title()} ({region}):\n\n"
         for s in results:
-            text += f"📌 *{s['name']}*\n"
-            text += f"🏫 {s['university']}\n"
+            name = s['name'].replace("_", "\\_")
+            uni = s['university'].replace("_", "\\_")
+            desc = s['description'].replace("_", "\\_")
+            text += f"📌 *{name}*\n"
+            text += f"🏫 {uni}\n"
             text += f"🌍 {s['country']} | 💰 {s['funding']}\n"
             text += f"📅 Deadline: {s['deadline']}\n"
-            text += f"ℹ️ {s['description']}\n"
+            text += f"ℹ️ {desc}\n"
             text += f"🔗 {s['link']}\n\n"
         text += "Search again: /search | Main menu: /start"
 
     # Send as chunks if needed
     chunks = chunk_send(text)
-    if len(chunks) == 1:
-        await query.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
-    else:
-        await query.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
-        for ch in chunks[1:]:
-            await query.message.reply_text(ch, parse_mode="Markdown", disable_web_page_preview=True)
+    try:
+        if len(chunks) == 1:
+            await query.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
+        else:
+            await query.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
+            for ch in chunks[1:]:
+                await query.message.reply_text(ch, parse_mode="Markdown", disable_web_page_preview=True)
+    except Exception:
+        # Fallback without Markdown if formatting fails
+        for ch in chunks:
+            await query.message.reply_text(ch, disable_web_page_preview=True)
     return ConversationHandler.END
 
 
@@ -1095,17 +1115,23 @@ async def uni_field_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = f"🏫 Found *{len(results)}* universities for {field.title()} in {region}:\n\n"
         for u in results:
             tier = u.get("ranking_tier", "").replace("top", "Top ").title()
-            text += f"🎓 *{u['name']}*\n"
+            name = u['name'].replace("_", "\\_")
+            notes = u.get('notes', '').replace("_", "\\_")
+            text += f"🎓 *{name}*\n"
             text += f"🌍 {u['country']} | 🏆 {tier}\n"
             text += f"💰 Tuition: {u.get('tuition', 'N/A')}\n"
-            text += f"📝 {u.get('notes', '')}\n"
+            text += f"📝 {notes}\n"
             text += f"🔗 {u.get('website', '')}\n\n"
         text += "Search again: /universities | Menu: /start"
 
     chunks = chunk_send(text)
-    await query.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
-    for ch in chunks[1:]:
-        await query.message.reply_text(ch, parse_mode="Markdown", disable_web_page_preview=True)
+    try:
+        await query.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
+        for ch in chunks[1:]:
+            await query.message.reply_text(ch, parse_mode="Markdown", disable_web_page_preview=True)
+    except Exception:
+        for ch in chunks:
+            await query.message.reply_text(ch, disable_web_page_preview=True)
     return ConversationHandler.END
 
 
@@ -1142,24 +1168,44 @@ async def opp_type_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     items = [o for o in OPPORTUNITIES if o.get("type") == opp_type]
     if not items:
-        await query.edit_message_text(f"No {label} found.")
+        await query.edit_message_text(f"No {label} found.\n\nBrowse more: /opportunities | Menu: /start")
         return
 
     text = f"{label} ({len(items)} found):\n\n"
     for o in items:
-        text += f"📌 *{o['name']}*\n"
-        text += f"🏢 {o['organization']} | 🌍 {o['country']}\n"
-        text += f"🎯 {o.get('field', 'Any').title()} | 📚 {o.get('level', 'Any').title()}\n"
+        # Escape underscores in dynamic fields for Markdown safety
+        name = str(o.get('name', '')).replace("_", "\\_")
+        org = str(o.get('organization', '')).replace("_", "\\_")
+        desc = str(o.get('description', '')).replace("_", "\\_")
+        field_val = o.get('field', 'Any')
+        if isinstance(field_val, list):
+            field_str = ", ".join(f.title() for f in field_val)
+        else:
+            field_str = str(field_val).title()
+        level_val = o.get('level', 'Any')
+        if isinstance(level_val, list):
+            level_str = ", ".join(l.title() for l in level_val)
+        else:
+            level_str = str(level_val).title()
+        text += f"📌 *{name}*\n"
+        text += f"🏢 {org} | 🌍 {o['country']}\n"
+        text += f"🎯 {field_str} | 📚 {level_str}\n"
         text += f"💰 {o.get('funding', 'N/A')}\n"
         text += f"📅 {o.get('deadline', 'N/A')}\n"
-        text += f"ℹ️ {o.get('description', '')}\n"
+        text += f"ℹ️ {desc}\n"
         text += f"🔗 {o.get('link', '')}\n\n"
     text += "Browse more: /opportunities | Menu: /start"
 
     chunks = chunk_send(text)
-    await query.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
+    try:
+        await query.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
+    except Exception:
+        await query.edit_message_text(chunks[0], disable_web_page_preview=True)
     for ch in chunks[1:]:
-        await query.message.reply_text(ch, parse_mode="Markdown", disable_web_page_preview=True)
+        try:
+            await query.message.reply_text(ch, parse_mode="Markdown", disable_web_page_preview=True)
+        except Exception:
+            await query.message.reply_text(ch, disable_web_page_preview=True)
 
 
 # Shortcut commands
@@ -1167,17 +1213,23 @@ async def _opp_shortcut(update: Update, context: ContextTypes.DEFAULT_TYPE, opp_
     label = OPP_TYPES.get(opp_type, opp_type.title())
     items = [o for o in OPPORTUNITIES if o.get("type") == opp_type]
     if not items:
-        await update.message.reply_text(f"No {label} found.")
+        await update.message.reply_text(f"No {label} found.\n\nMore: /opportunities | Menu: /start")
         return
     text = f"{label} ({len(items)} found):\n\n"
     for o in items:
-        text += f"📌 *{o['name']}*\n"
-        text += f"🏢 {o['organization']} | 🌍 {o['country']}\n"
+        name = str(o.get('name', '')).replace("_", "\\_")
+        org = str(o.get('organization', '')).replace("_", "\\_")
+        desc = str(o.get('description', '')).replace("_", "\\_")
+        text += f"📌 *{name}*\n"
+        text += f"🏢 {org} | 🌍 {o['country']}\n"
         text += f"💰 {o.get('funding', 'N/A')} | 📅 {o.get('deadline', 'N/A')}\n"
-        text += f"ℹ️ {o.get('description', '')}\n"
+        text += f"ℹ️ {desc}\n"
         text += f"🔗 {o.get('link', '')}\n\n"
     text += "More: /opportunities | Menu: /start"
-    await send_chunked(update, text, parse_mode="Markdown")
+    try:
+        await send_chunked(update, text, parse_mode="Markdown")
+    except Exception:
+        await send_chunked(update, text)
 
 async def internships_cmd(update, context): await _opp_shortcut(update, context, "internship")
 async def research_cmd(update, context):    await _opp_shortcut(update, context, "research")
@@ -1213,6 +1265,7 @@ async def cost_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"❌ City '{' '.join(context.args)}' not found. Use /cost to see available cities.")
             return
 
+    safe_tips = str(city.get('tips', 'N/A')).replace("_", "\\_")
     text = (
         f"💰 *Cost of Living in {city['city']}, {city['country']}*\n"
         f"({city.get('currency_note', 'USD/month')})\n\n"
@@ -1223,9 +1276,12 @@ async def cost_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"🎭 Entertainment: ${city['entertainment']}\n"
         f"{'─' * 25}\n"
         f"💵 *Total: ${city['total']}/month*\n\n"
-        f"💡 Tips: {city.get('tips', 'N/A')}"
+        f"💡 Tips: {safe_tips}"
     )
-    await update.message.reply_text(text, parse_mode="Markdown")
+    try:
+        await update.message.reply_text(text, parse_mode="Markdown")
+    except Exception:
+        await update.message.reply_text(text)
 
 
 async def compare_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1263,19 +1319,20 @@ async def compare_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cheaper = c2["city"] if diff > 0 else c1["city"]
     text = (
         f"💰 *{c1['city']} vs {c2['city']}* (USD/month)\n\n"
-        f"{'Category':<16} {'🏙 ' + c1['city']:<14} {'🏙 ' + c2['city']:<14}\n"
-        f"{'─' * 40}\n"
-        f"{'🏠 Rent':<16} ${c1['rent']:<13} ${c2['rent']:<13}\n"
-        f"{'🍽 Food':<16} ${c1['food']:<13} ${c2['food']:<13}\n"
-        f"{'🚇 Transport':<16} ${c1['transport']:<13} ${c2['transport']:<13}\n"
-        f"{'📱 Phone/Net':<16} ${c1['internet_phone']:<13} ${c2['internet_phone']:<13}\n"
-        f"{'🎭 Fun':<16} ${c1['entertainment']:<13} ${c2['entertainment']:<13}\n"
-        f"{'─' * 40}\n"
-        f"{'💵 TOTAL':<16} *${c1['total']}*{'':>8} *${c2['total']}*\n\n"
+        f"🏠 Rent: ${c1['rent']} vs ${c2['rent']}\n"
+        f"🍽 Food: ${c1['food']} vs ${c2['food']}\n"
+        f"🚇 Transport: ${c1['transport']} vs ${c2['transport']}\n"
+        f"📱 Phone/Net: ${c1['internet_phone']} vs ${c2['internet_phone']}\n"
+        f"🎭 Fun: ${c1['entertainment']} vs ${c2['entertainment']}\n"
+        f"{'─' * 30}\n"
+        f"💵 *TOTAL: ${c1['total']} vs ${c2['total']}*\n\n"
         f"📊 {cheaper} is *${abs(diff)}* cheaper per month\n"
         f"📊 That's *${abs(diff) * 12}* cheaper per year!"
     )
-    await update.message.reply_text(text, parse_mode="Markdown")
+    try:
+        await update.message.reply_text(text, parse_mode="Markdown")
+    except Exception:
+        await update.message.reply_text(text)
 
 
 # ---------------------------------------------------------------------------
@@ -1304,14 +1361,24 @@ async def visa_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
     docs = "\n".join(f"  • {d}" for d in visa.get("documents", []))
+    tips = visa.get("tips", "N/A")
+    if isinstance(tips, list):
+        tips_text = "\n".join(f"  • {t}" for t in tips)
+    else:
+        tips_text = str(tips)
+    # Escape underscores in dynamic text to prevent Markdown breakage
+    safe_country = visa['country'].replace("_", "\\_")
+    safe_visa_type = visa['visa_type'].replace("_", "\\_")
+    safe_docs = docs.replace("_", "\\_")
+    safe_tips = tips_text.replace("_", "\\_")
     text = (
-        f"🛂 *Visa Guide: {visa['country']}*\n\n"
-        f"📋 Visa Type: {visa['visa_type']}\n\n"
-        f"📄 Documents Required:\n{docs}\n\n"
+        f"🛂 *Visa Guide: {safe_country}*\n\n"
+        f"📋 Visa Type: {safe_visa_type}\n\n"
+        f"📄 Documents Required:\n{safe_docs}\n\n"
         f"⏱ Processing Time: {visa['processing_time']}\n"
-        f"💵 Cost: {visa['cost_estimate']}\n"
+        f"💵 Cost: {visa.get('cost_estimate', visa.get('cost', 'N/A'))}\n"
         f"🏛 Embassy: {visa.get('embassy_link', 'N/A')}\n\n"
-        f"💡 Tips: {visa.get('tips', 'N/A')}"
+        f"💡 Tips:\n{safe_tips}"
     )
     await send_chunked(update, text, parse_mode="Markdown")
 
@@ -1356,41 +1423,47 @@ async def test_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    text = f"📚 *{name.upper()} — {data.get('full_name', '')}*\n\n"
+    def esc(s):
+        return str(s).replace("_", "\\_")
+
+    text = f"📚 *{name.upper()} — {esc(data.get('full_name', ''))}*\n\n"
 
     if "types" in data:
-        text += "📋 Types: " + ", ".join(data["types"]) + "\n\n"
+        text += "📋 Types: " + ", ".join(esc(t) for t in data["types"]) + "\n\n"
 
     if "format" in data:
         text += "📐 *Format:*\n"
         for section, desc in data["format"].items():
-            text += f"  • {section}: {desc}\n"
+            text += f"  • {esc(section)}: {esc(desc)}\n"
         text += "\n"
 
-    text += f"📊 Scoring: {data.get('scoring', 'N/A')}\n\n"
+    text += f"📊 Scoring: {esc(data.get('scoring', 'N/A'))}\n\n"
 
     if "common_requirements" in data:
         text += "🎯 *Common Requirements:*\n"
         for level, score in data["common_requirements"].items():
-            text += f"  • {level}: {score}\n"
+            text += f"  • {esc(level)}: {esc(score)}\n"
         text += "\n"
 
-    text += f"💵 Cost: {data.get('cost', 'N/A')}\n"
-    text += f"⏱ Validity: {data.get('validity', 'N/A')}\n"
-    text += f"📍 Test Centers (Ghana): {data.get('test_centers_ghana', 'N/A')}\n\n"
+    text += f"💵 Cost: {esc(data.get('cost', 'N/A'))}\n"
+    text += f"⏱ Validity: {esc(data.get('validity', 'N/A'))}\n"
+    text += f"📍 Test Centers (Ghana): {esc(data.get('test_centers_ghana', 'N/A'))}\n\n"
 
     if "free_prep_resources" in data:
         text += "📖 *Free Prep Resources:*\n"
         for r in data["free_prep_resources"]:
-            text += f"  • {r}\n"
+            text += f"  • {esc(r)}\n"
         text += "\n"
 
     if "tips" in data:
         text += "💡 *Tips:*\n"
         for t in data["tips"]:
-            text += f"  • {t}\n"
+            text += f"  • {esc(t)}\n"
 
-    await send_chunked(update, text, parse_mode="Markdown")
+    try:
+        await send_chunked(update, text, parse_mode="Markdown")
+    except Exception:
+        await send_chunked(update, text.replace("*", "").replace("\\_", "_"))
 
 
 # ---------------------------------------------------------------------------
@@ -1438,10 +1511,19 @@ async def ask_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     top = scored[:3]
     text = "🤖 *Here's what I found:*\n\n"
     for score, faq in top:
-        text += f"❓ *{faq['question']}*\n\n{faq['answer']}\n\n{'─' * 30}\n\n"
+        q = faq['question'].replace("_", "\\_")
+        a = faq['answer'].replace("_", "\\_")
+        text += f"❓ *{q}*\n\n{a}\n\n{'─' * 30}\n\n"
 
     text += "Ask another: /ask <question> | Menu: /start"
-    await send_chunked(update, text, parse_mode="Markdown")
+    try:
+        await send_chunked(update, text, parse_mode="Markdown")
+    except Exception:
+        text_plain = "🤖 Here's what I found:\n\n"
+        for score, faq in top:
+            text_plain += f"❓ {faq['question']}\n\n{faq['answer']}\n\n{'─' * 30}\n\n"
+        text_plain += "Ask another: /ask <question> | Menu: /start"
+        await send_chunked(update, text_plain)
 
 
 # ---------------------------------------------------------------------------
@@ -1474,14 +1556,25 @@ async def essay_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     key = query.data.replace("essay_", "")
     guide = ESSAY_GUIDES.get(key)
     if not guide:
-        await query.edit_message_text("Guide not found.")
+        await query.edit_message_text("Guide not found. Try /essay for the full menu.")
         return
 
-    text = f"*{guide['title']}*\n\n{guide['content']}\n\n📝 More guides: /essay | Menu: /start"
+    # Escape underscores in content for Markdown safety
+    title = guide['title'].replace("_", "\\_")
+    content = guide['content'].replace("_", "\\_")
+    text = f"*{title}*\n\n{content}\n\n📝 More guides: /essay | Menu: /start"
     chunks = chunk_send(text)
-    await query.edit_message_text(chunks[0], parse_mode="Markdown")
-    for ch in chunks[1:]:
-        await query.message.reply_text(ch, parse_mode="Markdown")
+    try:
+        await query.edit_message_text(chunks[0], parse_mode="Markdown")
+        for ch in chunks[1:]:
+            await query.message.reply_text(ch, parse_mode="Markdown")
+    except Exception:
+        # Fallback without Markdown
+        text_plain = f"{guide['title']}\n\n{guide['content']}\n\n📝 More guides: /essay | Menu: /start"
+        chunks = chunk_send(text_plain)
+        await query.edit_message_text(chunks[0])
+        for ch in chunks[1:]:
+            await query.message.reply_text(ch)
 
 
 # ---------------------------------------------------------------------------
@@ -1540,8 +1633,9 @@ async def check_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
 
     icon = "✅" if new_val else "⬜"
+    item_name = CHECKLIST_ITEMS[idx].replace("_", "\\_")
     await update.message.reply_text(
-        f"{icon} *{CHECKLIST_ITEMS[idx]}* {'checked' if new_val else 'unchecked'}!\n\nSee full list: /checklist",
+        f"{icon} *{item_name}* {'checked' if new_val else 'unchecked'}!\n\nSee full list: /checklist",
         parse_mode="Markdown",
     )
 
@@ -1563,6 +1657,7 @@ async def show_reminders(message, user_id, edit=None):
         for (idx,) in rows:
             if 0 <= idx < len(SCHOLARSHIPS):
                 s = SCHOLARSHIPS[idx]
+                sname = s['name'].replace("_", "\\_")
                 deadline_dt = parse_deadline(s["deadline"])
                 days_info = ""
                 if deadline_dt:
@@ -1573,7 +1668,7 @@ async def show_reminders(message, user_id, edit=None):
                         days_info = " (TODAY!)"
                     else:
                         days_info = " (PASSED)"
-                text += f"  {idx + 1}. {s['name']} — {s['deadline']}{days_info}\n"
+                text += f"  {idx + 1}. {sname} — {s['deadline']}{days_info}\n"
         text += "\n💡 Unsubscribe: `/unsubscribe <number>`"
 
     if edit:
@@ -1613,8 +1708,9 @@ async def subscribe_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         c.execute("INSERT INTO subscriptions (user_id, scholarship_index) VALUES (?, ?)", (user_id, idx))
         conn.commit()
         s = SCHOLARSHIPS[idx]
+        sname = s['name'].replace("_", "\\_")
         await update.message.reply_text(
-            f"✅ Subscribed to deadline reminders for:\n*{s['name']}*\nDeadline: {s['deadline']}\n\nSee all: /reminders",
+            f"✅ Subscribed to deadline reminders for:\n*{sname}*\nDeadline: {s['deadline']}\n\nSee all: /reminders",
             parse_mode="Markdown",
         )
     except sqlite3.IntegrityError:
@@ -1855,7 +1951,8 @@ async def show_recommendations(message, user_id, edit=None):
     if top_schol:
         text += "🎓 *Top 5 Scholarships for You:*\n\n"
         for sc, idx, s in top_schol:
-            text += f"  📌 *{s['name']}*\n"
+            sname = s['name'].replace("_", "\\_")
+            text += f"  📌 *{sname}*\n"
             text += f"     {s['country']} | {s['funding']} | {s['deadline']}\n\n"
     else:
         text += "🎓 No strong scholarship matches. Try broadening your profile.\n\n"
@@ -1882,7 +1979,8 @@ async def show_recommendations(message, user_id, edit=None):
     if top_unis:
         text += "🏫 *Top 3 Universities for You:*\n\n"
         for sc, u in top_unis:
-            text += f"  🎓 *{u['name']}*\n"
+            uname = u['name'].replace("_", "\\_")
+            text += f"  🎓 *{uname}*\n"
             text += f"     {u['country']} | Tuition: {u.get('tuition', 'N/A')} | {u.get('ranking_tier', '').replace('top', 'Top ')}\n\n"
 
     # --- Opportunities ---
@@ -1901,18 +1999,31 @@ async def show_recommendations(message, user_id, edit=None):
     if top_opps:
         text += "🌍 *Top 3 Opportunities for You:*\n\n"
         for sc, o in top_opps:
-            text += f"  📌 *{o['name']}*\n"
-            text += f"     {o['organization']} | {o.get('funding', 'N/A')}\n\n"
+            oname = o['name'].replace("_", "\\_")
+            oorg = o['organization'].replace("_", "\\_")
+            text += f"  📌 *{oname}*\n"
+            text += f"     {oorg} | {o.get('funding', 'N/A')}\n\n"
 
     text += "Update profile: /setprofile | Menu: /start"
 
-    if edit:
-        chunks = chunk_send(text)
-        await edit.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
-        for ch in chunks[1:]:
-            await edit.message.reply_text(ch, parse_mode="Markdown", disable_web_page_preview=True)
-    else:
-        await send_chunked(message, text, parse_mode="Markdown")
+    try:
+        if edit:
+            chunks = chunk_send(text)
+            await edit.edit_message_text(chunks[0], parse_mode="Markdown", disable_web_page_preview=True)
+            for ch in chunks[1:]:
+                await edit.message.reply_text(ch, parse_mode="Markdown", disable_web_page_preview=True)
+        else:
+            await send_chunked(message, text, parse_mode="Markdown")
+    except Exception:
+        # Fallback without Markdown
+        plain = text.replace("*", "").replace("\\_", "_")
+        if edit:
+            chunks = chunk_send(plain)
+            await edit.edit_message_text(chunks[0], disable_web_page_preview=True)
+            for ch in chunks[1:]:
+                await edit.message.reply_text(ch, disable_web_page_preview=True)
+        else:
+            await send_chunked(message, plain)
 
 
 async def recommend_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1959,6 +2070,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "  /profile — View my profile\n"
         "  /setprofile — Set up profile\n"
         "  /recommend — Personalized picks\n\n"
+        "🔐 *Admin:*\n"
+        "  /admin — Admin panel (add/delete/broadcast)\n"
+        "  /stats — Bot usage statistics\n\n"
         "© 2026 Scott Antwi — Owner & Developer\n"
         "Alpha Global Minds 🌍"
     )
@@ -1969,7 +2083,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Back-to-start callback
 # ---------------------------------------------------------------------------
 async def back_start_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await start(update, context)
+    return await start(update, context)
 
 
 # ---------------------------------------------------------------------------
@@ -1981,6 +2095,25 @@ async def unknown_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Use /start to see the main menu with all features!\n"
         "Or /help for a full list of commands."
     )
+
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+    """Global error handler — log the error and notify the user if possible."""
+    logger.error(f"Exception while handling an update: {context.error}", exc_info=context.error)
+    if update and hasattr(update, "effective_message") and update.effective_message:
+        try:
+            await update.effective_message.reply_text(
+                "⚠️ Something went wrong. Please try again or use /start."
+            )
+        except Exception:
+            pass
+    elif update and hasattr(update, "callback_query") and update.callback_query:
+        try:
+            await update.callback_query.message.reply_text(
+                "⚠️ Something went wrong. Please try again or use /start."
+            )
+        except Exception:
+            pass
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2014,9 +2147,10 @@ async def check_deadlines(context: ContextTypes.DEFAULT_TYPE):
 
         if days_left in alert_days:
             emoji = "🔴" if days_left <= 1 else "🟡" if days_left <= 7 else "🟢"
+            sname = s['name'].replace("_", "\\_")
             text = (
                 f"{emoji} *Deadline Reminder!*\n\n"
-                f"📌 *{s['name']}*\n"
+                f"📌 *{sname}*\n"
                 f"📅 Deadline: {s['deadline']}\n"
                 f"⏰ *{days_left} day(s) left!*\n\n"
                 f"🔗 {s['link']}\n\n"
@@ -2113,36 +2247,49 @@ def main():
     )
     app.add_handler(profile_conv)
 
-    # --- Scholarship search conversation ---
-    search_conv = ConversationHandler(
+    # --- Main menu + search + university combined conversation ---
+    # /start shows the menu; menu buttons dispatch to search/university flows or standalone info.
+    # This avoids the issue of /start being trapped in a single-purpose search_conv.
+    main_conv = ConversationHandler(
         entry_points=[
-            CommandHandler("search", search_start),
             CommandHandler("start", start),
+            CommandHandler("search", search_start),
+            CommandHandler("universities", universities_cmd),
         ],
         states={
+            # After /start, user sees menu buttons (menu_*)
             CHOOSING_LEVEL: [
                 CallbackQueryHandler(level_chosen, pattern="^level_"),
                 CallbackQueryHandler(menu_router, pattern="^menu_"),
+                CallbackQueryHandler(back_start_callback, pattern="^back_start$"),
             ],
-            CHOOSING_FIELD: [CallbackQueryHandler(field_chosen, pattern="^field_")],
-            CHOOSING_REGION: [CallbackQueryHandler(region_chosen, pattern="^region_")],
+            CHOOSING_FIELD: [
+                CallbackQueryHandler(field_chosen, pattern="^field_"),
+                CallbackQueryHandler(back_start_callback, pattern="^back_start$"),
+            ],
+            CHOOSING_REGION: [
+                CallbackQueryHandler(region_chosen, pattern="^region_"),
+                CallbackQueryHandler(back_start_callback, pattern="^back_start$"),
+            ],
+            # University flow states
+            UNI_REGION: [
+                CallbackQueryHandler(uni_region_chosen, pattern="^uniregion_"),
+                CallbackQueryHandler(back_start_callback, pattern="^back_start$"),
+            ],
+            UNI_FIELD: [
+                CallbackQueryHandler(uni_field_chosen, pattern="^unifield_"),
+                CallbackQueryHandler(back_start_callback, pattern="^back_start$"),
+            ],
         },
-        fallbacks=[CommandHandler("cancel", cancel)],
+        fallbacks=[
+            CommandHandler("cancel", cancel),
+            CommandHandler("start", start),
+            CallbackQueryHandler(menu_router, pattern="^menu_"),
+            CallbackQueryHandler(back_start_callback, pattern="^back_start$"),
+        ],
         allow_reentry=True,
     )
-    app.add_handler(search_conv)
-
-    # --- University search conversation ---
-    uni_conv = ConversationHandler(
-        entry_points=[CommandHandler("universities", universities_cmd)],
-        states={
-            UNI_REGION: [CallbackQueryHandler(uni_region_chosen, pattern="^uniregion_")],
-            UNI_FIELD:  [CallbackQueryHandler(uni_field_chosen, pattern="^unifield_")],
-        },
-        fallbacks=[CommandHandler("cancel", cancel)],
-        allow_reentry=True,
-    )
-    app.add_handler(uni_conv)
+    app.add_handler(main_conv)
 
     # --- Standalone command handlers ---
     app.add_handler(CommandHandler("help", help_command))
@@ -2177,6 +2324,9 @@ def main():
 
     # --- Unknown text (fallback) ---
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, unknown_text))
+
+    # --- Global error handler ---
+    app.add_error_handler(error_handler)
 
     # --- APScheduler: daily deadline check ---
     job_queue = app.job_queue
