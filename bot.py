@@ -173,10 +173,38 @@ def init_db():
             financial_need TEXT
         )
     """)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS user_activity (
+            user_id INTEGER,
+            username TEXT,
+            first_name TEXT,
+            action TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
     conn.commit()
     conn.close()
 
 init_db()
+
+# Admin user ID (Scott)
+ADMIN_ID = 8387873012
+
+def track_user(update: Update, action: str):
+    """Log user activity for stats tracking."""
+    try:
+        user = update.effective_user
+        if user:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute(
+                "INSERT INTO user_activity (user_id, username, first_name, action) VALUES (?, ?, ?, ?)",
+                (user.id, user.username or "", user.first_name or "", action)
+            )
+            conn.commit()
+            conn.close()
+    except Exception:
+        pass  # Don't let tracking break the bot
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -291,9 +319,60 @@ def parse_deadline(deadline_str: str):
 
 
 # ---------------------------------------------------------------------------
+# /stats — Admin only: view bot usage stats
+# ---------------------------------------------------------------------------
+async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        user = update.effective_user
+        if not user or user.id != ADMIN_ID:
+            msg = update.message or update.callback_query.message
+            if msg:
+                await msg.reply_text("⛔ Admin only.")
+            return
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT COUNT(DISTINCT user_id) FROM user_activity")
+        total_users = c.fetchone()[0]
+        c.execute("SELECT COUNT(DISTINCT user_id) FROM user_activity WHERE date(timestamp) = date('now')")
+        today_users = c.fetchone()[0]
+        c.execute("SELECT COUNT(DISTINCT user_id) FROM user_activity WHERE timestamp >= datetime('now', '-7 days')")
+        week_users = c.fetchone()[0]
+        c.execute("SELECT action, COUNT(*) as cnt FROM user_activity GROUP BY action ORDER BY cnt DESC LIMIT 10")
+        top_features = c.fetchall()
+        c.execute("SELECT DISTINCT first_name, username, MAX(timestamp) FROM user_activity GROUP BY user_id ORDER BY MAX(timestamp) DESC LIMIT 10")
+        recent_users = c.fetchall()
+        c.execute("SELECT COUNT(*) FROM user_activity")
+        total_actions = c.fetchone()[0]
+        conn.close()
+
+        text = (
+            "📊 ScholarFinder Bot Stats\n\n"
+            f"👥 Total unique users: {total_users}\n"
+            f"📅 Active today: {today_users}\n"
+            f"📆 Active this week: {week_users}\n"
+            f"⚡ Total actions: {total_actions}\n\n"
+            "🔥 Top Features:\n"
+        )
+        for action, cnt in top_features:
+            text += f"  • {action}: {cnt}\n"
+        text += "\n👤 Recent Users:\n"
+        for fname, uname, ts in recent_users:
+            name = fname or uname or "Unknown"
+            uname_display = uname if uname else "no username"
+            text += f"  • {name} ({uname_display}) — {ts}\n"
+
+        await update.message.reply_text(text)
+    except Exception as e:
+        logger.error(f"Stats error: {e}")
+        if update.message:
+            await update.message.reply_text(f"Stats error: {e}")
+
+
+# ---------------------------------------------------------------------------
 # /start — Main menu
 # ---------------------------------------------------------------------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    track_user(update, "start")
     keyboard = [
         [
             InlineKeyboardButton("🔍 Find Scholarships", callback_data="menu_search"),
@@ -347,6 +426,7 @@ async def menu_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data
+    track_user(update, data.replace("menu_", ""))
 
     if data == "menu_search":
         # Start scholarship search flow
@@ -1531,6 +1611,9 @@ async def check_deadlines(context: ContextTypes.DEFAULT_TYPE):
 # ---------------------------------------------------------------------------
 def main():
     app = Application.builder().token(TOKEN).build()
+
+    # --- Admin commands (registered first, highest priority) ---
+    app.add_handler(CommandHandler("stats", stats_command), group=-1)
 
     # --- Profile conversation handler (must be added before generic callbacks) ---
     profile_conv = ConversationHandler(
