@@ -944,3 +944,172 @@
         init();
     }
 })();
+
+/* ==========================================
+   CHAT WIDGET — Smart FAQ Assistant
+   ========================================== */
+(function() {
+    const toggle = document.getElementById('chatToggle');
+    const widget = document.getElementById('chatWidget');
+    const minimize = document.getElementById('chatMinimize');
+    const input = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('chatSend');
+    const messages = document.getElementById('chatMessages');
+    if (!toggle) return;
+
+    let faqData = [];
+    let scholarships = [];
+    let chatOpen = false;
+    let welcomed = false;
+
+    // Load FAQ data
+    fetch('data/faq_data.json').then(r => r.json()).then(d => faqData = d).catch(() => {});
+    fetch('data/scholarships.json').then(r => r.json()).then(d => scholarships = d).catch(() => {});
+
+    function addMsg(text, type) {
+        const div = document.createElement('div');
+        div.className = 'chat-msg ' + type;
+        div.innerHTML = text;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function welcome() {
+        if (welcomed) return;
+        welcomed = true;
+        setTimeout(() => {
+            addMsg("👋 Hi! I'm the ScholarFinder Assistant.", 'bot');
+        }, 300);
+        setTimeout(() => {
+            addMsg("I can help you find scholarships, universities, visa info, test prep, and more. Just ask me anything!", 'bot');
+        }, 800);
+        setTimeout(() => {
+            addMsg("Try asking:<br>• \"Scholarships in Germany\"<br>• \"What is IELTS?\"<br>• \"Cost of living in London\"<br>• \"Visa for USA\"", 'bot');
+        }, 1500);
+    }
+
+    function findAnswer(query) {
+        const q = query.toLowerCase().trim();
+
+        // Check scholarships
+        if (q.includes('scholarship') || q.includes('fund') || q.includes('grant')) {
+            let country = null;
+            const countries = ['usa', 'uk', 'germany', 'canada', 'japan', 'korea', 'australia', 'france', 'ghana', 'china', 'turkey', 'uae', 'saudi'];
+            for (const c of countries) {
+                if (q.includes(c)) { country = c; break; }
+            }
+            let results = scholarships;
+            if (country) {
+                results = scholarships.filter(s => s.country.toLowerCase().includes(country));
+            }
+            if (results.length > 0) {
+                const top3 = results.slice(0, 3);
+                let html = country ? `Found ${results.length} scholarship(s)` : `We have ${results.length} scholarships`;
+                html += `. Here are some:<br><br>`;
+                top3.forEach(s => {
+                    html += `🎓 <strong>${s.name}</strong><br>📍 ${s.country} | 💰 ${s.funding}<br>📅 ${s.deadline}<br><br>`;
+                });
+                html += `<a href="#scholarships" style="color:#4361ee" onclick="document.getElementById('chatToggle').click()">See all →</a>`;
+                return html;
+            }
+        }
+
+        // Check cost of living
+        if (q.includes('cost') || q.includes('living') || q.includes('expensive') || q.includes('cheap')) {
+            return `💰 Check our <a href="#cost" style="color:#4361ee" onclick="document.getElementById('chatToggle').click()">Cost of Living</a> section! We cover 51 cities worldwide. You can search and compare cities side by side.`;
+        }
+
+        // Check visa
+        if (q.includes('visa') || q.includes('passport') || q.includes('travel')) {
+            return `🛂 Check our <a href="#visa" style="color:#4361ee" onclick="document.getElementById('chatToggle').click()">Visa Guide</a> section! We have guides for 26 countries with requirements, costs, and tips.`;
+        }
+
+        // Check tests
+        if (q.includes('ielts') || q.includes('toefl') || q.includes('sat') || q.includes('gre') || q.includes('duolingo') || q.includes('test') || q.includes('exam')) {
+            return `📚 Check our <a href="#testprep" style="color:#4361ee" onclick="document.getElementById('chatToggle').click()">Test Prep</a> section! We cover IELTS, TOEFL, SAT, GRE, and Duolingo with prep resources and tips.`;
+        }
+
+        // Check essay
+        if (q.includes('essay') || q.includes('statement') || q.includes('sop') || q.includes('cv') || q.includes('resume') || q.includes('write')) {
+            return `📝 Check our <a href="#essays" style="color:#4361ee" onclick="document.getElementById('chatToggle').click()">Essay Help</a> section! We have guides for personal statements, SOPs, CVs, and more.`;
+        }
+
+        // Check university
+        if (q.includes('university') || q.includes('universities') || q.includes('school') || q.includes('college')) {
+            return `🏫 Check our <a href="#universities" style="color:#4361ee" onclick="document.getElementById('chatToggle').click()">Universities</a> section! Browse 86 universities by region, field, and ranking.`;
+        }
+
+        // Check opportunities
+        if (q.includes('internship') || q.includes('competition') || q.includes('fellowship') || q.includes('research') || q.includes('summer') || q.includes('exchange')) {
+            return `🌍 Check our <a href="#opportunities" style="color:#4361ee" onclick="document.getElementById('chatToggle').click()">Opportunities</a> section! We have 62 internships, competitions, fellowships, and more.`;
+        }
+
+        // FAQ keyword matching
+        if (faqData.length > 0) {
+            let bestMatch = null;
+            let bestScore = 0;
+            const qWords = q.split(/\s+/);
+            for (const faq of faqData) {
+                const keywords = (faq.keywords || faq.question.toLowerCase().split(/\s+/));
+                let score = 0;
+                for (const w of qWords) {
+                    if (w.length < 3) continue;
+                    for (const k of keywords) {
+                        if (k.includes(w) || w.includes(k)) score++;
+                    }
+                }
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = faq;
+                }
+            }
+            if (bestMatch && bestScore >= 2) {
+                return `${bestMatch.answer}`;
+            }
+        }
+
+        // Greetings
+        if (q.match(/^(hi|hello|hey|yo|sup|good morning|good afternoon)/)) {
+            return `Hey there! 👋 How can I help you today? Ask me about scholarships, universities, visa requirements, test prep, or anything study-abroad related!`;
+        }
+
+        // Thanks
+        if (q.match(/^(thanks|thank you|thx)/)) {
+            return `You're welcome! 😊 Feel free to ask anything else. Good luck with your applications!`;
+        }
+
+        // Default
+        return `I'm not sure about that, but try browsing our sections:<br><br>🎯 <a href="#scholarships" style="color:#4361ee">Scholarships</a><br>🏫 <a href="#universities" style="color:#4361ee">Universities</a><br>🌍 <a href="#opportunities" style="color:#4361ee">Opportunities</a><br>💰 <a href="#cost" style="color:#4361ee">Cost of Living</a><br>🛂 <a href="#visa" style="color:#4361ee">Visa Guide</a><br><br>Or join our <a href="https://t.me/ScholarFinder_bot" style="color:#4361ee" target="_blank">Telegram bot</a> for personalized help!`;
+    }
+
+    function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+        addMsg(text, 'user');
+        input.value = '';
+        // Typing delay
+        setTimeout(() => {
+            const answer = findAnswer(text);
+            addMsg(answer, 'bot');
+        }, 500 + Math.random() * 500);
+    }
+
+    toggle.addEventListener('click', () => {
+        chatOpen = !chatOpen;
+        widget.classList.toggle('open', chatOpen);
+        if (chatOpen) {
+            welcome();
+            setTimeout(() => input.focus(), 400);
+        }
+    });
+
+    minimize.addEventListener('click', () => {
+        chatOpen = false;
+        widget.classList.remove('open');
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+})();
