@@ -282,6 +282,48 @@ img { max-width: 100%; height: auto; }
     font-weight: 300;
 }
 
+/* Welcome text with Scott's name */
+.hero-welcome {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+}
+.highlight-name {
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+/* Typewriter effect */
+.typewriter-container {
+    min-height: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.typewriter-text {
+    font-size: clamp(0.95rem, 2vw, 1.2rem);
+    color: var(--accent-green);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+}
+.typewriter-cursor {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--accent-blue);
+    font-weight: 300;
+    animation: blink 0.8s infinite;
+    margin-left: 2px;
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
 /* Hero Search */
 .hero-search {
     max-width: 600px;
