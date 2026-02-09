@@ -188,7 +188,7 @@ def init_db():
 init_db()
 
 # Admin user ID (Scott)
-ADMIN_ID = 8387873012
+ADMIN_ID = 0  # Replace with your Telegram user ID
 
 def track_user(update: Update, action: str):
     """Log user activity for stats tracking."""
@@ -366,6 +366,430 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Stats error: {e}")
         if update.message:
             await update.message.reply_text(f"Stats error: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Admin helper: save JSON data back to file
+# ---------------------------------------------------------------------------
+def _save(name, data):
+    """Write data list back to a JSON file."""
+    with open(os.path.join(SCRIPT_DIR, name), "w") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def is_admin(update: Update) -> bool:
+    """Check if the user is the admin."""
+    return update.effective_user and update.effective_user.id == ADMIN_ID
+
+
+# ---------------------------------------------------------------------------
+# /admin — Admin panel main menu
+# ---------------------------------------------------------------------------
+async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update):
+        await update.message.reply_text("⛔ Admin only.")
+        return
+    keyboard = [
+        [InlineKeyboardButton("➕ Add Scholarship", callback_data="adm_add_scholarship")],
+        [InlineKeyboardButton("➕ Add Opportunity", callback_data="adm_add_opportunity")],
+        [InlineKeyboardButton("➕ Add FAQ", callback_data="adm_add_faq")],
+        [InlineKeyboardButton("➕ Add Visa Guide", callback_data="adm_add_visa")],
+        [InlineKeyboardButton("➕ Add City Cost", callback_data="adm_add_cost")],
+        [InlineKeyboardButton("🗑 Delete Entry", callback_data="adm_delete_menu")],
+        [InlineKeyboardButton("📊 Stats", callback_data="adm_stats")],
+        [InlineKeyboardButton("📢 Broadcast Message", callback_data="adm_broadcast")],
+    ]
+    await update.message.reply_text(
+        "🔐 Admin Panel\n\nWhat do you want to do?",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+
+# ---------------------------------------------------------------------------
+# Admin conversation states (offset 200+ to avoid collision)
+# ---------------------------------------------------------------------------
+(
+    ADM_SCHOLARSHIP_NAME, ADM_SCHOLARSHIP_UNI, ADM_SCHOLARSHIP_COUNTRY,
+    ADM_SCHOLARSHIP_FIELD, ADM_SCHOLARSHIP_LEVEL, ADM_SCHOLARSHIP_FUNDING,
+    ADM_SCHOLARSHIP_DEADLINE, ADM_SCHOLARSHIP_LINK, ADM_SCHOLARSHIP_DESC,
+    ADM_OPP_NAME, ADM_OPP_TYPE, ADM_OPP_ORG, ADM_OPP_COUNTRY,
+    ADM_OPP_FIELD, ADM_OPP_LEVEL, ADM_OPP_FUNDING, ADM_OPP_DEADLINE,
+    ADM_OPP_LINK, ADM_OPP_DESC, ADM_OPP_ELIG,
+    ADM_FAQ_Q, ADM_FAQ_A,
+    ADM_VISA_COUNTRY, ADM_VISA_TYPE, ADM_VISA_DOCS, ADM_VISA_TIME,
+    ADM_VISA_COST, ADM_VISA_LINK, ADM_VISA_TIPS,
+    ADM_COST_CITY, ADM_COST_COUNTRY, ADM_COST_RENT, ADM_COST_FOOD,
+    ADM_COST_TRANSPORT, ADM_COST_TOTAL,
+    ADM_DELETE_TYPE, ADM_DELETE_NUM,
+    ADM_BROADCAST_MSG,
+) = range(200, 238)
+
+
+# ---------------------------------------------------------------------------
+# Add Scholarship flow
+# ---------------------------------------------------------------------------
+async def adm_add_scholarship_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text("➕ Add Scholarship\n\nSend the scholarship NAME:")
+    return ADM_SCHOLARSHIP_NAME
+
+async def adm_scholarship_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_schol"] = {"name": update.message.text}
+    await update.message.reply_text("University/Organization:")
+    return ADM_SCHOLARSHIP_UNI
+
+async def adm_scholarship_uni(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_schol"]["university"] = update.message.text
+    await update.message.reply_text("Country:")
+    return ADM_SCHOLARSHIP_COUNTRY
+
+async def adm_scholarship_country(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_schol"]["country"] = update.message.text
+    await update.message.reply_text("Fields (comma separated, e.g. computer science, engineering):")
+    return ADM_SCHOLARSHIP_FIELD
+
+async def adm_scholarship_field(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_schol"]["field"] = [f.strip().lower() for f in update.message.text.split(",")]
+    await update.message.reply_text("Levels (comma separated, e.g. undergraduate, masters):")
+    return ADM_SCHOLARSHIP_LEVEL
+
+async def adm_scholarship_level(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_schol"]["level"] = [l.strip().lower() for l in update.message.text.split(",")]
+    await update.message.reply_text("Funding (e.g. Full tuition + stipend):")
+    return ADM_SCHOLARSHIP_FUNDING
+
+async def adm_scholarship_funding(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_schol"]["funding"] = update.message.text
+    await update.message.reply_text("Deadline (e.g. April 30, 2026):")
+    return ADM_SCHOLARSHIP_DEADLINE
+
+async def adm_scholarship_deadline(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_schol"]["deadline"] = update.message.text
+    await update.message.reply_text("Link (URL):")
+    return ADM_SCHOLARSHIP_LINK
+
+async def adm_scholarship_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_schol"]["link"] = update.message.text
+    await update.message.reply_text("Short description:")
+    return ADM_SCHOLARSHIP_DESC
+
+async def adm_scholarship_desc(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global SCHOLARSHIPS
+    s = context.user_data["adm_schol"]
+    s["description"] = update.message.text
+    SCHOLARSHIPS.append(s)
+    _save("scholarships.json", SCHOLARSHIPS)
+    await update.message.reply_text(
+        f"✅ Scholarship added! Total: {len(SCHOLARSHIPS)}\n\n"
+        f"Name: {s['name']}\nCountry: {s['country']}\nFunding: {s['funding']}"
+    )
+    return ConversationHandler.END
+
+
+# ---------------------------------------------------------------------------
+# Add Opportunity flow
+# ---------------------------------------------------------------------------
+async def adm_add_opp_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text(
+        "➕ Add Opportunity\n\nSend the opportunity NAME:"
+    )
+    return ADM_OPP_NAME
+
+async def adm_opp_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_opp"] = {"name": update.message.text}
+    keyboard = [
+        [InlineKeyboardButton(t, callback_data="admopp_" + t)]
+        for t in ["internship", "research", "competition", "fellowship", "summer_school", "exchange"]
+    ]
+    await update.message.reply_text("Type:", reply_markup=InlineKeyboardMarkup(keyboard))
+    return ADM_OPP_TYPE
+
+async def adm_opp_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    context.user_data["adm_opp"]["type"] = query.data.replace("admopp_", "")
+    await query.edit_message_text("Organization:")
+    return ADM_OPP_ORG
+
+async def adm_opp_org(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_opp"]["organization"] = update.message.text
+    await update.message.reply_text("Country:")
+    return ADM_OPP_COUNTRY
+
+async def adm_opp_country(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_opp"]["country"] = update.message.text
+    await update.message.reply_text("Fields (comma separated):")
+    return ADM_OPP_FIELD
+
+async def adm_opp_field(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_opp"]["field"] = [f.strip().lower() for f in update.message.text.split(",")]
+    await update.message.reply_text("Levels (comma separated):")
+    return ADM_OPP_LEVEL
+
+async def adm_opp_level(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_opp"]["level"] = [l.strip().lower() for l in update.message.text.split(",")]
+    await update.message.reply_text("Funding/Prize:")
+    return ADM_OPP_FUNDING
+
+async def adm_opp_funding(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_opp"]["funding"] = update.message.text
+    await update.message.reply_text("Deadline:")
+    return ADM_OPP_DEADLINE
+
+async def adm_opp_deadline(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_opp"]["deadline"] = update.message.text
+    await update.message.reply_text("Link (URL):")
+    return ADM_OPP_LINK
+
+async def adm_opp_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_opp"]["link"] = update.message.text
+    await update.message.reply_text("Short description:")
+    return ADM_OPP_DESC
+
+async def adm_opp_desc(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_opp"]["description"] = update.message.text
+    await update.message.reply_text("Eligibility (who can apply):")
+    return ADM_OPP_ELIG
+
+async def adm_opp_elig(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global OPPORTUNITIES
+    o = context.user_data["adm_opp"]
+    o["eligibility"] = update.message.text
+    OPPORTUNITIES.append(o)
+    _save("opportunities.json", OPPORTUNITIES)
+    await update.message.reply_text(
+        f"✅ Opportunity added! Total: {len(OPPORTUNITIES)}\n\n"
+        f"Name: {o['name']}\nType: {o['type']}\nOrg: {o['organization']}"
+    )
+    return ConversationHandler.END
+
+
+# ---------------------------------------------------------------------------
+# Add FAQ flow
+# ---------------------------------------------------------------------------
+async def adm_add_faq_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text("➕ Add FAQ\n\nSend the QUESTION:")
+    return ADM_FAQ_Q
+
+async def adm_faq_q(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_faq_q"] = update.message.text
+    await update.message.reply_text("Now send the ANSWER:")
+    return ADM_FAQ_A
+
+async def adm_faq_a(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global FAQ_DATA
+    q = context.user_data["adm_faq_q"]
+    a = update.message.text
+    FAQ_DATA.append({"question": q, "answer": a, "keywords": q.lower().split()})
+    _save("faq_data.json", FAQ_DATA)
+    await update.message.reply_text(f"✅ FAQ added! Total: {len(FAQ_DATA)}\n\nQ: {q}")
+    return ConversationHandler.END
+
+
+# ---------------------------------------------------------------------------
+# Add Visa Guide flow
+# ---------------------------------------------------------------------------
+async def adm_add_visa_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text("➕ Add Visa Guide\n\nSend the COUNTRY name:")
+    return ADM_VISA_COUNTRY
+
+async def adm_visa_country(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_visa"] = {"country": update.message.text}
+    await update.message.reply_text("Visa type (e.g. Student Visa, Study Permit):")
+    return ADM_VISA_TYPE
+
+async def adm_visa_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_visa"]["visa_type"] = update.message.text
+    await update.message.reply_text("Documents needed (one per line):")
+    return ADM_VISA_DOCS
+
+async def adm_visa_docs(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_visa"]["documents"] = [d.strip() for d in update.message.text.split("\n") if d.strip()]
+    await update.message.reply_text("Processing time (e.g. 4-8 weeks):")
+    return ADM_VISA_TIME
+
+async def adm_visa_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_visa"]["processing_time"] = update.message.text
+    await update.message.reply_text("Cost estimate (e.g. $160):")
+    return ADM_VISA_COST
+
+async def adm_visa_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_visa"]["cost"] = update.message.text
+    await update.message.reply_text("Embassy/application link:")
+    return ADM_VISA_LINK
+
+async def adm_visa_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_visa"]["embassy_link"] = update.message.text
+    await update.message.reply_text("Tips for applicants:")
+    return ADM_VISA_TIPS
+
+async def adm_visa_tips(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global VISA_DATA
+    v = context.user_data["adm_visa"]
+    v["tips"] = [t.strip() for t in update.message.text.split("\n") if t.strip()]
+    VISA_DATA.append(v)
+    _save("visa_data.json", VISA_DATA)
+    await update.message.reply_text(f"✅ Visa guide added! Total: {len(VISA_DATA)}\n\nCountry: {v['country']}")
+    return ConversationHandler.END
+
+
+# ---------------------------------------------------------------------------
+# Add City Cost flow
+# ---------------------------------------------------------------------------
+async def adm_add_cost_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text("➕ Add City Cost\n\nSend the CITY name:")
+    return ADM_COST_CITY
+
+async def adm_cost_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_cost"] = {"city": update.message.text}
+    await update.message.reply_text("Country:")
+    return ADM_COST_COUNTRY
+
+async def adm_cost_country(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_cost"]["country"] = update.message.text
+    await update.message.reply_text("Monthly rent (USD, just the number):")
+    return ADM_COST_RENT
+
+async def adm_cost_rent(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_cost"]["rent"] = int(update.message.text.replace("$", "").strip())
+    await update.message.reply_text("Monthly food (USD):")
+    return ADM_COST_FOOD
+
+async def adm_cost_food(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_cost"]["food"] = int(update.message.text.replace("$", "").strip())
+    await update.message.reply_text("Monthly transport (USD):")
+    return ADM_COST_TRANSPORT
+
+async def adm_cost_transport(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["adm_cost"]["transport"] = int(update.message.text.replace("$", "").strip())
+    await update.message.reply_text("Total monthly estimate (USD):")
+    return ADM_COST_TOTAL
+
+async def adm_cost_total(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global COST_DATA
+    c = context.user_data["adm_cost"]
+    c["total"] = int(update.message.text.replace("$", "").strip())
+    COST_DATA.append(c)
+    _save("cost_data.json", COST_DATA)
+    await update.message.reply_text(
+        f"✅ City added! Total: {len(COST_DATA)}\n\n"
+        f"City: {c['city']}, {c['country']}\nTotal: ${c['total']}/month"
+    )
+    return ConversationHandler.END
+
+
+# ---------------------------------------------------------------------------
+# Delete entry flow
+# ---------------------------------------------------------------------------
+async def adm_delete_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    keyboard = [
+        [InlineKeyboardButton("Scholarship", callback_data="admdeltype_scholarship")],
+        [InlineKeyboardButton("Opportunity", callback_data="admdeltype_opportunity")],
+        [InlineKeyboardButton("FAQ", callback_data="admdeltype_faq")],
+        [InlineKeyboardButton("Visa Guide", callback_data="admdeltype_visa")],
+        [InlineKeyboardButton("City Cost", callback_data="admdeltype_cost")],
+    ]
+    await query.edit_message_text(
+        "🗑 Delete Entry\n\nWhat type?",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+    return ADM_DELETE_TYPE
+
+async def adm_delete_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    dtype = query.data.replace("admdeltype_", "")
+    context.user_data["adm_del_type"] = dtype
+
+    data_map = {
+        "scholarship": (SCHOLARSHIPS, "name"),
+        "opportunity": (OPPORTUNITIES, "name"),
+        "faq": (FAQ_DATA, "question"),
+        "visa": (VISA_DATA, "country"),
+        "cost": (COST_DATA, "city"),
+    }
+    data, key = data_map[dtype]
+    # Show last 10 entries
+    lines = []
+    start_idx = max(0, len(data) - 10)
+    for i in range(start_idx, len(data)):
+        lines.append(f"{i+1}. {data[i].get(key, '?')}")
+
+    text = f"🗑 Delete {dtype}\n\nLast entries:\n" + "\n".join(lines) + "\n\nSend the NUMBER to delete (or /cancel):"
+    await query.edit_message_text(text)
+    return ADM_DELETE_NUM
+
+async def adm_delete_num(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global SCHOLARSHIPS, OPPORTUNITIES, FAQ_DATA, VISA_DATA, COST_DATA
+    try:
+        idx = int(update.message.text) - 1
+        dtype = context.user_data["adm_del_type"]
+        data_map = {
+            "scholarship": ("scholarships.json", SCHOLARSHIPS),
+            "opportunity": ("opportunities.json", OPPORTUNITIES),
+            "faq": ("faq_data.json", FAQ_DATA),
+            "visa": ("visa_data.json", VISA_DATA),
+            "cost": ("cost_data.json", COST_DATA),
+        }
+        filename, data = data_map[dtype]
+        if 0 <= idx < len(data):
+            removed = data.pop(idx)
+            _save(filename, data)
+            name = removed.get("name", removed.get("question", removed.get("city", removed.get("country", "?"))))
+            await update.message.reply_text(f"✅ Deleted: {name}\nRemaining: {len(data)}")
+        else:
+            await update.message.reply_text("❌ Invalid number. Try again or /cancel")
+            return ADM_DELETE_NUM
+    except ValueError:
+        await update.message.reply_text("❌ Send a number. Try again or /cancel")
+        return ADM_DELETE_NUM
+    return ConversationHandler.END
+
+
+# ---------------------------------------------------------------------------
+# Broadcast message flow
+# ---------------------------------------------------------------------------
+async def adm_broadcast_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text("📢 Broadcast\n\nSend the message to broadcast to ALL users:")
+    return ADM_BROADCAST_MSG
+
+async def adm_broadcast_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = update.message.text
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT DISTINCT user_id FROM user_activity")
+    users = c.fetchall()
+    conn.close()
+
+    sent = 0
+    failed = 0
+    for (uid,) in users:
+        try:
+            await context.bot.send_message(chat_id=uid, text=msg)
+            sent += 1
+        except Exception:
+            failed += 1
+
+    await update.message.reply_text(f"📢 Broadcast complete!\n✅ Sent: {sent}\n❌ Failed: {failed}")
+    return ConversationHandler.END
+
+
+async def adm_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Admin action cancelled. Use /admin to try again.")
+    return ConversationHandler.END
 
 
 # ---------------------------------------------------------------------------
@@ -1614,6 +2038,64 @@ def main():
 
     # --- Admin commands (registered first, highest priority) ---
     app.add_handler(CommandHandler("stats", stats_command), group=-1)
+    app.add_handler(CommandHandler("admin", admin_command), group=-1)
+
+    # --- Admin conversation handler ---
+    admin_conv = ConversationHandler(
+        entry_points=[
+            CallbackQueryHandler(adm_add_scholarship_start, pattern="^adm_add_scholarship$"),
+            CallbackQueryHandler(adm_add_opp_start, pattern="^adm_add_opportunity$"),
+            CallbackQueryHandler(adm_add_faq_start, pattern="^adm_add_faq$"),
+            CallbackQueryHandler(adm_add_visa_start, pattern="^adm_add_visa$"),
+            CallbackQueryHandler(adm_add_cost_start, pattern="^adm_add_cost$"),
+            CallbackQueryHandler(adm_delete_menu, pattern="^adm_delete_menu$"),
+            CallbackQueryHandler(adm_broadcast_start, pattern="^adm_broadcast$"),
+            CallbackQueryHandler(stats_command, pattern="^adm_stats$"),
+        ],
+        states={
+            ADM_SCHOLARSHIP_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_scholarship_name)],
+            ADM_SCHOLARSHIP_UNI: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_scholarship_uni)],
+            ADM_SCHOLARSHIP_COUNTRY: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_scholarship_country)],
+            ADM_SCHOLARSHIP_FIELD: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_scholarship_field)],
+            ADM_SCHOLARSHIP_LEVEL: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_scholarship_level)],
+            ADM_SCHOLARSHIP_FUNDING: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_scholarship_funding)],
+            ADM_SCHOLARSHIP_DEADLINE: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_scholarship_deadline)],
+            ADM_SCHOLARSHIP_LINK: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_scholarship_link)],
+            ADM_SCHOLARSHIP_DESC: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_scholarship_desc)],
+            ADM_OPP_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_name)],
+            ADM_OPP_TYPE: [CallbackQueryHandler(adm_opp_type, pattern="^admopp_")],
+            ADM_OPP_ORG: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_org)],
+            ADM_OPP_COUNTRY: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_country)],
+            ADM_OPP_FIELD: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_field)],
+            ADM_OPP_LEVEL: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_level)],
+            ADM_OPP_FUNDING: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_funding)],
+            ADM_OPP_DEADLINE: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_deadline)],
+            ADM_OPP_LINK: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_link)],
+            ADM_OPP_DESC: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_desc)],
+            ADM_OPP_ELIG: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_opp_elig)],
+            ADM_FAQ_Q: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_faq_q)],
+            ADM_FAQ_A: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_faq_a)],
+            ADM_VISA_COUNTRY: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_visa_country)],
+            ADM_VISA_TYPE: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_visa_type)],
+            ADM_VISA_DOCS: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_visa_docs)],
+            ADM_VISA_TIME: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_visa_time)],
+            ADM_VISA_COST: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_visa_cost)],
+            ADM_VISA_LINK: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_visa_link)],
+            ADM_VISA_TIPS: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_visa_tips)],
+            ADM_COST_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_cost_city)],
+            ADM_COST_COUNTRY: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_cost_country)],
+            ADM_COST_RENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_cost_rent)],
+            ADM_COST_FOOD: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_cost_food)],
+            ADM_COST_TRANSPORT: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_cost_transport)],
+            ADM_COST_TOTAL: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_cost_total)],
+            ADM_DELETE_TYPE: [CallbackQueryHandler(adm_delete_type, pattern="^admdeltype_")],
+            ADM_DELETE_NUM: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_delete_num)],
+            ADM_BROADCAST_MSG: [MessageHandler(filters.TEXT & ~filters.COMMAND, adm_broadcast_msg)],
+        },
+        fallbacks=[CommandHandler("cancel", adm_cancel)],
+        allow_reentry=True,
+    )
+    app.add_handler(admin_conv)
 
     # --- Profile conversation handler (must be added before generic callbacks) ---
     profile_conv = ConversationHandler(
