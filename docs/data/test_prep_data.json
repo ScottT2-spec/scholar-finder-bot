@@ -1,0 +1,179 @@
+{
+  "ielts": {
+    "full_name": "International English Language Testing System",
+    "types": ["Academic (for university)", "General Training (for immigration)"],
+    "format": {
+      "Listening": "40 questions, 30 minutes + 10 min transfer time",
+      "Reading": "40 questions, 60 minutes, 3 passages",
+      "Writing": "2 tasks (150 words + 250 words), 60 minutes",
+      "Speaking": "11-14 minutes, face-to-face interview (3 parts)"
+    },
+    "scoring": "0-9 band scale. Each section scored separately. Overall = average of 4 sections.",
+    "common_requirements": {
+      "Most universities": "6.5 overall (no band below 6.0)",
+      "Top universities": "7.0-7.5 overall",
+      "Some programs": "6.0 minimum"
+    },
+    "cost": "$245-255 USD (varies by country, ~GHS 600 in Ghana)",
+    "validity": "2 years from test date",
+    "test_centers_ghana": "British Council Accra, IDP Accra",
+    "free_prep_resources": [
+      "British Council IELTS Prep — https://learnenglish.britishcouncil.org/skills/listening",
+      "IELTS Liz — https://ieltsliz.com (free lessons and tips)",
+      "IELTS Buddy — https://www.ieltsbuddy.com",
+      "YouTube: IELTS Liz, E2 IELTS, IELTS Advantage",
+      "Cambridge IELTS Practice Tests (books 1-18, find PDFs online)",
+      "BBC Learning English — https://www.bbc.co.uk/learningenglish"
+    ],
+    "tips": [
+      "Practice with real Cambridge IELTS tests (books 14-18 are most recent)",
+      "For Writing Task 2: Learn essay structures (opinion, discussion, problem-solution)",
+      "Speaking: Practice speaking English daily, even to yourself",
+      "Reading: Practice skimming and scanning techniques",
+      "Listening: Listen to BBC podcasts, TED talks, and English movies",
+      "Take the computer-based test — results come faster (3-5 days vs 13 days)"
+    ]
+  },
+  "toefl": {
+    "full_name": "Test of English as a Foreign Language (iBT)",
+    "types": ["TOEFL iBT (most common)", "TOEFL Essentials", "TOEFL ITP (institutional)"],
+    "format": {
+      "Reading": "2 passages, 10 questions each, 35 minutes",
+      "Listening": "3 lectures + 2 conversations, 36 minutes",
+      "Speaking": "4 tasks, 16 minutes (recorded)",
+      "Writing": "2 tasks (integrated + academic discussion), 29 minutes"
+    },
+    "scoring": "0-30 per section, 0-120 total",
+    "common_requirements": {
+      "Most universities": "80-90 total",
+      "Top universities": "100+",
+      "Some programs": "79 minimum"
+    },
+    "cost": "$200-245 USD (varies by country)",
+    "validity": "2 years from test date",
+    "test_centers_ghana": "Various ETS-authorized centers in Accra",
+    "free_prep_resources": [
+      "ETS Official TOEFL Prep — https://www.ets.org/toefl/test-takers/ibt/prepare",
+      "TOEFL Go! (official ETS app)",
+      "Magoosh TOEFL Blog — https://magoosh.com/toefl/",
+      "YouTube: TST Prep, NoteFull, Magoosh TOEFL",
+      "ETS Free Practice Test (full-length official test)",
+      "EdX TOEFL Prep Course (free audit)"
+    ],
+    "tips": [
+      "Take the free official ETS practice test first to know your baseline",
+      "Speaking section is recorded — practice speaking to a screen/phone",
+      "Integrated Writing: Practice note-taking while listening",
+      "TOEFL at Home is available if no test center nearby",
+      "TOEFL iBT now shorter (under 2 hours)",
+      "MyBest scores: ETS combines your best section scores from multiple tests"
+    ]
+  },
+  "duolingo": {
+    "full_name": "Duolingo English Test (DET)",
+    "types": ["One format — computer-adaptive test"],
+    "format": {
+      "Adaptive Test": "45 minutes, computer-adaptive questions",
+      "Writing Sample": "10 minutes, 2 writing prompts",
+      "Speaking Sample": "10 minutes, 2 speaking prompts",
+      "Total": "~1 hour"
+    },
+    "scoring": "10-160 scale",
+    "common_requirements": {
+      "Most universities": "105-115",
+      "Top universities": "120-130+",
+      "Some programs": "100 minimum"
+    },
+    "cost": "$59 USD — much cheaper than IELTS/TOEFL!",
+    "validity": "2 years from test date",
+    "test_centers_ghana": "Take at home! Only need computer + internet + webcam",
+    "free_prep_resources": [
+      "Duolingo English Test Official Practice — https://englishtest.duolingo.com/prepare",
+      "Free 15-minute practice test on the official website",
+      "YouTube: Duolingo English Test Tips, Teacher Luke",
+      "Duolingo app (for general English practice)",
+      "Reddit: r/DuolingoEnglishTest community"
+    ],
+    "tips": [
+      "Take the free practice test first — it's very similar to the real test",
+      "Can be taken AT HOME anytime — no test center needed!",
+      "Results in 48 hours — fastest of all English tests",
+      "Accepted by 4,500+ universities worldwide",
+      "Great budget option at just $59",
+      "Computer-adaptive: questions get harder as you answer correctly",
+      "You can retake every 21 days"
+    ]
+  },
+  "sat": {
+    "full_name": "Scholastic Assessment Test",
+    "types": ["Digital SAT (new format since 2024)"],
+    "format": {
+      "Reading and Writing": "2 modules, 54 questions, 64 minutes",
+      "Math": "2 modules, 44 questions, 70 minutes",
+      "Total": "~2 hours 14 minutes (plus breaks)"
+    },
+    "scoring": "400-1600 total (200-800 per section)",
+    "common_requirements": {
+      "Good score": "1200+",
+      "Competitive": "1400+",
+      "Top universities": "1500+",
+      "Note": "Many universities are now test-optional"
+    },
+    "cost": "$60 USD (fee waiver available for low-income students)",
+    "validity": "5 years (but most universities prefer recent scores)",
+    "test_centers_ghana": "Various schools in Accra authorized as SAT centers",
+    "free_prep_resources": [
+      "Khan Academy SAT Prep — https://www.khanacademy.org/sat (OFFICIAL partner)",
+      "College Board Official Practice — https://satsuite.collegeboard.org/sat/practice-preparation",
+      "Bluebook App (official practice tests for digital SAT)",
+      "YouTube: Scalar Learning, 1600.io, Organic Chemistry Tutor",
+      "Reddit: r/SAT community"
+    ],
+    "tips": [
+      "Khan Academy SAT prep is FREE and the BEST resource (official College Board partner)",
+      "New digital format is shorter and adaptive",
+      "Calculator allowed on ALL math questions now",
+      "Many top US universities are test-optional (2024-2026)",
+      "But strong scores can still strengthen your application",
+      "Take at least 3-4 full practice tests before the real one",
+      "Register early — test centers in Ghana fill up fast"
+    ]
+  },
+  "gre": {
+    "full_name": "Graduate Record Examination",
+    "types": ["GRE General Test", "GRE Subject Tests (specific fields)"],
+    "format": {
+      "Verbal Reasoning": "2 sections, 27 questions each, 41 minutes total",
+      "Quantitative Reasoning": "2 sections, 27 questions each, 47 minutes total",
+      "Analytical Writing": "1 essay task, 30 minutes",
+      "Total": "~2 hours"
+    },
+    "scoring": "Verbal: 130-170, Quantitative: 130-170, Writing: 0-6",
+    "common_requirements": {
+      "Good score": "Verbal 155+ / Quant 160+",
+      "Top programs": "Verbal 160+ / Quant 165+",
+      "Writing": "4.0+",
+      "Note": "Many programs have dropped GRE requirement"
+    },
+    "cost": "$220 USD (fee reduction to $110 available)",
+    "validity": "5 years from test date",
+    "test_centers_ghana": "ETS-authorized test centers in Accra / GRE at Home available",
+    "free_prep_resources": [
+      "ETS Official GRE Prep — https://www.ets.org/gre/test-takers/general-test/prepare",
+      "ETS PowerPrep (2 free official practice tests)",
+      "Magoosh GRE Blog — https://magoosh.com/gre/",
+      "GregMAT+ — https://www.gregmat.com ($5/month, excellent value)",
+      "YouTube: GregMAT, Magoosh GRE, Manhattan Prep",
+      "Vince Kotchian's GRE resources"
+    ],
+    "tips": [
+      "MANY graduate programs have dropped the GRE — check before you prep",
+      "If needed, Quant is most important for STEM applicants",
+      "GRE at Home is available — take from anywhere with internet",
+      "ETS PowerPrep free practice tests are the best baseline measure",
+      "GregMAT+ ($5/month) is the best affordable prep resource",
+      "Shorter format since September 2023 (~2 hours instead of 4)",
+      "You can send your best scores (ScoreSelect)"
+    ]
+  }
+}

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScholarFinder 🎓 — Your Complete Guide to Studying Abroad</title>
+    <meta name="description" content="Find scholarships, universities, and opportunities to study abroad. 151 scholarships, 86 universities, 62 opportunities — all in one place.">
+    <meta name="keywords" content="scholarships, study abroad, universities, international students, funding, opportunities">
+    <meta name="author" content="Scott Antwi — Alpha Global Minds">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="ScholarFinder 🎓 — Your Complete Guide to Studying Abroad">
+    <meta property="og:description" content="Find scholarships, universities, and opportunities to study abroad. 151 scholarships, 86 universities, 62 opportunities.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://scholarfinder.github.io">
+    <meta property="og:image" content="https://scholarfinder.github.io/og-image.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ScholarFinder 🎓">
+    <meta name="twitter:description" content="Your Complete Guide to Studying Abroad">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#hero" class="nav-logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">ScholarFinder</span>
+            </a>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#scholarships" class="nav-link" data-section="scholarships">Scholarships</a></li>
+                <li><a href="#universities" class="nav-link" data-section="universities">Universities</a></li>
+                <li><a href="#opportunities" class="nav-link" data-section="opportunities">Opportunities</a></li>
+                <li><a href="#cost" class="nav-link" data-section="cost">Cost of Living</a></li>
+                <li><a href="#visa" class="nav-link" data-section="visa">Visa Guide</a></li>
+                <li><a href="#testprep" class="nav-link" data-section="testprep">Test Prep</a></li>
+                <li><a href="#essays" class="nav-link" data-section="essays">Essays</a></li>
+                <li><a href="#faq" class="nav-link" data-section="faq">FAQ</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-bg-effects">
+            <div class="hero-orb hero-orb-1"></div>
+            <div class="hero-orb hero-orb-2"></div>
+            <div class="hero-orb hero-orb-3"></div>
+        </div>
+        <div class="container hero-content">
+            <h1 class="hero-title">
+                <span class="hero-emoji">🎓</span>
+                ScholarFinder
+            </h1>
+            <p class="hero-tagline">Your Complete Guide to Studying Abroad</p>
+            
+            <div class="hero-search">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="globalSearch" placeholder="Search scholarships, universities, opportunities..." autocomplete="off">
+                    <button class="search-clear" id="searchClear" aria-label="Clear search">×</button>
+                </div>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="151">0</span>
+                    <span class="stat-label">Scholarships</span>
+                </div>
+                <div class="stat-divider">•</div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="86">0</span>
+                    <span class="stat-label">Universities</span>
+                </div>
+                <div class="stat-divider">•</div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="62">0</span>
+                    <span class="stat-label">Opportunities</span>
+                </div>
+            </div>
+
+            <div class="hero-cta">
+                <a href="#scholarships" class="btn btn-primary">Find Scholarships</a>
+                <a href="#universities" class="btn btn-secondary">Explore Universities</a>
+            </div>
+
+            <p class="hero-credit">© 2026 Scott Antwi | Alpha Global Minds 🌍</p>
+        </div>
+        <div class="scroll-indicator">
+            <span>↓</span>
+        </div>
+    </section>
+
+    <!-- Scholarships Section -->
+    <section id="scholarships" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🎯 Scholarship Search</h2>
+                <p class="section-subtitle">Find your perfect funding opportunity from 151 scholarships worldwide</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="scholarshipSearch" class="filter-input" placeholder="🔍 Search by name, university, country...">
+                </div>
+                <div class="filter-group filter-row">
+                    <select id="scholarshipLevel" class="filter-select">
+                        <option value="">All Levels</option>
+                        <option value="undergraduate">Undergraduate</option>
+                        <option value="masters">Masters</option>
+                        <option value="phd">PhD</option>
+                    </select>
+                    <select id="scholarshipField" class="filter-select">
+                        <option value="">All Fields</option>
+                    </select>
+                    <select id="scholarshipRegion" class="filter-select">
+                        <option value="">All Countries</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-info" id="scholarshipResultsInfo"></div>
+            <div class="card-grid" id="scholarshipGrid"></div>
+            <button class="btn btn-load-more" id="scholarshipLoadMore" style="display:none;">Load More</button>
+        </div>
+    </section>
+
+    <!-- Universities Section -->
+    <section id="universities" class="section section-alt">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🏫 University Search</h2>
+                <p class="section-subtitle">Explore 86 universities across the globe</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="universitySearch" class="filter-input" placeholder="🔍 Search universities...">
+                </div>
+                <div class="filter-group filter-row">
+                    <select id="universityRegion" class="filter-select">
+                        <option value="">All Countries</option>
+                    </select>
+                    <select id="universityTier" class="filter-select">
+                        <option value="">All Rankings</option>
+                        <option value="top10">Top 10</option>
+                        <option value="top50">Top 50</option>
+                        <option value="top100">Top 100</option>
+                        <option value="top200">Top 200</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <select id="universityTuition" class="filter-select">
+                        <option value="">All Tuition</option>
+                        <option value="free">Free</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <select id="universityField" class="filter-select">
+                        <option value="">All Fields</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-info" id="universityResultsInfo"></div>
+            <div class="card-grid" id="universityGrid"></div>
+            <button class="btn btn-load-more" id="universityLoadMore" style="display:none;">Load More</button>
+        </div>
+    </section>
+
+    <!-- Opportunities Section -->
+    <section id="opportunities" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🚀 Opportunities</h2>
+                <p class="section-subtitle">Internships, research, competitions, fellowships, and more</p>
+            </div>
+            
+            <div class="tab-bar" id="opportunityTabs">
+                <button class="tab-btn active" data-type="">All</button>
+                <button class="tab-btn" data-type="internship">💼 Internships</button>
+                <button class="tab-btn" data-type="research">🔬 Research</button>
+                <button class="tab-btn" data-type="competition">🏆 Competitions</button>
+                <button class="tab-btn" data-type="fellowship">🎖️ Fellowships</button>
+                <button class="tab-btn" data-type="summer_school">☀️ Summer Schools</button>
+                <button class="tab-btn" data-type="exchange">🌐 Exchanges</button>
+            </div>
+
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="opportunitySearch" class="filter-input" placeholder="🔍 Search opportunities...">
+                </div>
+            </div>
+
+            <div class="results-info" id="opportunityResultsInfo"></div>
+            <div class="card-grid" id="opportunityGrid"></div>
+            <button class="btn btn-load-more" id="opportunityLoadMore" style="display:none;">Load More</button>
+        </div>
+    </section>
+
+    <!-- Cost of Living Section -->
+    <section id="cost" class="section section-alt">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">💰 Cost of Living</h2>
+                <p class="section-subtitle">Compare living costs in student cities worldwide</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="costSearch" class="filter-input" placeholder="🔍 Search by city or country...">
+                </div>
+            </div>
+
+            <div class="cost-compare-toggle">
+                <button class="btn btn-secondary btn-sm" id="toggleCompare">📊 Compare Two Cities</button>
+            </div>
+
+            <div class="cost-compare-panel" id="comparePanel" style="display:none;">
+                <div class="compare-selectors">
+                    <select id="compareCity1" class="filter-select">
+                        <option value="">Select City 1</option>
+                    </select>
+                    <span class="compare-vs">VS</span>
+                    <select id="compareCity2" class="filter-select">
+                        <option value="">Select City 2</option>
+                    </select>
+                </div>
+                <div class="compare-results" id="compareResults"></div>
+            </div>
+
+            <div class="card-grid" id="costGrid"></div>
+        </div>
+    </section>
+
+    <!-- Visa Guide Section -->
+    <section id="visa" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🛂 Visa Guide</h2>
+                <p class="section-subtitle">Everything you need to know about student visas</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="visaSearch" class="filter-input" placeholder="🔍 Search by country...">
+                </div>
+            </div>
+
+            <div class="card-grid card-grid-single" id="visaGrid"></div>
+        </div>
+    </section>
+
+    <!-- Test Prep Section -->
+    <section id="testprep" class="section section-alt">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">📝 Test Prep</h2>
+                <p class="section-subtitle">Prepare for IELTS, TOEFL, SAT, GRE, and Duolingo English Test</p>
+            </div>
+            
+            <div class="card-grid" id="testPrepGrid"></div>
+        </div>
+    </section>
+
+    <!-- Essay Help Section -->
+    <section id="essays" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">✍️ Essay Help</h2>
+                <p class="section-subtitle">Templates and guides for personal statements, SOPs, and more</p>
+            </div>
+            
+            <div class="tab-bar" id="essayTabs">
+            </div>
+
+            <div class="essay-content" id="essayContent"></div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section section-alt">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">❓ Frequently Asked Questions</h2>
+                <p class="section-subtitle">Quick answers to common questions about studying abroad</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="faqSearch" class="filter-input" placeholder="🔍 Search questions...">
+                </div>
+            </div>
+
+            <div class="accordion" id="faqAccordion"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3><span class="logo-icon">🎓</span> ScholarFinder</h3>
+                    <p>Your Complete Guide to Studying Abroad</p>
+                    <p class="footer-credit">Built with ❤️ by <strong>Scott Antwi</strong></p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <a href="#scholarships">Scholarships</a>
+                    <a href="#universities">Universities</a>
+                    <a href="#opportunities">Opportunities</a>
+                    <a href="#cost">Cost of Living</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <a href="#visa">Visa Guide</a>
+                    <a href="#testprep">Test Prep</a>
+                    <a href="#essays">Essay Help</a>
+                    <a href="#faq">FAQ</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <a href="https://t.me/ScholarFinderBot" target="_blank" rel="noopener">📱 Telegram Bot</a>
+                    <a href="https://github.com/scottantwi/scholarfinder" target="_blank" rel="noopener">💻 GitHub</a>
+                    <a href="mailto:contact@alphaglobalminds.com">📧 Contact Us</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 <strong>Alpha Global Minds</strong> 🌍 — All rights reserved</p>
+                <p class="footer-tagline">Empowering students to reach the world</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader">
+            <span class="loader-emoji">🎓</span>
+            <p>Loading ScholarFinder...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
