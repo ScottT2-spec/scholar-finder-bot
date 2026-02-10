@@ -1524,3 +1524,123 @@ img { max-width: 100%; height: auto; }
 .chat-input-area button:hover {
     transform: scale(1.1);
 }
+
+/* ============================================
+   Feature Grid — Card Navigation
+   ============================================ */
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .feature-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+}
+
+.feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card:hover, .feature-card:active {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-blue);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.feature-card h3 {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.feature-card p {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.feature-arrow {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    transition: var(--transition);
+}
+
+.feature-card:hover .feature-arrow {
+    color: var(--accent-blue);
+    transform: translateX(4px);
+}
+
+/* Back button in detail sections */
+.back-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 8px 20px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    margin-bottom: 16px;
+    display: inline-block;
+}
+
+.back-btn:hover {
+    border-color: var(--accent-blue);
+    color: var(--text-primary);
+    background: rgba(67, 97, 238, 0.1);
+}
+
+/* Detail sections slide in */
+.detail-section {
+    animation: fadeSlideIn 0.3s ease;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Nav CTA button */
+.nav-cta {
+    background: var(--accent-gradient);
+    padding: 6px 16px !important;
+    border-radius: var(--border-radius-sm);
+    color: white !important;
+    font-weight: 600;
+}
+
+.nav-cta:hover {
+    opacity: 0.9;
+}
