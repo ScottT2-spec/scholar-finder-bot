@@ -910,6 +910,76 @@
         tick();
     }
 
+    // ==========================================
+    // FEATURE CARD NAVIGATION
+    // ==========================================
+    function initFeatureCards() {
+        const featureCards = $$('.feature-card');
+        const detailSections = $$('.detail-section');
+        const featuresSection = $('#features');
+        const heroSection = $('#hero');
+        const backBtns = $$('.back-btn');
+
+        function showSection(targetId) {
+            // Hide hero, features, and all detail sections
+            heroSection.style.display = 'none';
+            featuresSection.style.display = 'none';
+            detailSections.forEach(s => s.style.display = 'none');
+
+            // Show the target section
+            const target = document.getElementById(targetId);
+            if (target) {
+                target.style.display = '';
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }
+        }
+
+        function showHome() {
+            detailSections.forEach(s => s.style.display = 'none');
+            heroSection.style.display = '';
+            featuresSection.style.display = '';
+            window.scrollTo({ top: featuresSection.offsetTop - 80, behavior: 'smooth' });
+        }
+
+        featureCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const targetId = card.dataset.target;
+                showSection(targetId);
+            });
+        });
+
+        backBtns.forEach(btn => {
+            btn.addEventListener('click', showHome);
+        });
+
+        // Handle browser back button
+        featureCards.forEach(card => {
+            card.addEventListener('click', () => {
+                history.pushState({ section: card.dataset.target }, '', '#' + card.dataset.target);
+            });
+        });
+
+        backBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                history.pushState({ section: 'home' }, '', '#features');
+            });
+        });
+
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.section && e.state.section !== 'home') {
+                showSection(e.state.section);
+            } else {
+                showHome();
+            }
+        });
+
+        // Handle direct link to section (e.g. #scholarships)
+        const hash = window.location.hash.replace('#', '');
+        if (hash && document.getElementById(hash) && hash !== 'hero' && hash !== 'features') {
+            setTimeout(() => showSection(hash), 100);
+        }
+    }
+
     async function init() {
         initNavigation();
 
@@ -924,6 +994,7 @@
         animateCounters();
         initTypewriter();
         initGlobalSearch();
+        initFeatureCards();
         initScholarships();
         initUniversities();
         initOpportunities();
