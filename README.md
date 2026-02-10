@@ -1,132 +1,69 @@
-# 🎓 ScholarFinder Bot
+# ScholarFinder Bot
 
-**Your complete guide to studying abroad** — a Telegram bot with 25+ commands covering scholarships, universities, opportunities, visa guides, cost of living, test prep, essay help, and more.
+A Telegram bot I built to help students (especially in Africa) find scholarships, universities, and opportunities to study abroad. I got tired of spending hours searching different websites for scholarship info, so I put everything in one place.
 
-Built by **Scott | Alpha Global Minds**
+**Try it:** [@ScholarFinder_bot](https://t.me/ScholarFinder_bot) on Telegram
 
-## 📊 Database
+**Website:** [scottt2-spec.github.io/scholar-finder-bot](https://scottt2-spec.github.io/scholar-finder-bot)
 
-| Category | Count |
-|----------|-------|
-| Scholarships | 151 |
+## What's in the database
+
+| What | How many |
+|------|----------|
+| Scholarships | 151 across 46 countries |
 | Universities | 86 |
-| Opportunities | 62 |
-| Cost of Living Cities | 51 |
-| FAQ Q&A Pairs | 42 |
-| Visa Guides | 26 |
-| Test Prep Guides | 5 |
-| Essay Writing Guides | 6 |
+| Opportunities (internships, research, competitions) | 62 |
+| Cities with cost of living data | 51 |
+| FAQ answers | 42 |
+| Visa guides | 26 countries |
+| Test prep guides | 5 (IELTS, TOEFL, SAT, GRE, Duolingo) |
+| Essay writing guides | 6 |
 
-## 🚀 Features
+## What you can do with it
 
-### 🔍 Scholarship Search
-- `/start` — Main menu with inline buttons for all features
-- `/search` — Interactive search: level → field → region → results
-- `/all` — List all 151 scholarships (chunked messages)
+**Find scholarships** — Search by level (undergrad/masters/PhD), field, and region. Or just browse all 151.
 
-### 🏫 University Search
-- `/universities` — Interactive: region → field → results with ranking, tuition, website
+**Look up universities** — Filter by region and field of study. Shows rankings, tuition, and links.
 
-### 🌍 Opportunities Database (62 entries)
-- `/opportunities` — Browse by category (inline buttons)
-- `/internships` — Google STEP, Microsoft Explore, Meta University, Outreachy, GSoC, etc.
-- `/research` — MIT MSRP, Stanford SURF, Caltech SURF, CERN, DAAD RISE, etc.
-- `/competitions` — Kaggle, Zindi, ICPC, Google Code Jam, Hult Prize, etc.
-- `/fellowships` — MLH Fellowship, GitHub Campus Expert, GDSC Lead, Mandela Washington, etc.
-- `/summer` — DeepMind, Oxford ML, EPFL, Heidelberg Laureate Forum, etc.
-- `/exchange` — AFS, UWC, Kennedy-Lugar YES, Global UGRAD, Erasmus+, etc.
+**Browse opportunities** — Internships (Google STEP, Microsoft Explore, GSoC), research programs (MIT MSRP, Stanford SURF, CERN), competitions (Kaggle, ICPC, Hult Prize), fellowships, summer programs, and exchange programs.
 
-### 💰 Cost of Living
-- `/cost <city>` — Monthly breakdown (rent, food, transport, etc.)
-- `/compare <city1> vs <city2>` — Side-by-side comparison
+**Compare cost of living** — Check monthly costs for any of the 51 cities, or compare two cities side by side.
 
-### 🛂 Visa Guide
-- `/visa <country>` — Documents, processing time, cost, tips (26 countries)
+**Visa info** — Documents needed, processing time, costs, and tips for 26 countries.
 
-### 📚 Test Prep
-- `/tests` — Overview of all 5 tests (IELTS, TOEFL, Duolingo, SAT, GRE)
-- `/test <name>` — Detailed format, scoring, requirements, free resources, tips
+**Test prep** — Format, scoring, resources, and tips for IELTS, TOEFL, SAT, GRE, and Duolingo.
 
-### 🤖 AI Q&A
-- `/ask <question>` — Keyword-matched against 42 FAQ entries
-- Word overlap scoring, top 1-3 matches, topic suggestions
+**Essay help** — Guides for personal statements, SOPs, CVs, activity lists, with dos/don'ts and example phrases.
 
-### 📝 Essay & SOP Help
-- `/essay` — Menu with 6 comprehensive guides:
-  - Personal Statement Structure
-  - Statement of Purpose (SOP)
-  - Academic CV Format
-  - Activity List Tips
-  - Essay Dos & Don'ts
-  - Power Words for Applications
+**Track your applications** — Checklist you can check off as you complete each step (transcripts, recommendations, etc.)
 
-### ✅ Application Checklist
-- `/checklist` — 9-item checklist with ✅/⬜ per user
-- `/check <number>` — Toggle items on/off
-- Items: Personal Statement, CV, Transcripts, Recommendations, Language Score, Passport, Application Form, Motivation Letter, Portfolio
+**Deadline reminders** — Subscribe to any scholarship and get notified at 30, 7, and 1 day before the deadline.
 
-### ⏰ Deadline Reminders
-- `/subscribe <number>` — Subscribe to deadline alerts (number from `/all`)
-- `/unsubscribe <number>` — Remove subscription
-- `/reminders` — View my subscriptions with days remaining
-- **Automatic notifications** at 30, 7, and 1 days before deadlines (APScheduler)
+**Personalized recommendations** — Set up your profile (country, GPA, field, goals) and get scholarship matches.
 
-### 👤 Student Profile
-- `/setprofile` — Guided setup (name, country, level, GPA, field, career goals, financial need)
-- `/profile` — View saved profile
-- Data stored in SQLite
+**Ask questions** — Type any question and the bot matches it against 42 common study-abroad FAQs.
 
-### ⭐ Personalized Recommendations
-- `/recommend` — Based on your profile:
-  - Top 5 matching scholarships
-  - Top 3 matching universities
-  - Top 3 matching opportunities
-- Scoring considers level, field, region, financial need, tuition tier
+## Why I built it
 
-### 📖 Help
-- `/help` — All commands grouped by category
+I'm a high school student in Ghana applying to universities abroad. The scholarship search process is frustrating — info is scattered across dozens of websites, deadlines sneak up on you, and a lot of the advice out there is generic or not relevant to African students.
 
-## 🛠 Technical Stack
+I wanted something that just works: open Telegram, search, get results. No ads, no sign-ups, no paywalls.
 
-- **Language:** Python 3
-- **Framework:** python-telegram-bot (v20+)
-- **Database:** SQLite (`users.db`)
-  - Tables: `subscriptions`, `checklist_progress`, `user_profiles`
-- **Scheduler:** APScheduler (daily deadline check)
-- **Data:** JSON files for all reference data
+## Built with
 
-## 📁 File Structure
+- Python + python-telegram-bot
+- SQLite for user data and activity tracking
+- APScheduler for deadline reminders
+- JSON data files (handpicked, not scraped)
 
-```
-scholarbot/
-├── bot.py                  # Main bot (all features)
-├── scholarships.json       # 151 scholarships
-├── universities.json       # 86 universities
-├── opportunities.json      # 62 opportunities
-├── cost_data.json          # 51 cities
-├── faq_data.json           # 42 Q&A pairs
-├── test_prep_data.json     # 5 standardized tests
-├── visa_data.json          # 26 countries
-├── essay_guides.json       # 6 writing guides
-├── users.db                # SQLite user data (auto-created)
-├── watchdog.sh             # Auto-restart watchdog
-└── README.md               # This file
-```
+## Run it yourself
 
-## 🔧 Running
+1. Clone this repo
+2. Create a Telegram bot via [@BotFather](https://t.me/BotFather)
+3. Set your bot token and admin ID in the code
+4. `pip install python-telegram-bot apscheduler`
+5. `python bot.py`
 
-```bash
-# Install dependencies
-pip install python-telegram-bot apscheduler
+---
 
-# Run
-cd scholarbot
-python3 bot.py
-
-# Watchdog (auto-restart)
-bash watchdog.sh &
-```
-
-## 🌍 Region Coverage
-
-Africa • Europe • Middle East • Asia • North America • Oceania • South America — covering 46 countries.
+Built by Scott | [Alpha Global Minds](https://github.com/ScottT2-spec)
