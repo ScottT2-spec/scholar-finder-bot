@@ -942,27 +942,27 @@
         }
 
         featureCards.forEach(card => {
-            card.addEventListener('click', () => {
+            function handleCardTap(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 const targetId = card.dataset.target;
                 showSection(targetId);
-            });
+                history.pushState({ section: targetId }, '', '#' + targetId);
+            }
+            card.addEventListener('click', handleCardTap);
+            card.addEventListener('touchend', handleCardTap);
+            card.style.cursor = 'pointer';
         });
 
         backBtns.forEach(btn => {
-            btn.addEventListener('click', showHome);
-        });
-
-        // Handle browser back button
-        featureCards.forEach(card => {
-            card.addEventListener('click', () => {
-                history.pushState({ section: card.dataset.target }, '', '#' + card.dataset.target);
-            });
-        });
-
-        backBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
+            function handleBack(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showHome();
                 history.pushState({ section: 'home' }, '', '#features');
-            });
+            }
+            btn.addEventListener('click', handleBack);
+            btn.addEventListener('touchend', handleBack);
         });
 
         window.addEventListener('popstate', (e) => {
