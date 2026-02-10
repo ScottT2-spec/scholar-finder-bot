@@ -1005,7 +1005,81 @@
         initFAQ();
         initLazyLoad();
 
+        initCarousel();
+
         console.log('🎓 ScholarFinder loaded — © 2026 Scott Antwi | Alpha Global Minds');
+    }
+
+    // ==========================================
+    // IMAGE CAROUSEL
+    // ==========================================
+    function initCarousel() {
+        const track = document.getElementById('carouselTrack');
+        const dotsContainer = document.getElementById('carouselDots');
+        const prevBtn = document.getElementById('carouselPrev');
+        const nextBtn = document.getElementById('carouselNext');
+        if (!track || !dotsContainer) return;
+
+        const slides = track.querySelectorAll('.carousel-slide');
+        const total = slides.length;
+        let current = 0;
+        let autoTimer = null;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        // Create dots
+        for (let i = 0; i < total; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+            dot.addEventListener('click', () => goTo(i));
+            dotsContainer.appendChild(dot);
+        }
+
+        function goTo(index) {
+            current = ((index % total) + total) % total;
+            track.style.transform = 'translateX(-' + (current * 100) + '%)';
+            // Update dots
+            dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => {
+                d.classList.toggle('active', i === current);
+            });
+        }
+
+        function next() { goTo(current + 1); }
+        function prev() { goTo(current - 1); }
+
+        function startAuto() {
+            stopAuto();
+            autoTimer = setInterval(next, 4000);
+        }
+        function stopAuto() {
+            if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+        }
+
+        prevBtn.addEventListener('click', () => { prev(); stopAuto(); startAuto(); });
+        nextBtn.addEventListener('click', () => { next(); stopAuto(); startAuto(); });
+
+        // Touch / swipe support
+        track.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            stopAuto();
+        }, { passive: true });
+        track.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) next(); else prev();
+            }
+            startAuto();
+        }, { passive: true });
+
+        // Pause on hover (desktop)
+        const wrapper = track.parentElement;
+        wrapper.addEventListener('mouseenter', stopAuto);
+        wrapper.addEventListener('mouseleave', startAuto);
+
+        // Start auto-slide
+        startAuto();
     }
 
     // Start when DOM is ready

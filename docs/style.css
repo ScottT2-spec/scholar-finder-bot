@@ -1526,6 +1526,136 @@ img { max-width: 100%; height: auto; }
 }
 
 /* ============================================
+   IMAGE CAROUSEL
+   ============================================ */
+.carousel-section {
+    padding: 60px 0 40px;
+    background: var(--bg-secondary);
+    overflow: hidden;
+}
+
+.carousel-wrapper {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+.carousel-slide {
+    min-width: 100%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: block;
+}
+
+.carousel-slide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(10, 10, 15, 0.7) 0%, rgba(10, 10, 15, 0.05) 50%, transparent 100%);
+    pointer-events: none;
+}
+
+.carousel-caption {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    z-index: 2;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    letter-spacing: 0.02em;
+}
+
+/* Arrows */
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(10, 10, 15, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.carousel-arrow:hover {
+    background: rgba(67, 97, 238, 0.6);
+    border-color: var(--accent-blue);
+}
+.carousel-prev { left: 12px; }
+.carousel-next { right: 12px; }
+
+/* Dots */
+.carousel-dots {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 3;
+}
+.carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 0;
+}
+.carousel-dot.active {
+    background: var(--accent-blue);
+    box-shadow: 0 0 8px rgba(67, 97, 238, 0.6);
+    transform: scale(1.2);
+}
+
+/* Responsive carousel */
+@media (max-width: 768px) {
+    .carousel-section { padding: 40px 0 30px; }
+    .carousel-slide img { height: 250px; }
+    .carousel-caption { font-size: 0.95rem; bottom: 16px; left: 16px; right: 16px; }
+    .carousel-arrow { width: 36px; height: 36px; font-size: 1.2rem; }
+    .carousel-prev { left: 8px; }
+    .carousel-next { right: 8px; }
+    .carousel-dots { bottom: 10px; gap: 6px; }
+    .carousel-dot { width: 8px; height: 8px; }
+}
+
+@media (max-width: 480px) {
+    .carousel-slide img { height: 200px; }
+    .carousel-caption { font-size: 0.85rem; bottom: 12px; left: 12px; right: 12px; }
+}
+
+/* ============================================
    Feature Grid — Card Navigation
    ============================================ */
 
