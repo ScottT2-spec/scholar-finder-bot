@@ -9,14 +9,11 @@
     <meta name="author" content="Scott Antwi — Alpha Global Minds">
     <meta name="google-site-verification" content="zzKbvY2042VwsudBL454uiEItDuI7XSbc3sSR61L6GE" />
     
-    <!-- Open Graph -->
     <meta property="og:title" content="ScholarFinder 🎓 — Your Complete Guide to Studying Abroad">
     <meta property="og:description" content="Find scholarships, universities, and opportunities to study abroad. 151 scholarships, 86 universities, 62 opportunities.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://scholarfinder.github.io">
-    <meta property="og:image" content="https://scholarfinder.github.io/og-image.png">
+    <meta property="og:url" content="https://scottt2-spec.github.io/scholar-finder-bot">
     
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ScholarFinder 🎓">
     <meta name="twitter:description" content="Your Complete Guide to Studying Abroad">
@@ -36,14 +33,9 @@
                 <span></span><span></span><span></span>
             </button>
             <ul class="nav-menu" id="navMenu">
-                <li><a href="#scholarships" class="nav-link" data-section="scholarships">Scholarships</a></li>
-                <li><a href="#universities" class="nav-link" data-section="universities">Universities</a></li>
-                <li><a href="#opportunities" class="nav-link" data-section="opportunities">Opportunities</a></li>
-                <li><a href="#cost" class="nav-link" data-section="cost">Cost of Living</a></li>
-                <li><a href="#visa" class="nav-link" data-section="visa">Visa Guide</a></li>
-                <li><a href="#testprep" class="nav-link" data-section="testprep">Test Prep</a></li>
-                <li><a href="#essays" class="nav-link" data-section="essays">Essays</a></li>
-                <li><a href="#faq" class="nav-link" data-section="faq">FAQ</a></li>
+                <li><a href="#hero" class="nav-link">Home</a></li>
+                <li><a href="#features" class="nav-link">Explore</a></li>
+                <li><a href="https://t.me/ScholarFinder_bot" class="nav-link nav-cta" target="_blank">Open Bot 📱</a></li>
             </ul>
         </div>
     </nav>
@@ -60,7 +52,7 @@
                 <span class="hero-emoji">🎓</span>
                 ScholarFinder
             </h1>
-            <p class="hero-welcome">Welcome! Built by <span class="highlight-name">Scott Antwi</span></p>
+            <p class="hero-welcome">Built by <span class="highlight-name">Scott Antwi</span></p>
             <div class="typewriter-container">
                 <span class="typewriter-text" id="typewriterText"></span>
                 <span class="typewriter-cursor">|</span>
@@ -92,8 +84,8 @@
             </div>
 
             <div class="hero-cta">
-                <a href="#scholarships" class="btn btn-primary">Find Scholarships</a>
-                <a href="#universities" class="btn btn-secondary">Explore Universities</a>
+                <a href="#features" class="btn btn-primary">Explore Everything ↓</a>
+                <a href="https://t.me/ScholarFinder_bot" class="btn btn-secondary" target="_blank">Open Telegram Bot</a>
             </div>
 
             <p class="hero-credit">© 2026 Scott Antwi | Alpha Global Minds 🌍</p>
@@ -103,12 +95,74 @@
         </div>
     </section>
 
-    <!-- Scholarships Section -->
-    <section id="scholarships" class="section">
+    <!-- Feature Cards Grid -->
+    <section id="features" class="section">
         <div class="container">
             <div class="section-header">
+                <h2 class="section-title">What do you need?</h2>
+                <p class="section-subtitle">Tap any card to explore</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card" data-target="scholarships">
+                    <span class="feature-icon">🎯</span>
+                    <h3>Scholarships</h3>
+                    <p>151 scholarships across 46 countries</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="universities">
+                    <span class="feature-icon">🏫</span>
+                    <h3>Universities</h3>
+                    <p>86 universities worldwide with rankings</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="opportunities">
+                    <span class="feature-icon">🚀</span>
+                    <h3>Opportunities</h3>
+                    <p>62 internships, research, competitions</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="cost">
+                    <span class="feature-icon">💰</span>
+                    <h3>Cost of Living</h3>
+                    <p>Compare 51 student cities</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="visa">
+                    <span class="feature-icon">🛂</span>
+                    <h3>Visa Guide</h3>
+                    <p>Student visa info for 26 countries</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="testprep">
+                    <span class="feature-icon">📝</span>
+                    <h3>Test Prep</h3>
+                    <p>IELTS, TOEFL, SAT, GRE, Duolingo</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="essays">
+                    <span class="feature-icon">✍️</span>
+                    <h3>Essay Help</h3>
+                    <p>Personal statements, SOPs, CVs</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="faq">
+                    <span class="feature-icon">❓</span>
+                    <h3>FAQ</h3>
+                    <p>42 answers to common questions</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scholarships Section (hidden by default, shown on tap) -->
+    <section id="scholarships" class="section detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
                 <h2 class="section-title">🎯 Scholarship Search</h2>
-                <p class="section-subtitle">Find your perfect funding opportunity from 151 scholarships worldwide</p>
+                <p class="section-subtitle">Find your perfect funding opportunity</p>
             </div>
             
             <div class="filters-bar">
@@ -138,9 +192,10 @@
     </section>
 
     <!-- Universities Section -->
-    <section id="universities" class="section section-alt">
+    <section id="universities" class="section section-alt detail-section" style="display:none;">
         <div class="container">
             <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
                 <h2 class="section-title">🏫 University Search</h2>
                 <p class="section-subtitle">Explore 86 universities across the globe</p>
             </div>
@@ -181,9 +236,10 @@
     </section>
 
     <!-- Opportunities Section -->
-    <section id="opportunities" class="section">
+    <section id="opportunities" class="section detail-section" style="display:none;">
         <div class="container">
             <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
                 <h2 class="section-title">🚀 Opportunities</h2>
                 <p class="section-subtitle">Internships, research, competitions, fellowships, and more</p>
             </div>
@@ -194,7 +250,7 @@
                 <button class="tab-btn" data-type="research">🔬 Research</button>
                 <button class="tab-btn" data-type="competition">🏆 Competitions</button>
                 <button class="tab-btn" data-type="fellowship">🎖️ Fellowships</button>
-                <button class="tab-btn" data-type="summer_school">☀️ Summer Schools</button>
+                <button class="tab-btn" data-type="summer_school">☀️ Summer</button>
                 <button class="tab-btn" data-type="exchange">🌐 Exchanges</button>
             </div>
 
@@ -211,9 +267,10 @@
     </section>
 
     <!-- Cost of Living Section -->
-    <section id="cost" class="section section-alt">
+    <section id="cost" class="section section-alt detail-section" style="display:none;">
         <div class="container">
             <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
                 <h2 class="section-title">💰 Cost of Living</h2>
                 <p class="section-subtitle">Compare living costs in student cities worldwide</p>
             </div>
@@ -246,11 +303,12 @@
     </section>
 
     <!-- Visa Guide Section -->
-    <section id="visa" class="section">
+    <section id="visa" class="section detail-section" style="display:none;">
         <div class="container">
             <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
                 <h2 class="section-title">🛂 Visa Guide</h2>
-                <p class="section-subtitle">Everything you need to know about student visas</p>
+                <p class="section-subtitle">Student visa info for 26 countries</p>
             </div>
             
             <div class="filters-bar">
@@ -264,11 +322,12 @@
     </section>
 
     <!-- Test Prep Section -->
-    <section id="testprep" class="section section-alt">
+    <section id="testprep" class="section section-alt detail-section" style="display:none;">
         <div class="container">
             <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
                 <h2 class="section-title">📝 Test Prep</h2>
-                <p class="section-subtitle">Prepare for IELTS, TOEFL, SAT, GRE, and Duolingo English Test</p>
+                <p class="section-subtitle">IELTS, TOEFL, SAT, GRE, and Duolingo English Test</p>
             </div>
             
             <div class="card-grid" id="testPrepGrid"></div>
@@ -276,26 +335,26 @@
     </section>
 
     <!-- Essay Help Section -->
-    <section id="essays" class="section">
+    <section id="essays" class="section detail-section" style="display:none;">
         <div class="container">
             <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
                 <h2 class="section-title">✍️ Essay Help</h2>
-                <p class="section-subtitle">Templates and guides for personal statements, SOPs, and more</p>
+                <p class="section-subtitle">Guides for personal statements, SOPs, and more</p>
             </div>
             
-            <div class="tab-bar" id="essayTabs">
-            </div>
-
+            <div class="tab-bar" id="essayTabs"></div>
             <div class="essay-content" id="essayContent"></div>
         </div>
     </section>
 
     <!-- FAQ Section -->
-    <section id="faq" class="section section-alt">
+    <section id="faq" class="section section-alt detail-section" style="display:none;">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">❓ Frequently Asked Questions</h2>
-                <p class="section-subtitle">Quick answers to common questions about studying abroad</p>
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">❓ FAQ</h2>
+                <p class="section-subtitle">Quick answers to common questions</p>
             </div>
             
             <div class="filters-bar">
@@ -315,33 +374,18 @@
                 <div class="footer-brand">
                     <h3><span class="logo-icon">🎓</span> ScholarFinder</h3>
                     <p>Your Complete Guide to Studying Abroad</p>
-                    <p class="footer-credit">Built with ❤️ by <strong>Scott Antwi</strong></p>
-                </div>
-                <div class="footer-links">
-                    <h4>Quick Links</h4>
-                    <a href="#scholarships">Scholarships</a>
-                    <a href="#universities">Universities</a>
-                    <a href="#opportunities">Opportunities</a>
-                    <a href="#cost">Cost of Living</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Resources</h4>
-                    <a href="#visa">Visa Guide</a>
-                    <a href="#testprep">Test Prep</a>
-                    <a href="#essays">Essay Help</a>
-                    <a href="#faq">FAQ</a>
+                    <p class="footer-credit">Built by <strong>Scott Antwi</strong></p>
                 </div>
                 <div class="footer-links">
                     <h4>Connect</h4>
                     <a href="https://t.me/ScholarFinder_bot" target="_blank" rel="noopener">📱 Telegram Bot</a>
                     <a href="https://github.com/ScottT2-spec" target="_blank" rel="noopener">💻 GitHub</a>
                     <a href="https://instagram.com/bb_scott1" target="_blank" rel="noopener">📸 Instagram</a>
-                    <a href="mailto:scottantwi930@gmail.com">📧 Email Scott</a>
+                    <a href="mailto:scottantwi930@gmail.com">📧 Email</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>© 2026 <strong>Alpha Global Minds</strong> 🌍 — All rights reserved</p>
-                <p class="footer-tagline">Empowering students to reach the world</p>
+                <p>© 2026 <strong>Alpha Global Minds</strong> 🌍</p>
             </div>
         </div>
     </footer>
