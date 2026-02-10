@@ -5,27 +5,27 @@
 
 /* CSS Custom Properties */
 :root {
-    --bg-primary: #0b0f14;
-    --bg-secondary: #0f1419;
-    --bg-card: #162028;
-    --bg-card-hover: #1e2d38;
-    --bg-input: #111920;
-    --accent-blue: #20b2aa;
-    --accent-purple: #e07850;
-    --accent-gradient: linear-gradient(135deg, #20b2aa, #2dd4bf);
-    --accent-gradient-hover: linear-gradient(135deg, #2dd4bf, #34d9c3);
-    --text-primary: #f0f4f8;
-    --text-secondary: #94a3b8;
-    --text-muted: #5e7282;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --border-color: #1e3040;
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #0f0f18;
+    --bg-card: #1a1a2e;
+    --bg-card-hover: #222240;
+    --bg-input: #12121f;
+    --accent-blue: #4361ee;
+    --accent-purple: #7209b7;
+    --accent-gradient: linear-gradient(135deg, #4361ee, #7209b7);
+    --accent-gradient-hover: linear-gradient(135deg, #5371ff, #8319c7);
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0b0;
+    --text-muted: #6a6a7a;
+    --success: #06d6a0;
+    --warning: #ffd166;
+    --danger: #ef476f;
+    --border-color: #2a2a3e;
     --border-radius: 12px;
     --border-radius-sm: 8px;
     --border-radius-lg: 16px;
-    --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.45);
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
     --transition: all 0.3s ease;
     --nav-height: 64px;
     --container-max: 1200px;
@@ -1545,7 +1545,7 @@ img { max-width: 100%; height: auto; }
 
 .carousel-track {
     display: flex;
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform;
 }
 
@@ -1563,7 +1563,11 @@ img { max-width: 100%; height: auto; }
 }
 
 .carousel-slide::after {
-    display: none;
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(10, 10, 15, 0.7) 0%, rgba(10, 10, 15, 0.05) 50%, transparent 100%);
+    pointer-events: none;
 }
 
 .carousel-caption {

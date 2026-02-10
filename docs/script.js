@@ -1050,7 +1050,7 @@
 
         function startAuto() {
             stopAuto();
-            autoTimer = setInterval(next, 2500);
+            autoTimer = setInterval(next, 4000);
         }
         function stopAuto() {
             if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
