@@ -863,7 +863,7 @@
     // ==========================================
     function initTypewriter() {
         const messages = [
-            "🔍 Search 151+ scholarships across 46 countries",
+            "🔍 Search 485+ scholarships across 46 countries",
             "🏫 Explore 86 top universities worldwide",
             "🌍 Find internships, research programs & competitions",
             "💰 Compare cost of living in 51+ cities",
@@ -1050,7 +1050,7 @@
 
         function startAuto() {
             stopAuto();
-            autoTimer = setInterval(next, 4000);
+            autoTimer = setInterval(next, 2500);
         }
         function stopAuto() {
             if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
@@ -1256,5 +1256,81 @@
     sendBtn.addEventListener('click', sendMessage);
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') sendMessage();
+    });
+})();
+
+/* ==========================================
+   WELCOME REGISTRATION MODAL
+   ========================================== */
+(function() {
+    // Check if already registered
+    if (localStorage.getItem('sf_registered')) return;
+
+    const modal = document.getElementById('welcomeModal');
+    if (!modal) return;
+
+    // Show modal
+    modal.style.display = 'flex';
+
+    // Populate countries
+    const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (DRC)","Congo (Republic)","Costa Rica","Côte d'Ivoire","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","São Tomé and Príncipe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+    
+    const countrySel = document.getElementById('regCountry');
+    countries.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        countrySel.appendChild(opt);
+    });
+
+    // Populate DOB selects
+    const daySel = document.getElementById('regDobDay');
+    const monthSel = document.getElementById('regDobMonth');
+    const yearSel = document.getElementById('regDobYear');
+
+    for (let d = 1; d <= 31; d++) {
+        const opt = document.createElement('option');
+        opt.value = String(d).padStart(2, '0');
+        opt.textContent = String(d).padStart(2, '0');
+        daySel.appendChild(opt);
+    }
+
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    monthNames.forEach((m, i) => {
+        const opt = document.createElement('option');
+        opt.value = String(i + 1).padStart(2, '0');
+        opt.textContent = m;
+        monthSel.appendChild(opt);
+    });
+
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear - 10; y >= currentYear - 50; y--) {
+        const opt = document.createElement('option');
+        opt.value = String(y);
+        opt.textContent = String(y);
+        yearSel.appendChild(opt);
+    }
+
+    // Show/hide friend name field
+    const hearAbout = document.getElementById('regHearAbout');
+    const friendGroup = document.getElementById('friendNameGroup');
+    hearAbout.addEventListener('change', () => {
+        friendGroup.style.display = hearAbout.value === 'Friend Recommended' ? 'flex' : 'none';
+    });
+
+    // Handle form submit
+    document.getElementById('welcomeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = {
+            name: document.getElementById('regName').value.trim(),
+            country: countrySel.value,
+            dob: daySel.value + '/' + monthSel.value + '/' + yearSel.value,
+            hearAbout: hearAbout.value,
+            friendName: document.getElementById('regFriendName').value.trim(),
+            registeredAt: new Date().toISOString()
+        };
+        localStorage.setItem('sf_registered', JSON.stringify(data));
+        modal.classList.add('hidden');
+        setTimeout(() => modal.remove(), 500);
     });
 })();
