@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScholarFinder 🎓 — Your Complete Guide to Studying Abroad</title>
+    <meta name="description" content="Find scholarships, universities, and opportunities to study abroad. 485 scholarships, 86 universities, 138 opportunities — all in one place.">
+    <meta name="keywords" content="scholarships, study abroad, universities, international students, funding, opportunities">
+    <meta name="author" content="Scott Antwi — Alpha Global Minds">
+    <meta name="google-site-verification" content="zzKbvY2042VwsudBL454uiEItDuI7XSbc3sSR61L6GE" />
+    
+    <meta property="og:title" content="ScholarFinder 🎓 — Your Complete Guide to Studying Abroad">
+    <meta property="og:description" content="Find scholarships, universities, and opportunities to study abroad. 485 scholarships, 86 universities, 138 opportunities.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://scottt2-spec.github.io/scholar-finder-bot">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ScholarFinder 🎓">
+    <meta name="twitter:description" content="Your Complete Guide to Studying Abroad">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#hero" class="nav-logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">ScholarFinder</span>
+            </a>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#hero" class="nav-link">Home</a></li>
+                <li><a href="#features" class="nav-link">Explore</a></li>
+                <li><a href="https://t.me/ScholarFinder_bot" class="nav-link nav-cta" target="_blank">Open Bot 📱</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-bg-effects">
+            <div class="hero-orb hero-orb-1"></div>
+            <div class="hero-orb hero-orb-2"></div>
+            <div class="hero-orb hero-orb-3"></div>
+        </div>
+        <div class="container hero-content">
+            <h1 class="hero-title">
+                <span class="hero-emoji">🎓</span>
+                ScholarFinder
+            </h1>
+            <p class="hero-welcome">Built by <span class="highlight-name">Scott Antwi</span></p>
+            <div class="typewriter-container">
+                <span class="typewriter-text" id="typewriterText"></span>
+                <span class="typewriter-cursor">|</span>
+            </div>
+            
+            <div class="hero-search">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="globalSearch" placeholder="Search scholarships, universities, opportunities..." autocomplete="off">
+                    <button class="search-clear" id="searchClear" aria-label="Clear search">×</button>
+                </div>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="485">0</span>
+                    <span class="stat-label">Scholarships</span>
+                </div>
+                <div class="stat-divider">•</div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="86">0</span>
+                    <span class="stat-label">Universities</span>
+                </div>
+                <div class="stat-divider">•</div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="138">0</span>
+                    <span class="stat-label">Opportunities</span>
+                </div>
+            </div>
+
+            <div class="hero-cta">
+                <a href="#features" class="btn btn-primary">Explore Everything ↓</a>
+                <a href="https://t.me/ScholarFinder_bot" class="btn btn-secondary" target="_blank">Open Telegram Bot</a>
+            </div>
+
+            <p class="hero-credit">© 2026 Scott Antwi | Alpha Global Minds 🌍</p>
+        </div>
+        <div class="scroll-indicator">
+            <span>↓</span>
+        </div>
+    </section>
+
+    <!-- Image Carousel -->
+    <section id="carousel" class="carousel-section">
+        <div class="carousel-wrapper">
+            <div class="carousel-track" id="carouselTrack">
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1523050854058-8df90110c3f1?w=1200&h=600&fit=crop&q=80" alt="Graduation celebration" loading="lazy">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1200&h=600&fit=crop&q=80" alt="Diverse students laughing together outdoors" loading="lazy">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=600&fit=crop&q=80" alt="Students studying together" loading="lazy">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&h=600&fit=crop&q=80" alt="Hackathon workshop with laptops" loading="lazy">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&h=600&fit=crop&q=80" alt="Technology and science" loading="lazy">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1200&h=600&fit=crop&q=80" alt="Studying with books and notebook" loading="lazy">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=1200&h=600&fit=crop&q=80" alt="University campus with students" loading="lazy">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200&h=600&fit=crop&q=80" alt="Students in classroom discussion" loading="lazy">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=600&fit=crop&q=80" alt="Professional meeting and internship" loading="lazy">
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=600&fit=crop&q=80" alt="Team collaboration at whiteboard" loading="lazy">
+                </div>
+            </div>
+            <button class="carousel-arrow carousel-prev" id="carouselPrev" aria-label="Previous slide">‹</button>
+            <button class="carousel-arrow carousel-next" id="carouselNext" aria-label="Next slide">›</button>
+            <div class="carousel-dots" id="carouselDots"></div>
+        </div>
+    </section>
+
+    <!-- Feature Cards Grid -->
+    <section id="features" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">What do you need?</h2>
+                <p class="section-subtitle">Tap any card to explore</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card" data-target="scholarships">
+                    <span class="feature-icon">🎯</span>
+                    <h3>Scholarships</h3>
+                    <p>485 scholarships across 46 countries</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="universities">
+                    <span class="feature-icon">🏫</span>
+                    <h3>Universities</h3>
+                    <p>86 universities worldwide with rankings</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="opportunities">
+                    <span class="feature-icon">🚀</span>
+                    <h3>Opportunities</h3>
+                    <p>138 internships, research, competitions</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="cost">
+                    <span class="feature-icon">💰</span>
+                    <h3>Cost of Living</h3>
+                    <p>Compare 51 student cities</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="visa">
+                    <span class="feature-icon">🛂</span>
+                    <h3>Visa Guide</h3>
+                    <p>Student visa info for 26 countries</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="testprep">
+                    <span class="feature-icon">📝</span>
+                    <h3>Test Prep</h3>
+                    <p>IELTS, TOEFL, SAT, GRE, Duolingo</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="essays">
+                    <span class="feature-icon">✍️</span>
+                    <h3>Essay Help</h3>
+                    <p>Personal statements, SOPs, CVs</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-card" data-target="faq">
+                    <span class="feature-icon">❓</span>
+                    <h3>FAQ</h3>
+                    <p>42 answers to common questions</p>
+                    <span class="feature-arrow">→</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scholarships Section (hidden by default, shown on tap) -->
+    <section id="scholarships" class="section detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">🎯 Scholarship Search</h2>
+                <p class="section-subtitle">Find your perfect funding opportunity</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="scholarshipSearch" class="filter-input" placeholder="🔍 Search by name, university, country...">
+                </div>
+                <div class="filter-group filter-row">
+                    <select id="scholarshipLevel" class="filter-select">
+                        <option value="">All Levels</option>
+                        <option value="undergraduate">Undergraduate</option>
+                        <option value="masters">Masters</option>
+                        <option value="phd">PhD</option>
+                    </select>
+                    <select id="scholarshipField" class="filter-select">
+                        <option value="">All Fields</option>
+                    </select>
+                    <select id="scholarshipRegion" class="filter-select">
+                        <option value="">All Countries</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-info" id="scholarshipResultsInfo"></div>
+            <div class="card-grid" id="scholarshipGrid"></div>
+            <button class="btn btn-load-more" id="scholarshipLoadMore" style="display:none;">Load More</button>
+        </div>
+    </section>
+
+    <!-- Universities Section -->
+    <section id="universities" class="section section-alt detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">🏫 University Search</h2>
+                <p class="section-subtitle">Explore 86 universities across the globe</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="universitySearch" class="filter-input" placeholder="🔍 Search universities...">
+                </div>
+                <div class="filter-group filter-row">
+                    <select id="universityRegion" class="filter-select">
+                        <option value="">All Countries</option>
+                    </select>
+                    <select id="universityTier" class="filter-select">
+                        <option value="">All Rankings</option>
+                        <option value="top10">Top 10</option>
+                        <option value="top50">Top 50</option>
+                        <option value="top100">Top 100</option>
+                        <option value="top200">Top 200</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <select id="universityTuition" class="filter-select">
+                        <option value="">All Tuition</option>
+                        <option value="free">Free</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <select id="universityField" class="filter-select">
+                        <option value="">All Fields</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-info" id="universityResultsInfo"></div>
+            <div class="card-grid" id="universityGrid"></div>
+            <button class="btn btn-load-more" id="universityLoadMore" style="display:none;">Load More</button>
+        </div>
+    </section>
+
+    <!-- Opportunities Section -->
+    <section id="opportunities" class="section detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">🚀 Opportunities</h2>
+                <p class="section-subtitle">Internships, research, competitions, fellowships, and more</p>
+            </div>
+            
+            <div class="tab-bar" id="opportunityTabs">
+                <button class="tab-btn active" data-type="">All</button>
+                <button class="tab-btn" data-type="internship">💼 Internships</button>
+                <button class="tab-btn" data-type="research">🔬 Research</button>
+                <button class="tab-btn" data-type="competition">🏆 Competitions</button>
+                <button class="tab-btn" data-type="fellowship">🎖️ Fellowships</button>
+                <button class="tab-btn" data-type="summer_school">☀️ Summer</button>
+                <button class="tab-btn" data-type="exchange">🌐 Exchanges</button>
+            </div>
+
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="opportunitySearch" class="filter-input" placeholder="🔍 Search opportunities...">
+                </div>
+            </div>
+
+            <div class="results-info" id="opportunityResultsInfo"></div>
+            <div class="card-grid" id="opportunityGrid"></div>
+            <button class="btn btn-load-more" id="opportunityLoadMore" style="display:none;">Load More</button>
+        </div>
+    </section>
+
+    <!-- Cost of Living Section -->
+    <section id="cost" class="section section-alt detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">💰 Cost of Living</h2>
+                <p class="section-subtitle">Compare living costs in student cities worldwide</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="costSearch" class="filter-input" placeholder="🔍 Search by city or country...">
+                </div>
+            </div>
+
+            <div class="cost-compare-toggle">
+                <button class="btn btn-secondary btn-sm" id="toggleCompare">📊 Compare Two Cities</button>
+            </div>
+
+            <div class="cost-compare-panel" id="comparePanel" style="display:none;">
+                <div class="compare-selectors">
+                    <select id="compareCity1" class="filter-select">
+                        <option value="">Select City 1</option>
+                    </select>
+                    <span class="compare-vs">VS</span>
+                    <select id="compareCity2" class="filter-select">
+                        <option value="">Select City 2</option>
+                    </select>
+                </div>
+                <div class="compare-results" id="compareResults"></div>
+            </div>
+
+            <div class="card-grid" id="costGrid"></div>
+        </div>
+    </section>
+
+    <!-- Visa Guide Section -->
+    <section id="visa" class="section detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">🛂 Visa Guide</h2>
+                <p class="section-subtitle">Student visa info for 26 countries</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="visaSearch" class="filter-input" placeholder="🔍 Search by country...">
+                </div>
+            </div>
+
+            <div class="card-grid card-grid-single" id="visaGrid"></div>
+        </div>
+    </section>
+
+    <!-- Test Prep Section -->
+    <section id="testprep" class="section section-alt detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">📝 Test Prep</h2>
+                <p class="section-subtitle">IELTS, TOEFL, SAT, GRE, and Duolingo English Test</p>
+            </div>
+            
+            <div class="card-grid" id="testPrepGrid"></div>
+        </div>
+    </section>
+
+    <!-- Essay Help Section -->
+    <section id="essays" class="section detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">✍️ Essay Help</h2>
+                <p class="section-subtitle">Guides for personal statements, SOPs, and more</p>
+            </div>
+            
+            <div class="tab-bar" id="essayTabs"></div>
+            <div class="essay-content" id="essayContent"></div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section section-alt detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">❓ FAQ</h2>
+                <p class="section-subtitle">Quick answers to common questions</p>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <input type="text" id="faqSearch" class="filter-input" placeholder="🔍 Search questions...">
+                </div>
+            </div>
+
+            <div class="accordion" id="faqAccordion"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3><span class="logo-icon">🎓</span> ScholarFinder</h3>
+                    <p>Your Complete Guide to Studying Abroad</p>
+                    <p class="footer-credit">Built by <strong>Scott Antwi</strong></p>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <a href="https://t.me/ScholarFinder_bot" target="_blank" rel="noopener">📱 Telegram Bot</a>
+                    <a href="https://github.com/ScottT2-spec" target="_blank" rel="noopener">💻 GitHub</a>
+                    <a href="https://instagram.com/bb_scott1" target="_blank" rel="noopener">📸 Instagram</a>
+                    <a href="mailto:scottantwi930@gmail.com">📧 Email</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 <strong>Alpha Global Minds</strong> 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+
+    <!-- Welcome Registration Modal -->
+    <div class="welcome-modal-overlay" id="welcomeModal">
+        <div class="welcome-modal">
+            <div class="welcome-modal-header">
+                <span class="welcome-emoji">🎓</span>
+                <h2 class="welcome-title">Welcome to ScholarFinder!</h2>
+                <p class="welcome-subtitle">Tell us a bit about yourself to get started</p>
+            </div>
+            <form id="welcomeForm" class="welcome-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="regName">Full Name</label>
+                    <input type="text" id="regName" class="form-input" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="regCountry">Country</label>
+                    <select id="regCountry" class="form-select" required>
+                        <option value="">Select your country</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <div class="dob-row">
+                        <select id="regDobDay" class="form-select dob-select" required>
+                            <option value="">DD</option>
+                        </select>
+                        <select id="regDobMonth" class="form-select dob-select" required>
+                            <option value="">MM</option>
+                        </select>
+                        <select id="regDobYear" class="form-select dob-select" required>
+                            <option value="">YYYY</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="regHearAbout">How did you hear about us?</label>
+                    <select id="regHearAbout" class="form-select" required>
+                        <option value="">Select an option</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="Friend Recommended">Friend Recommended</option>
+                        <option value="Google Search">Google Search</option>
+                        <option value="School/Teacher">School/Teacher</option>
+                        <option value="Online Forum">Online Forum</option>
+                        <option value="Blog/Article">Blog/Article</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group" id="friendNameGroup" style="display:none;">
+                    <label for="regFriendName">Friend's Name</label>
+                    <input type="text" id="regFriendName" class="form-input" placeholder="Who recommended us?">
+                </div>
+                <button type="submit" class="btn btn-primary welcome-submit">Get Started 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader">
+            <span class="loader-emoji">🎓</span>
+            <p>Loading ScholarFinder...</p>
+        </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget" id="chatWidget">
+        <button class="chat-toggle" id="chatToggle" aria-label="Open chat">
+            <span class="chat-icon">💬</span>
+            <span class="chat-close">✕</span>
+        </button>
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <span>🎓 ScholarFinder Assistant</span>
+                <button class="chat-minimize" id="chatMinimize">—</button>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Ask me anything..." autocomplete="off">
+                <button id="chatSend">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
