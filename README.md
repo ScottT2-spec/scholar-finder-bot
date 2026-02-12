@@ -1,6 +1,6 @@
 # ScholarFinder Bot
 
-A Telegram bot I built to help students (especially in Africa) find scholarships, universities, and opportunities to study abroad. I got tired of spending hours searching different websites for scholarship info, so I put everything in one place.
+A Telegram bot I built to help students (especially in Africa) find scholarships, universities, and opportunities to study abroad. I was tired of spending hours searching different websites for scholarship info, so I put everything in one place.
 
 **Try it:** [@ScholarFinder_bot](https://t.me/ScholarFinder_bot) on Telegram
 
@@ -67,3 +67,5 @@ I wanted something that just works: open Telegram, search, get results. No ads, 
 ---
 
 Built by Scott | [Alpha Global Minds](https://github.com/ScottT2-spec)
+
+<!-- v2 -->
