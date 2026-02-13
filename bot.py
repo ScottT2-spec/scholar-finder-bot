@@ -31,26 +31,26 @@ from telegram.ext import (
     filters, ContextTypes, ConversationHandler
 )
 
-# ---------------------------------------------------------------------------
+#
 # Logging
-# ---------------------------------------------------------------------------
+#
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
+#
 # Constants / paths
-# ---------------------------------------------------------------------------
+#
 TOKEN = "YOUR_BOT_TOKEN_HERE"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(SCRIPT_DIR, "users.db")
 CHUNK_SIZE = 3500  # max chars per Telegram message
 
-# ---------------------------------------------------------------------------
+#
 # Load data files
-# ---------------------------------------------------------------------------
+#
 def _load(name):
     with open(os.path.join(SCRIPT_DIR, name), "r") as f:
         return json.load(f)
@@ -64,9 +64,9 @@ VISA_DATA      = _load("visa_data.json")
 OPPORTUNITIES  = _load("opportunities.json")
 ESSAY_GUIDES   = _load("essay_guides.json")
 
-# ---------------------------------------------------------------------------
+#
 # Region map (covers ALL countries in scholarships.json)
-# ---------------------------------------------------------------------------
+#
 REGION_MAP = {
     "Africa": [
         "Egypt", "Ethiopia", "Ghana", "Kenya", "Nigeria", "Rwanda",
@@ -139,9 +139,9 @@ CHOOSING_LEVEL, CHOOSING_FIELD, CHOOSING_REGION = range(3)
 # University search conversation states
 UNI_REGION, UNI_FIELD = range(50, 52)
 
-# ---------------------------------------------------------------------------
+#
 # Database setup
-# ---------------------------------------------------------------------------
+#
 def init_db():
     """Create tables if they don't exist."""
     conn = sqlite3.connect(DB_PATH)
@@ -206,9 +206,9 @@ def track_user(update: Update, action: str):
     except Exception:
         pass  # Don't let tracking break the bot
 
-# ---------------------------------------------------------------------------
+#
 # Helpers
-# ---------------------------------------------------------------------------
+#
 def chunk_send(text: str):
     """Split text into chunks of at most CHUNK_SIZE characters."""
     chunks = []
@@ -318,9 +318,9 @@ def parse_deadline(deadline_str: str):
     return None
 
 
-# ---------------------------------------------------------------------------
+#
 # /stats — Admin only: view bot usage stats
-# ---------------------------------------------------------------------------
+#
 async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         user = update.effective_user
@@ -368,9 +368,9 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"Stats error: {e}")
 
 
-# ---------------------------------------------------------------------------
+#
 # Admin helper: save JSON data back to file
-# ---------------------------------------------------------------------------
+#
 def _save(name, data):
     """Write data list back to a JSON file."""
     with open(os.path.join(SCRIPT_DIR, name), "w") as f:
@@ -382,9 +382,9 @@ def is_admin(update: Update) -> bool:
     return update.effective_user and update.effective_user.id == ADMIN_ID
 
 
-# ---------------------------------------------------------------------------
+#
 # /admin — Admin panel main menu
-# ---------------------------------------------------------------------------
+#
 async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_admin(update):
         await update.message.reply_text("⛔ Admin only.")
@@ -405,9 +405,9 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# ---------------------------------------------------------------------------
+#
 # Admin conversation states (offset 200+ to avoid collision)
-# ---------------------------------------------------------------------------
+#
 (
     ADM_SCHOLARSHIP_NAME, ADM_SCHOLARSHIP_UNI, ADM_SCHOLARSHIP_COUNTRY,
     ADM_SCHOLARSHIP_FIELD, ADM_SCHOLARSHIP_LEVEL, ADM_SCHOLARSHIP_FUNDING,
@@ -425,9 +425,9 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ) = range(200, 238)
 
 
-# ---------------------------------------------------------------------------
+#
 # Add Scholarship flow
-# ---------------------------------------------------------------------------
+#
 async def adm_add_scholarship_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -487,9 +487,9 @@ async def adm_scholarship_desc(update: Update, context: ContextTypes.DEFAULT_TYP
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # Add Opportunity flow
-# ---------------------------------------------------------------------------
+#
 async def adm_add_opp_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -567,9 +567,9 @@ async def adm_opp_elig(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # Add FAQ flow
-# ---------------------------------------------------------------------------
+#
 async def adm_add_faq_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -591,9 +591,9 @@ async def adm_faq_a(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # Add Visa Guide flow
-# ---------------------------------------------------------------------------
+#
 async def adm_add_visa_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -640,9 +640,9 @@ async def adm_visa_tips(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # Add City Cost flow
-# ---------------------------------------------------------------------------
+#
 async def adm_add_cost_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -687,9 +687,9 @@ async def adm_cost_total(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # Delete entry flow
-# ---------------------------------------------------------------------------
+#
 async def adm_delete_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -757,9 +757,9 @@ async def adm_delete_num(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # Broadcast message flow
-# ---------------------------------------------------------------------------
+#
 async def adm_broadcast_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -792,9 +792,9 @@ async def adm_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # /start — Main menu
-# ---------------------------------------------------------------------------
+#
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     track_user(update, "start")
     keyboard = [
@@ -844,9 +844,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return CHOOSING_LEVEL
 
 
-# ---------------------------------------------------------------------------
+#
 # Menu callback router
-# ---------------------------------------------------------------------------
+#
 async def menu_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle main menu button presses (standalone, outside any ConversationHandler)."""
     query = update.callback_query
@@ -940,9 +940,9 @@ async def menu_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # Scholarship search conversation (level → field → region → results)
-# ---------------------------------------------------------------------------
+#
 async def search_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Entry via /search command."""
     keyboard = [[InlineKeyboardButton(level.title(), callback_data="level_" + level)] for level in LEVELS]
@@ -1034,9 +1034,9 @@ async def region_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # /all — List all scholarships
-# ---------------------------------------------------------------------------
+#
 async def all_scholarships(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lines = [f"📋 All {len(SCHOLARSHIPS)} scholarships:\n"]
     for i, s in enumerate(SCHOLARSHIPS):
@@ -1053,9 +1053,9 @@ async def all_scholarships(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(msg, disable_web_page_preview=True)
 
 
-# ---------------------------------------------------------------------------
+#
 # University search (region → field → results)
-# ---------------------------------------------------------------------------
+#
 async def universities_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton(r, callback_data="uniregion_" + r)] for r in list(UNI_REGION_MAP.keys()) + ["All"]]
     await update.message.reply_text(
@@ -1135,9 +1135,9 @@ async def uni_field_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # Opportunities
-# ---------------------------------------------------------------------------
+#
 async def show_opportunities_menu(query_or_msg):
     """Show opportunity type buttons."""
     keyboard = [
@@ -1239,9 +1239,9 @@ async def summer_cmd(update, context):      await _opp_shortcut(update, context,
 async def exchange_cmd(update, context):    await _opp_shortcut(update, context, "exchange")
 
 
-# ---------------------------------------------------------------------------
+#
 # Cost of living
-# ---------------------------------------------------------------------------
+#
 async def cost_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         cities = ", ".join(sorted(c["city"] for c in COST_DATA))
@@ -1335,9 +1335,9 @@ async def compare_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(text)
 
 
-# ---------------------------------------------------------------------------
+#
 # Visa guide
-# ---------------------------------------------------------------------------
+#
 async def visa_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         countries = ", ".join(sorted(v["country"] for v in VISA_DATA))
@@ -1383,9 +1383,9 @@ async def visa_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_chunked(update, text, parse_mode="Markdown")
 
 
-# ---------------------------------------------------------------------------
+#
 # Test prep
-# ---------------------------------------------------------------------------
+#
 async def show_tests_overview(query_or_msg):
     """Show overview of all tests."""
     text = "📚 *Test Prep Overview*\n\n"
@@ -1466,9 +1466,9 @@ async def test_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_chunked(update, text.replace("*", "").replace("\\_", "_"))
 
 
-# ---------------------------------------------------------------------------
+#
 # AI Q&A — keyword matching
-# ---------------------------------------------------------------------------
+#
 async def ask_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
         topics = sorted(set(faq["question"] for faq in FAQ_DATA))
@@ -1526,9 +1526,9 @@ async def ask_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_chunked(update, text_plain)
 
 
-# ---------------------------------------------------------------------------
+#
 # Essay help
-# ---------------------------------------------------------------------------
+#
 async def show_essay_menu(query_or_msg):
     keyboard = [
         [InlineKeyboardButton("📝 Personal Statement", callback_data="essay_personal_statement")],
@@ -1577,9 +1577,9 @@ async def essay_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_text(ch)
 
 
-# ---------------------------------------------------------------------------
+#
 # Application checklist
-# ---------------------------------------------------------------------------
+#
 async def show_checklist(message, user_id, edit=None):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -1640,9 +1640,9 @@ async def check_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# ---------------------------------------------------------------------------
+#
 # Deadline reminders / subscriptions
-# ---------------------------------------------------------------------------
+#
 async def show_reminders(message, user_id, edit=None):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -1747,9 +1747,9 @@ async def unsubscribe_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("You weren't subscribed to that scholarship.")
 
 
-# ---------------------------------------------------------------------------
+#
 # Student profile
-# ---------------------------------------------------------------------------
+#
 async def show_profile(message, user_id, edit=None):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -1903,9 +1903,9 @@ async def profile_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # Personalized recommendations
-# ---------------------------------------------------------------------------
+#
 async def show_recommendations(message, user_id, edit=None):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -2030,9 +2030,9 @@ async def recommend_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await show_recommendations(update.message, update.effective_user.id)
 
 
-# ---------------------------------------------------------------------------
+#
 # /help — All commands
-# ---------------------------------------------------------------------------
+#
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "📖 *ScholarFinder — All Commands*\n\n"
@@ -2079,16 +2079,16 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode="Markdown")
 
 
-# ---------------------------------------------------------------------------
+#
 # Back-to-start callback
-# ---------------------------------------------------------------------------
+#
 async def back_start_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return await start(update, context)
 
 
-# ---------------------------------------------------------------------------
+#
 # Unknown text handler
-# ---------------------------------------------------------------------------
+#
 async def unknown_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "👋 Hey! I'm ScholarFinder.\n\n"
@@ -2121,9 +2121,9 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-# ---------------------------------------------------------------------------
+#
 # APScheduler — deadline reminder job
-# ---------------------------------------------------------------------------
+#
 async def check_deadlines(context: ContextTypes.DEFAULT_TYPE):
     """Daily job: notify subscribers about upcoming deadlines."""
     now = datetime.utcnow()
@@ -2164,9 +2164,9 @@ async def check_deadlines(context: ContextTypes.DEFAULT_TYPE):
                 logger.warning(f"Failed to send reminder to {user_id}: {e}")
 
 
-# ---------------------------------------------------------------------------
+#
 # Main
-# ---------------------------------------------------------------------------
+#
 def main():
     app = Application.builder().token(TOKEN).build()
 

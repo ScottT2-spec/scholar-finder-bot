@@ -64,8 +64,6 @@ I wanted something that just works: open Telegram, search, get results. No ads, 
 4. `pip install python-telegram-bot apscheduler`
 5. `python bot.py`
 
----
-
 Built by Scott | [Alpha Global Minds](https://github.com/ScottT2-spec)
 
 <!-- v2 -->
