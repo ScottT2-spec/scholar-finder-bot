@@ -188,7 +188,7 @@ def init_db():
 init_db()
 
 # Admin user ID (Scott)
-ADMIN_ID = 0  # Replace with your Telegram user ID
+ADMIN_ID = 8387873012  # Replace with your Telegram user ID
 
 def track_user(update: Update, action: str):
     """Log user activity for stats tracking."""
