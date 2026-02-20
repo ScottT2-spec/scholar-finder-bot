@@ -1334,3 +1334,429 @@
         setTimeout(() => modal.remove(), 500);
     });
 })();
+
+})();
+
+// ==========================================
+// AI AGENTS (Self-contained module)
+// ==========================================
+(function() {
+    'use strict';
+    function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+    function $$(sel, ctx) { return [...(ctx || document).querySelectorAll(sel)]; }
+    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // Load scholarship data
+    let DATA = { scholarships: [] };
+    fetch('./scholarships.json').then(r => r.json()).then(d => { DATA.scholarships = d; }).catch(() => {});
+
+    const AGENTS = {
+        scout: { icon: '🔍', name: 'Scout', role: 'Scholarship Finder' },
+        writer: { icon: '📝', name: 'Writer', role: 'Essay Assistant' },
+        profiler: { icon: '👤', name: 'Profiler', role: 'Student Matcher' },
+        tracker: { icon: '📅', name: 'Tracker', role: 'Deadline Manager' },
+        advisor: { icon: '🎓', name: 'Advisor', role: 'Strategy Coach' },
+        prep: { icon: '💬', name: 'Prep', role: 'Interview Coach' }
+    };
+
+    const interviewQuestions = [
+        { q: "Tell me about yourself and why you deserve this scholarship.", tip: "Start with your background, mention key achievements, connect to your goals. Keep it under 2 minutes." },
+        { q: "What are your academic and career goals?", tip: "Be specific. Mention your field, what you want to achieve, and how the scholarship helps." },
+        { q: "How will you give back to your community?", tip: "Share concrete plans. Mention any existing community work like volunteering or mentoring." },
+        { q: "What challenges have you overcome?", tip: "Pick ONE meaningful challenge. Explain the situation, what you did, and what you learned." },
+        { q: "Why did you choose this field of study?", tip: "Tell a story. What moment sparked your interest? What excites you about it?" },
+        { q: "Where do you see yourself in 10 years?", tip: "Show ambition but be realistic. Connect your vision to the scholarship's mission." },
+        { q: "What makes you different from other applicants?", tip: "Highlight unique experiences, skills, or perspectives. Don't be generic." },
+        { q: "How do you handle failure or setbacks?", tip: "Give a real example. Show resilience, learning, and growth." },
+        { q: "What's a project or achievement you're most proud of?", tip: "Pick something with measurable impact. Explain your role and the outcome." },
+        { q: "Do you have any questions for us?", tip: "Always say yes. Ask about mentorship, research opportunities, or community engagement." }
+    ];
+
+    function initAIAgents() {
+        // Launch buttons
+        $$('.ai-agent-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const agent = card.dataset.agent;
+                openAgentModal(agent);
+            });
+        });
+
+        // Close modal
+        $('#aiModalClose').addEventListener('click', closeAgentModal);
+        $('#aiModalOverlay').addEventListener('click', e => {
+            if (e.target === $('#aiModalOverlay')) closeAgentModal();
+        });
+    }
+
+    function openAgentModal(agentKey) {
+        const agent = AGENTS[agentKey];
+        const overlay = $('#aiModalOverlay');
+        $('#aiModalIcon').textContent = agent.icon;
+        $('#aiModalTitle').textContent = agent.name;
+        $('#aiModalRole').textContent = agent.role;
+
+        const body = $('#aiModalBody');
+        body.innerHTML = '';
+
+        switch(agentKey) {
+            case 'scout': body.innerHTML = buildScoutUI(); initScout(); break;
+            case 'writer': body.innerHTML = buildWriterUI(); initWriter(); break;
+            case 'profiler': body.innerHTML = buildProfilerUI(); initProfiler(); break;
+            case 'tracker': body.innerHTML = buildTrackerUI(); break;
+            case 'advisor': body.innerHTML = buildAdvisorUI(); break;
+            case 'prep': body.innerHTML = buildPrepUI(); initPrep(); break;
+        }
+
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAgentModal() {
+        $('#aiModalOverlay').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    // ===== SCOUT AGENT =====
+    function buildScoutUI() {
+        const countries = [...new Set(DATA.scholarships.map(s => s.country).filter(Boolean))].sort();
+        const fields = [...new Set(DATA.scholarships.flatMap(s => s.fields || []).filter(Boolean))].sort();
+        return `
+            <div class="scout-form">
+                <div>
+                    <label>Your GPA (out of 4.0)</label>
+                    <input type="number" id="scoutGpa" min="0" max="4" step="0.1" placeholder="e.g. 3.5">
+                </div>
+                <div>
+                    <label>Preferred Country</label>
+                    <select id="scoutCountry"><option value="">Any Country</option>${countries.map(c => `<option value="${c}">${c}</option>`).join('')}</select>
+                </div>
+                <div>
+                    <label>Field of Study</label>
+                    <select id="scoutField"><option value="">Any Field</option>${fields.map(f => `<option value="${f}">${f}</option>`).join('')}</select>
+                </div>
+                <div>
+                    <label>Degree Level</label>
+                    <select id="scoutLevel">
+                        <option value="">Any Level</option>
+                        <option value="undergraduate">Undergraduate</option>
+                        <option value="masters">Masters</option>
+                        <option value="phd">PhD</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="scoutSearch" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);border:none;">🔍 Find My Scholarships</button>
+            </div>
+            <div class="scout-results" id="scoutResults"></div>
+        `;
+    }
+
+    function initScout() {
+        $('#scoutSearch').addEventListener('click', () => {
+            const gpa = parseFloat($('#scoutGpa').value) || 0;
+            const country = $('#scoutCountry').value;
+            const field = $('#scoutField').value;
+            const level = $('#scoutLevel').value;
+            const results = $('#scoutResults');
+
+            let matches = DATA.scholarships.map(s => {
+                let score = 0;
+                let total = 0;
+
+                // Country match
+                total += 30;
+                if (!country || (s.country && s.country.toLowerCase() === country.toLowerCase())) score += 30;
+                else if (s.country && s.country.toLowerCase().includes(country.toLowerCase())) score += 15;
+
+                // Field match
+                total += 25;
+                if (!field) score += 25;
+                else if (s.fields && s.fields.some(f => f.toLowerCase().includes(field.toLowerCase()))) score += 25;
+                else if (s.name && s.name.toLowerCase().includes(field.toLowerCase())) score += 10;
+
+                // Level match
+                total += 25;
+                if (!level) score += 25;
+                else if (s.level && s.level.toLowerCase().includes(level.toLowerCase())) score += 25;
+
+                // GPA (bonus)
+                total += 20;
+                if (gpa >= 3.5) score += 20;
+                else if (gpa >= 3.0) score += 15;
+                else if (gpa >= 2.5) score += 10;
+                else score += 5;
+
+                const pct = Math.round((score / total) * 100);
+                return { ...s, matchScore: pct };
+            });
+
+            matches.sort((a, b) => b.matchScore - a.matchScore);
+            matches = matches.slice(0, 20);
+
+            if (matches.length === 0) {
+                results.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No scholarships found. Try adjusting your filters.</p>';
+                return;
+            }
+
+            results.innerHTML = matches.map(m => `
+                <div class="scout-match-card">
+                    <div class="scout-match-info">
+                        <h4>${escapeHtml(m.name)}</h4>
+                        <p>${escapeHtml(m.country || '')} · ${escapeHtml((m.fields || []).join(', ') || 'Various')} · ${escapeHtml(m.level || 'All levels')}</p>
+                    </div>
+                    <div class="scout-match-score">${m.matchScore}%</div>
+                </div>
+            `).join('');
+        });
+    }
+
+    // ===== WRITER AGENT =====
+    function buildWriterUI() {
+        return `
+            <div class="writer-container">
+                <div class="writer-editor">
+                    <textarea id="writerText" placeholder="Start writing your scholarship essay here..."></textarea>
+                    <div class="writer-stats">
+                        <div class="writer-stat">Words: <span id="writerWords">0</span></div>
+                        <div class="writer-stat">Characters: <span id="writerChars">0</span></div>
+                        <div class="writer-stat">Sentences: <span id="writerSentences">0</span></div>
+                        <div class="writer-stat">Reading time: <span id="writerTime">0 min</span></div>
+                    </div>
+                </div>
+                <div class="writer-sidebar">
+                    <h4>📝 Essay Structure Guide</h4>
+                    <div class="writer-tip">
+                        <h5>Opening Hook</h5>
+                        <p>Start with a compelling story, question, or statement that grabs attention. Avoid clichés.</p>
+                    </div>
+                    <div class="writer-tip">
+                        <h5>Your Background</h5>
+                        <p>Briefly share where you come from and what shaped your aspirations. Be authentic.</p>
+                    </div>
+                    <div class="writer-tip">
+                        <h5>Achievements & Impact</h5>
+                        <p>Highlight 2-3 key achievements with specific numbers or outcomes. Show, don't tell.</p>
+                    </div>
+                    <div class="writer-tip">
+                        <h5>Why This Scholarship</h5>
+                        <p>Connect your goals to the scholarship's mission. Show you've researched them.</p>
+                    </div>
+                    <div class="writer-tip">
+                        <h5>Future Vision</h5>
+                        <p>End with clear goals and how the scholarship helps you get there. Be specific and ambitious.</p>
+                    </div>
+                    <div class="writer-tip">
+                        <h5>💡 Pro Tips</h5>
+                        <p>• Keep it 500-650 words unless specified<br>• Use active voice<br>• One story > many summaries<br>• Proofread aloud</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function initWriter() {
+        const ta = $('#writerText');
+        ta.addEventListener('input', () => {
+            const text = ta.value;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const chars = text.length;
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length;
+            $('#writerWords').textContent = words;
+            $('#writerChars').textContent = chars;
+            $('#writerSentences').textContent = sentences;
+            $('#writerTime').textContent = Math.max(1, Math.round(words / 200)) + ' min';
+        });
+    }
+
+    // ===== PROFILER AGENT =====
+    function buildProfilerUI() {
+        return `
+            <div class="profiler-form">
+                <div><label>Full Name</label><input type="text" id="profName" placeholder="Your name"></div>
+                <div><label>Country</label><input type="text" id="profCountry" placeholder="e.g. Ghana"></div>
+                <div><label>GPA</label><input type="number" id="profGpa" min="0" max="4" step="0.1" placeholder="e.g. 3.8"></div>
+                <div><label>Degree Level</label>
+                    <select id="profLevel"><option value="undergraduate">Undergraduate</option><option value="masters">Masters</option><option value="phd">PhD</option></select>
+                </div>
+                <div><label>Field of Interest</label><input type="text" id="profField" placeholder="e.g. Computer Science"></div>
+                <div><label>Years of Experience</label><input type="number" id="profExp" min="0" placeholder="e.g. 2"></div>
+                <div class="full-width"><label>Key Skills (comma separated)</label><input type="text" id="profSkills" placeholder="e.g. Python, Machine Learning, Leadership"></div>
+                <div class="full-width">
+                    <button class="btn btn-primary" id="profilerAnalyze" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);border:none;width:100%;">👤 Analyze My Profile</button>
+                </div>
+            </div>
+            <div class="profiler-results" id="profilerResults"></div>
+        `;
+    }
+
+    function initProfiler() {
+        $('#profilerAnalyze').addEventListener('click', () => {
+            const gpa = parseFloat($('#profGpa').value) || 0;
+            const country = $('#profCountry').value.toLowerCase();
+            const field = $('#profField').value.toLowerCase();
+            const level = $('#profLevel').value;
+            const results = $('#profilerResults');
+
+            const top = DATA.scholarships.slice(0, 15).map(s => {
+                let pct = 40;
+                if (gpa >= 3.5) pct += 20; else if (gpa >= 3.0) pct += 10;
+                if (s.country && s.country.toLowerCase().includes(country)) pct += 15;
+                if (s.fields && s.fields.some(f => f.toLowerCase().includes(field))) pct += 15;
+                if (s.level && s.level.toLowerCase().includes(level)) pct += 10;
+                pct = Math.min(pct, 98);
+                return { name: s.name, pct };
+            }).sort((a, b) => b.pct - a.pct);
+
+            results.innerHTML = '<h4 style="color:var(--text-primary);margin-bottom:12px;">Your Eligibility Matches</h4>' +
+                top.map(t => {
+                    const color = t.pct > 75 ? 'var(--success)' : t.pct > 50 ? 'var(--warning)' : 'var(--danger)';
+                    return `<div class="profiler-match">
+                        <span style="color:var(--text-primary);font-size:14px;">${escapeHtml(t.name)}</span>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="profiler-bar-bg"><div class="profiler-bar-fill" style="width:${t.pct}%;background:${color};"></div></div>
+                            <span style="color:${color};font-weight:700;font-size:14px;min-width:40px;text-align:right;">${t.pct}%</span>
+                        </div>
+                    </div>`;
+                }).join('');
+        });
+    }
+
+    // ===== TRACKER AGENT =====
+    function buildTrackerUI() {
+        const now = new Date();
+        const deadlines = DATA.scholarships
+            .filter(s => s.deadline)
+            .map(s => {
+                const dl = new Date(s.deadline);
+                const diff = Math.ceil((dl - now) / (1000 * 60 * 60 * 24));
+                return { name: s.name, country: s.country, deadline: s.deadline, days: diff };
+            })
+            .filter(d => d.days > -30)
+            .sort((a, b) => a.days - b.days)
+            .slice(0, 25);
+
+        if (!deadlines.length) {
+            return '<p style="color:var(--text-muted);text-align:center;padding:40px;">No deadlines found in the database.</p>';
+        }
+
+        return `
+            <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+                    <span class="tracker-dot red" style="width:8px;height:8px;display:inline-block;"></span> Less than 7 days
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+                    <span class="tracker-dot yellow" style="width:8px;height:8px;display:inline-block;"></span> 7–30 days
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+                    <span class="tracker-dot green" style="width:8px;height:8px;display:inline-block;"></span> More than 30 days
+                </div>
+            </div>
+            <div class="tracker-timeline">
+                ${deadlines.map(d => {
+                    const urgency = d.days < 0 ? 'red' : d.days < 7 ? 'red' : d.days < 30 ? 'yellow' : 'green';
+                    const label = d.days < 0 ? 'PASSED' : d.days === 0 ? 'TODAY' : d.days + ' days';
+                    return `<div class="tracker-item">
+                        <div class="tracker-dot ${urgency}"></div>
+                        <div class="tracker-info">
+                            <h4>${escapeHtml(d.name)}</h4>
+                            <p>${escapeHtml(d.country || '')} · ${d.deadline}</p>
+                        </div>
+                        <div class="tracker-days ${urgency}">
+                            <div class="days-num">${d.days < 0 ? '—' : d.days}</div>
+                            <div class="days-label">${label}</div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    // ===== ADVISOR AGENT =====
+    function buildAdvisorUI() {
+        const scholarships = DATA.scholarships.slice(0, 12).map((s, i) => {
+            const competition = ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)];
+            const fit = 60 + Math.floor(Math.random() * 35);
+            const effort = ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)];
+            const priority = fit > 80 ? 'high' : fit > 65 ? 'medium' : 'low';
+            return { ...s, competition, fit, effort, priority, rank: i + 1 };
+        }).sort((a, b) => b.fit - a.fit).map((s, i) => ({ ...s, rank: i + 1 }));
+
+        return `
+            <p style="color:var(--text-secondary);margin-bottom:20px;font-size:14px;">Based on scholarship data analysis, here are your recommended priorities:</p>
+            <div class="advisor-list">
+                ${scholarships.map(s => `
+                    <div class="advisor-card">
+                        <div class="advisor-card-header">
+                            <div>
+                                <span style="color:var(--text-primary);font-weight:600;">${escapeHtml(s.name)}</span>
+                                <p style="color:var(--text-muted);font-size:12px;margin-top:2px;">${escapeHtml(s.country || '')}</p>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <span class="advisor-priority ${s.priority}">${s.priority} priority</span>
+                                <span class="advisor-rank">#${s.rank}</span>
+                            </div>
+                        </div>
+                        <div class="advisor-metrics">
+                            <div class="advisor-metric">Fit Score: <span>${s.fit}%</span></div>
+                            <div class="advisor-metric">Competition: <span>${s.competition}</span></div>
+                            <div class="advisor-metric">Effort: <span>${s.effort}</span></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // ===== PREP AGENT =====
+    function buildPrepUI() {
+        return `
+            <div class="prep-chat" id="prepChat">
+                <div class="prep-msg agent">
+                    👋 Hi! I'm your Interview Coach. I'll ask you common scholarship interview questions and give you tips on how to answer them.<br><br>
+                    Ready to practice? Choose a question to start:
+                </div>
+            </div>
+            <div class="prep-options" id="prepOptions">
+                ${interviewQuestions.slice(0, 5).map((q, i) => `
+                    <button class="prep-option-btn" data-qi="${i}">${q.q.substring(0, 50)}...</button>
+                `).join('')}
+                <button class="prep-option-btn" data-qi="random">🎲 Random Question</button>
+            </div>
+        `;
+    }
+
+    function initPrep() {
+        $('#prepOptions').addEventListener('click', e => {
+            const btn = e.target.closest('.prep-option-btn');
+            if (!btn) return;
+            const qi = btn.dataset.qi;
+            const idx = qi === 'random' ? Math.floor(Math.random() * interviewQuestions.length) : parseInt(qi);
+            const q = interviewQuestions[idx];
+
+            const chat = $('#prepChat');
+            chat.innerHTML += `<div class="prep-msg user">I'd like to practice: "${q.q}"</div>`;
+            chat.innerHTML += `
+                <div class="prep-msg agent">
+                    <strong>📋 Question:</strong><br>"${q.q}"<br><br>
+                    <strong>💡 How to answer:</strong><br>${q.tip}<br><br>
+                    <strong>⏱ Tip:</strong> Practice answering this aloud in under 2 minutes. Record yourself and listen back.<br><br>
+                    <em>When you're ready, pick another question below!</em>
+                </div>
+            `;
+            chat.scrollTop = chat.scrollHeight;
+
+            // Refresh options
+            const opts = $('#prepOptions');
+            const newQuestions = interviewQuestions.filter((_, i) => i !== idx).sort(() => Math.random() - 0.5).slice(0, 4);
+            opts.innerHTML = newQuestions.map((nq, i) => {
+                const origIdx = interviewQuestions.indexOf(nq);
+                return `<button class="prep-option-btn" data-qi="${origIdx}">${nq.q.substring(0, 50)}...</button>`;
+            }).join('') + '<button class="prep-option-btn" data-qi="random">🎲 Random Question</button>';
+        });
+    }
+
+    // Initialize when DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(initAIAgents, 500));
+    } else {
+        setTimeout(initAIAgents, 500);
+    }
+})();

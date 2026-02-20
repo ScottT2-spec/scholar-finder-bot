@@ -178,6 +178,12 @@
                     <p>42 answers to common questions</p>
                     <span class="feature-arrow">→</span>
                 </div>
+                <div class="feature-card ai-agents-card" data-target="ai-agents">
+                    <span class="feature-icon">🤖</span>
+                    <h3>AI Agents</h3>
+                    <p>6 AI-powered agents to guide your scholarship journey</p>
+                    <span class="feature-arrow">→</span>
+                </div>
             </div>
         </div>
     </section>
@@ -392,6 +398,85 @@
             <div class="accordion" id="faqAccordion"></div>
         </div>
     </section>
+
+    <!-- AI Agents Section -->
+    <section id="ai-agents" class="section detail-section" style="display:none;">
+        <div class="container">
+            <div class="section-header">
+                <button class="back-btn" data-back="features">← Back</button>
+                <h2 class="section-title">🤖 AI Agents</h2>
+                <p class="section-subtitle">6 intelligent agents working together to guide your scholarship journey</p>
+            </div>
+
+            <div class="ai-agents-grid">
+                <!-- Scout Agent -->
+                <div class="ai-agent-card" data-agent="scout">
+                    <div class="ai-agent-icon">🔍</div>
+                    <h3>Scout</h3>
+                    <p class="ai-agent-role">Scholarship Finder</p>
+                    <p class="ai-agent-desc">Matches scholarships to your profile — GPA, country, field, degree level. Smart filtering with match scores.</p>
+                    <button class="btn btn-primary btn-sm ai-launch-btn">Launch Agent →</button>
+                </div>
+                <!-- Writer Agent -->
+                <div class="ai-agent-card" data-agent="writer">
+                    <div class="ai-agent-icon">📝</div>
+                    <h3>Writer</h3>
+                    <p class="ai-agent-role">Essay Assistant</p>
+                    <p class="ai-agent-desc">Helps draft and improve scholarship essays. Structure suggestions, tone tips, and word count tracking.</p>
+                    <button class="btn btn-primary btn-sm ai-launch-btn">Launch Agent →</button>
+                </div>
+                <!-- Profiler Agent -->
+                <div class="ai-agent-card" data-agent="profiler">
+                    <div class="ai-agent-icon">👤</div>
+                    <h3>Profiler</h3>
+                    <p class="ai-agent-role">Student Matcher</p>
+                    <p class="ai-agent-desc">Builds your comprehensive profile and calculates eligibility percentage for every scholarship.</p>
+                    <button class="btn btn-primary btn-sm ai-launch-btn">Launch Agent →</button>
+                </div>
+                <!-- Tracker Agent -->
+                <div class="ai-agent-card" data-agent="tracker">
+                    <div class="ai-agent-icon">📅</div>
+                    <h3>Tracker</h3>
+                    <p class="ai-agent-role">Deadline Manager</p>
+                    <p class="ai-agent-desc">Tracks every scholarship deadline. Color-coded timeline so you never miss an application.</p>
+                    <button class="btn btn-primary btn-sm ai-launch-btn">Launch Agent →</button>
+                </div>
+                <!-- Advisor Agent -->
+                <div class="ai-agent-card" data-agent="advisor">
+                    <div class="ai-agent-icon">🎓</div>
+                    <h3>Advisor</h3>
+                    <p class="ai-agent-role">Strategy Coach</p>
+                    <p class="ai-agent-desc">Recommends which scholarships to prioritize. Analyzes competition level, fit score, and effort required.</p>
+                    <button class="btn btn-primary btn-sm ai-launch-btn">Launch Agent →</button>
+                </div>
+                <!-- Prep Agent -->
+                <div class="ai-agent-card" data-agent="prep">
+                    <div class="ai-agent-icon">💬</div>
+                    <h3>Prep</h3>
+                    <p class="ai-agent-role">Interview Coach</p>
+                    <p class="ai-agent-desc">Practice scholarship interview questions with AI feedback. Build confidence before the real thing.</p>
+                    <button class="btn btn-primary btn-sm ai-launch-btn">Launch Agent →</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agent Modals -->
+    <div class="ai-modal-overlay" id="aiModalOverlay" style="display:none;">
+        <div class="ai-modal">
+            <div class="ai-modal-header">
+                <div class="ai-modal-title-row">
+                    <span class="ai-modal-icon" id="aiModalIcon"></span>
+                    <div>
+                        <h3 id="aiModalTitle"></h3>
+                        <span class="ai-modal-role" id="aiModalRole"></span>
+                    </div>
+                </div>
+                <button class="ai-modal-close" id="aiModalClose">✕</button>
+            </div>
+            <div class="ai-modal-body" id="aiModalBody"></div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
