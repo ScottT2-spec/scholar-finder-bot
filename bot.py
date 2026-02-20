@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 #
 # Constants / paths
 #
-TOKEN = "YOUR_BOT_TOKEN_HERE"
+TOKEN = "8546969297:AAGre3cx16LVPeHijJEO86X-pN5Z_CX4_LQ"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(SCRIPT_DIR, "users.db")
 CHUNK_SIZE = 3500  # max chars per Telegram message
@@ -187,8 +187,9 @@ def init_db():
 
 init_db()
 
-# Admin user ID (Scott)
-ADMIN_ID = 8387873012  # Replace with your Telegram user ID
+# Admin user ID (Scott) — DO NOT CHANGE THIS
+ADMIN_ID = 8387873012  # Scott's Telegram user ID — permanent admin
+ADMIN_IDS = [8387873012]  # Backup list — add more admins here if needed
 
 def track_user(update: Update, action: str):
     """Log user activity for stats tracking."""
@@ -379,7 +380,10 @@ def _save(name, data):
 
 def is_admin(update: Update) -> bool:
     """Check if the user is the admin."""
-    return update.effective_user and update.effective_user.id == ADMIN_ID
+    if not update.effective_user:
+        return False
+    uid = update.effective_user.id
+    return uid == ADMIN_ID or uid in ADMIN_IDS
 
 
 #
