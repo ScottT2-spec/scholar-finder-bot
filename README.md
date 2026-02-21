@@ -10,9 +10,9 @@ A Telegram bot I built to help students (especially in Africa) find scholarships
 
 | What | How many |
 |------|----------|
-| Scholarships | 151 across 46 countries |
-| Universities | 86 |
-| Opportunities (internships, research, competitions) | 62 |
+| Scholarships | 485 across 46 countries |
+| Universities | 184 |
+| Opportunities (internships, research, competitions) | 138 |
 | Cities with cost of living data | 51 |
 | FAQ answers | 42 |
 | Visa guides | 26 countries |
@@ -21,7 +21,7 @@ A Telegram bot I built to help students (especially in Africa) find scholarships
 
 ## What you can do with it
 
-**Find scholarships** — Search by level (undergrad/masters/PhD), field, and region. Or just browse all 151.
+**Find scholarships** — Search by level (undergrad/masters/PhD), field, and region. Or just browse all 485.
 
 **Look up universities** — Filter by region and field of study. Shows rankings, tuition, and links.
 
