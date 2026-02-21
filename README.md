@@ -4,7 +4,7 @@ A Telegram bot I built to help students (especially in Africa) find scholarships
 
 **Try it:** [@ScholarFinder_bot](https://t.me/ScholarFinder_bot) on Telegram
 
-**Website:** [scottt2-spec.github.io/scholar-finder-bot](scholarfinder.pythonanywhere.com/)
+**Website:** [scholarfinder.pythonanywhere.com/](scholarfinder.pythonanywhere.com/)
 
 ## What's in the database
 
