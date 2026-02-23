@@ -2344,11 +2344,9 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # ================================
-# Keep-alive server for Replit/Railway
-# ================================
-from flask import Flask
+
 from threading import Thread
+from flask import Flask
 
 app = Flask("")
 
@@ -2356,15 +2354,14 @@ app = Flask("")
 def home():
     return "Bot is running!"
 
-def run():
+def run_flask():
     app.run(host="0.0.0.0", port=8080)
 
-# Start the web server in a separate thread
-t = Thread(target=run)
-t.start()
+# Start Flask server in a thread
+Thread(target=run_flask).start()
 
-# ================================
-# Start the Telegram bot
-# ================================
-if __name__ == "__main__":
-    application.run_polling()
+# ===============================
+# Start your Telegram bot
+# ===============================
+# Make sure this is your original code line
+application.run_polling()
