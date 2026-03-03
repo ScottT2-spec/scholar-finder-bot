@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 #
 # Constants / paths
 #
-TOKEN = "YOUR TOKEN"
+TOKEN = "$"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(SCRIPT_DIR, "users.db")
 CHUNK_SIZE = 3500  # max chars per Telegram message
