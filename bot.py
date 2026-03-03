@@ -2337,33 +2337,7 @@ def main():
     # --- Global error handler ---
     app.add_error_handler(error_handler)
 
-    # --- APScheduler: daily deadline check ---
-    job_queue = app.job_queue
-    if job_queue:
-        job_queue.run_repeating(check_deadlines, interval=86400, first=60)  # run daily, first run 60s after start
-        logger.info("Deadline reminder job scheduled (daily).")
-
     print("🎓 ScholarFinder bot is running! (Full rewrite)")
-    app.run_polling(drop_pending_updates=True)
-
-
-if __name__ == "__main__":
-    main()
-
-from threading import Thread
-from flask import Flask
-
-app = Flask("")
-
-@app.route("/")
-def home():
-    return "Bot is running!"
-
-def run_flask():
-    app.run(host="0.0.0.0", port=8080)
-
-# Start Flask server in a thread
-Thread(target=run_flask).start()
 
 @app.route('/' + os.environ.get('BOT_TOKEN'), methods=['POST'])
 def getMessage():
@@ -2376,7 +2350,7 @@ def getMessage():
 def webhook():
     bot.remove_webhook()
     # Replace 'your-app-name' with your actual Vercel project URL later
-    bot.set_webhook(url='https://your-app-name.vercel.app/' + os.environ.get('BOT_TOKEN'))
+    bot.set_webhook(url='https://scholar-finder-bot.vercel.app/' + os.environ.get('BOT_TOKEN'))
     return "Webhook is active!", 200
 
 # This is for local testing; Vercel ignores this __main__ block
