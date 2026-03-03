@@ -1,27 +1,4 @@
 /usr/bin/env python3
-
-/usr/bin/env python3
-import os
-import json
-import re
-import sqlite3
-import logging
-import asyncio
-from datetime import datetime, timedelta
-from difflib import SequenceMatcher
-
-from flask import Flask, request
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (
-    Application, CommandHandler, CallbackQueryHandler, MessageHandler,
-    filters, ContextTypes, ConversationHandler
-)
-
-
-server = Flask(__name__)
-TOKEN = os.environ.get('BOT_TOKEN')
-
-
 """
 ScholarFinder Bot — Complete Study Abroad Assistant
 Built by Scott | Alpha Global Minds
@@ -66,6 +43,7 @@ logger = logging.getLogger(__name__)
 #
 # Constants / paths
 #
+TOKEN = "YOUR TOKEN"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(SCRIPT_DIR, "users.db")
 CHUNK_SIZE = 3500  # max chars per Telegram message
@@ -209,9 +187,9 @@ def init_db():
 
 init_db()
 
-# Admin
-ADMIN_ID = 8387873012
-ADMIN_IDS = [8387873012]
+# Admin user ID (Scott) — DO NOT CHANGE THIS
+ADMIN_ID = 8387873012  # Scott's Telegram user ID — permanent admin
+ADMIN_IDS = [8387873012]  # Backup list — add more admins here if needed
 
 def track_user(update: Update, action: str):
     """Log user activity for stats tracking."""
@@ -2354,37 +2332,15 @@ def main():
     # --- Global error handler ---
     app.add_error_handler(error_handler)
 
+    # --- APScheduler: daily deadline check ---
+    job_queue = app.job_queue
+    if job_queue:
+        job_queue.run_repeating(check_deadlines, interval=86400, first=60)  # run daily, first run 60s after start
+        logger.info("Deadline reminder job scheduled (daily).")
+
     print("🎓 ScholarFinder bot is running! (Full rewrite)")
+    app.run_polling(drop_pending_updates=True)
 
-    # 
-
-# Global variable to hold the bot instance
-telegram_app = None
-
-async def init_telegram():
-    global telegram_app
-    if telegram_app is None:
-        
-        telegram_app = Application.builder().token(os.environ.get('BOT_TOKEN')).build()
-        await telegram_app.initialize()
-    return telegram_app
-
-@server.route('/' + os.environ.get('BOT_TOKEN', ''), methods=['POST'])
-async def getMessage():
-    bot_app = await init_telegram()
-    if request.get_json():
-        update = Update.de_json(request.get_json(force=True), bot_app.bot)
-        await bot_app.process_update(update)
-    return "!", 200
-
-@server.route("/")
-def webhook_info():
-    token = os.environ.get('BOT_TOKEN', '')
-    url = f"https://scholar-finder-bot.vercel.app/{token}"
-    return f"To activate, visit: <a href='https://api.telegram.org/bot{token}/setWebhook?url={url}'>Click here to set Webhook</a>", 200
 
 if __name__ == "__main__":
-    
-    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
-
-
+    main()
