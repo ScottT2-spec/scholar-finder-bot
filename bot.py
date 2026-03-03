@@ -66,7 +66,6 @@ logger = logging.getLogger(__name__)
 #
 # Constants / paths
 #
-TOKEN = "YOUR TOKEN"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(SCRIPT_DIR, "users.db")
 CHUNK_SIZE = 3500  # max chars per Telegram message
@@ -212,7 +211,7 @@ init_db()
 
 # Admin
 ADMIN_ID = 8387873012
-ADMIN_IDS = 8387873012
+ADMIN_IDS = [8387873012]
 
 def track_user(update: Update, action: str):
     """Log user activity for stats tracking."""
