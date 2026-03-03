@@ -1,8 +1,26 @@
 /usr/bin/env python3
-from flask import Flask, request
-import os
 
-app = Flask(__name__)
+/usr/bin/env python3
+import os
+import json
+import re
+import sqlite3
+import logging
+import asyncio
+from datetime import datetime, timedelta
+from difflib import SequenceMatcher
+
+from flask import Flask, request
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (
+    Application, CommandHandler, CallbackQueryHandler, MessageHandler,
+    filters, ContextTypes, ConversationHandler
+)
+
+
+server = Flask(__name__)
+TOKEN = os.environ.get('BOT_TOKEN')
+
 
 """
 ScholarFinder Bot — Complete Study Abroad Assistant
@@ -192,9 +210,9 @@ def init_db():
 
 init_db()
 
-# Admin user ID (Scott) — DO NOT CHANGE THIS
-ADMIN_ID = ID  # Scott's Telegram user ID — permanent admin
-ADMIN_IDS = [ID]  # Backup list — add more admins here if needed
+# Admin
+ADMIN_ID = 8387873012
+ADMIN_IDS = 8387873012
 
 def track_user(update: Update, action: str):
     """Log user activity for stats tracking."""
@@ -2339,21 +2357,35 @@ def main():
 
     print("🎓 ScholarFinder bot is running! (Full rewrite)")
 
-@app.route('/' + os.environ.get('BOT_TOKEN'), methods=['POST'])
+    # 
+
+# Global variable to hold the bot instance
+telegram_app = None
+
+async def init_telegram():
+    global telegram_app
+    if telegram_app is None:
+        
+        telegram_app = Application.builder().token(os.environ.get('BOT_TOKEN')).build()
+        await telegram_app.initialize()
+    return telegram_app
+
+@server.route('/' + os.environ.get('BOT_TOKEN', ''), methods=['POST'])
 async def getMessage():
-    # This matches the 'Application' setup you have at the top
-    if telegram_app:
-        update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-        await telegram_app.process_update(update)
+    bot_app = await init_telegram()
+    if request.get_json():
+        update = Update.de_json(request.get_json(force=True), bot_app.bot)
+        await bot_app.process_update(update)
     return "!", 200
 
-@app.route("/")
-def webhook():
-    # Use your actual Vercel URL
-    webhook_url = f"https://scholar-finder-bot.vercel.app/{os.environ.get('BOT_TOKEN')}"
-    # This is a bit of a hack to set it since Vercel is serverless
-    return f"Visit this to set: https://api.telegram.org/bot{os.environ.get('BOT_TOKEN')}/setWebhook?url={webhook_url}", 200
+@server.route("/")
+def webhook_info():
+    token = os.environ.get('BOT_TOKEN', '')
+    url = f"https://scholar-finder-bot.vercel.app/{token}"
+    return f"To activate, visit: <a href='https://api.telegram.org/bot{token}/setWebhook?url={url}'>Click here to set Webhook</a>", 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+    
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+
 
