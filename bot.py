@@ -1,4 +1,9 @@
 /usr/bin/env python3
+from flask import Flask, request
+import os
+
+app = Flask(__name__)
+
 """
 ScholarFinder Bot — Complete Study Abroad Assistant
 Built by Scott | Alpha Global Minds
@@ -2360,8 +2365,20 @@ def run_flask():
 # Start Flask server in a thread
 Thread(target=run_flask).start()
 
-# ===============================
-# Start your Telegram bot
-# ===============================
-# Make sure this is your original code line
-application.run_polling()
+@app.route('/' + os.environ.get('BOT_TOKEN'), methods=['POST'])
+def getMessage():
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
+
+@app.route("/")
+def webhook():
+    bot.remove_webhook()
+    # Replace 'your-app-name' with your actual Vercel project URL later
+    bot.set_webhook(url='https://your-app-name.vercel.app/' + os.environ.get('BOT_TOKEN'))
+    return "Webhook is active!", 200
+
+# This is for local testing; Vercel ignores this __main__ block
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
