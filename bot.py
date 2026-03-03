@@ -187,9 +187,9 @@ def init_db():
 
 init_db()
 
-# Admin user ID (Scott) — DO NOT CHANGE THIS
-ADMIN_ID = 8387873012  # Scott's Telegram user ID — permanent admin
-ADMIN_IDS = [8387873012]  # Backup list — add more admins here if needed
+#
+ADMIN_ID = $
+ADMIN_IDS = [$]  # 
 
 def track_user(update: Update, action: str):
     """Log user activity for stats tracking."""
@@ -300,11 +300,11 @@ def parse_deadline(deadline_str: str):
         except ValueError:
             pass
 
-    # "October - December (varies)" → pick middle month
+    # 
     m = re.match(r"(\w+)\s*[-–]\s*(\w+)", lower)
     if m:
         month_str = m.group(2).strip().capitalize()
-        # Remove anything after the month
+        # 
         month_str = month_str.split()[0] if " " in month_str else month_str
         try:
             month_dt = datetime.strptime(month_str, "%B")
