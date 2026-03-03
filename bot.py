@@ -2340,19 +2340,20 @@ def main():
     print("🎓 ScholarFinder bot is running! (Full rewrite)")
 
 @app.route('/' + os.environ.get('BOT_TOKEN'), methods=['POST'])
-def getMessage():
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
+async def getMessage():
+    # This matches the 'Application' setup you have at the top
+    if telegram_app:
+        update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+        await telegram_app.process_update(update)
     return "!", 200
 
 @app.route("/")
 def webhook():
-    bot.remove_webhook()
-    # Replace 'your-app-name' with your actual Vercel project URL later
-    bot.set_webhook(url='https://scholar-finder-bot.vercel.app/' + os.environ.get('BOT_TOKEN'))
-    return "Webhook is active!", 200
+    # Use your actual Vercel URL
+    webhook_url = f"https://scholar-finder-bot.vercel.app/{os.environ.get('BOT_TOKEN')}"
+    # This is a bit of a hack to set it since Vercel is serverless
+    return f"Visit this to set: https://api.telegram.org/bot{os.environ.get('BOT_TOKEN')}/setWebhook?url={webhook_url}", 200
 
-# This is for local testing; Vercel ignores this __main__ block
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+
