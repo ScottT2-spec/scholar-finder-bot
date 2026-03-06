@@ -2338,7 +2338,6 @@ def main():
         job_queue.run_repeating(check_deadlines, interval=86400, first=60)  # run daily, first run 60s after start
         logger.info("Deadline reminder job scheduled (daily).")
 
-    print("🎓 ScholarFinder bot is running! (Full rewrite)")
     app.run_polling(drop_pending_updates=True)
 
 
