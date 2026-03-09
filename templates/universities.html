@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Universities{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">🏫 University Search</h2>
+        <div style="margin-bottom: 20px;">
+            <input type="text" id="searchInput" class="form-input" placeholder="🔍 Search universities...">
+        </div>
+        <p id="resultsInfo" style="color: var(--text2); margin-bottom: 12px;"></p>
+        <div id="results"></div>
+        <button id="loadMore" class="btn btn-secondary" style="display: none; margin: 20px auto;">Load More</button>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+let page = 1;
+async function search(reset = true) {
+    if (reset) { page = 1; document.getElementById('results').innerHTML = ''; }
+    const q = document.getElementById('searchInput').value;
+    const res = await fetch(`/api/universities?q=${encodeURIComponent(q)}&page=${page}&per_page=20`);
+    const data = await res.json();
+    document.getElementById('resultsInfo').textContent = `${data.total} universities found`;
+    data.results.forEach(u => {
+        const card = document.createElement('div');
+        card.className = 'card'; card.style.marginBottom = '10px';
+        const name = u.name || u.university || 'University';
+        card.innerHTML = `<h3>${name}</h3>
+            <div class="meta">
+                ${u.country ? '<span>📍 '+u.country+'</span>' : ''}
+                ${u.ranking ? '<span>🏆 #'+u.ranking+'</span>' : ''}
+                ${u.tuition ? '<span>💰 '+u.tuition+'</span>' : ''}
+            </div>
+            ${u.description ? '<p style="color:var(--text2);font-size:0.9rem;margin-top:8px;">'+u.description.slice(0,200)+'</p>' : ''}
+            ${u.website || u.link ? '<a href="'+(u.website||u.link)+'" target="_blank" class="btn btn-sm btn-secondary" style="margin-top:10px;">Visit →</a>' : ''}`;
+        document.getElementById('results').appendChild(card);
+    });
+    document.getElementById('loadMore').style.display = data.total > page * 20 ? 'block' : 'none';
+}
+document.getElementById('searchInput').addEventListener('input', (function(){let t;return()=>{clearTimeout(t);t=setTimeout(()=>search(),300)}})());
+document.getElementById('loadMore').addEventListener('click', () => { page++; search(false); });
+search();
+</script>
+{% endblock %}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malaria Cell Detection — AI Analysis</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #121212;
+      --card: #1e1e1e;
+      --card-hover: #252525;
+      --accent: #4ade80;
+      --accent-dim: #22c55e;
+      --danger: #ef4444;
+      --text: #e5e5e5;
+      --text-dim: #a3a3a3;
+      --border: #333;
+      --radius: 12px;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.6; min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    header { text-align: center; padding: 2.5rem 1rem 1.5rem; }
+    header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.3rem; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-dim); font-size: 1rem; }
+    .back-link { display: inline-block; color: var(--accent); font-size: 0.85rem; margin-bottom: 1rem; }
+
+    main { flex: 1; max-width: 700px; width: 100%; margin: 0 auto; padding: 0 1rem 3rem; }
+
+    .info-box {
+      background: #1a2e1a; border: 1px solid #2d4a2d; color: #86efac;
+      padding: 0.8rem 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; font-size: 0.88rem;
+    }
+
+    .upload-card {
+      background: var(--card); border: 2px dashed var(--border);
+      border-radius: var(--radius); padding: 2.5rem 1.5rem;
+      text-align: center; cursor: pointer; transition: 0.2s; position: relative;
+    }
+    .upload-card:hover, .upload-card.drag-over { border-color: var(--accent); background: var(--card-hover); }
+    .upload-card input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .upload-icon { font-size: 2.8rem; margin-bottom: 0.6rem; display: block; }
+    .upload-card p { color: var(--text-dim); }
+    .formats { font-size: 0.8rem; color: #666; margin-top: 0.3rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--accent); color: #0a0a0a; font-weight: 600;
+      font-size: 0.95rem; padding: 0.7rem 1.6rem; border: none;
+      border-radius: 8px; cursor: pointer; margin-top: 1.2rem; transition: 0.2s;
+    }
+    .btn:hover { background: var(--accent-dim); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .file-name { margin-top: 0.8rem; font-size: 0.85rem; color: var(--accent); word-break: break-all; }
+
+    .spinner {
+      display: none; margin: 1.5rem auto; width: 36px; height: 36px;
+      border: 3px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .result-card {
+      display: none; background: var(--card); border-radius: var(--radius);
+      overflow: hidden; margin-top: 1.5rem; border: 1px solid var(--border);
+    }
+    .result-image { width: 100%; max-height: 350px; object-fit: contain; background: #0a0a0a; }
+    .result-body { padding: 1.2rem 1.5rem; }
+    .result-label { font-size: 1.5rem; font-weight: 700; }
+    .result-label.healthy { color: var(--accent); }
+    .result-label.infected { color: var(--danger); }
+    .conf-wrap { background: #2a2a2a; border-radius: 6px; height: 10px; margin: 0.8rem 0 0.3rem; overflow: hidden; }
+    .conf-bar { height: 100%; border-radius: 6px; transition: width 0.6s ease; }
+    .conf-text { font-size: 0.85rem; color: var(--text-dim); }
+
+    .history-section { margin-top: 2.5rem; }
+    .history-section h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.8rem; color: var(--text-dim); }
+    .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem; }
+    .history-item { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .history-item img { width: 100%; height: 100px; object-fit: cover; background: #0a0a0a; }
+    .history-item .meta { padding: 0.5rem 0.6rem; font-size: 0.78rem; }
+    .tag { display: inline-block; font-weight: 700; font-size: 0.72rem; padding: 0.1rem 0.4rem; border-radius: 3px; }
+    .tag-healthy { background: #166534; color: #bbf7d0; }
+    .tag-infected { background: #7f1d1d; color: #fecaca; }
+
+    .error-msg { display: none; background: #2d1111; border: 1px solid #7f1d1d; color: #fca5a5; padding: 0.7rem 1rem; border-radius: 8px; margin-top: 1rem; font-size: 0.9rem; }
+
+    footer { text-align: center; padding: 2rem 1rem; font-size: 0.82rem; color: #525252; border-top: 1px solid #1e1e1e; }
+    footer span { color: var(--accent); }
+
+    @media (max-width: 520px) {
+      header h1 { font-size: 1.4rem; }
+      .history-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="back-link">← Back to ScholarFinder</a>
+    <h1>Malaria <span>Cell Detection</span></h1>
+    <p>Upload a blood cell microscope image for AI analysis</p>
+  </header>
+
+  <main>
+    <div class="info-box">
+      🔬 This tool analyzes microscope images of blood cells to detect malaria parasites. Works best with thin blood smear images at 100x magnification.
+    </div>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+      <div class="upload-card" id="dropZone">
+        <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png">
+        <span class="upload-icon">🔬</span>
+        <p><strong>Drag & drop</strong> a cell image here, or <strong>tap to browse</strong></p>
+        <p class="formats">Accepts JPG, PNG — max 16 MB</p>
+      </div>
+      <div class="file-name" id="fileName"></div>
+      <div style="text-align:center">
+        <button type="submit" class="btn" id="submitBtn" disabled>Analyze Cell</button>
+      </div>
+    </form>
+
+    <div class="spinner" id="spinner"></div>
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="result-card" id="resultCard">
+      <img class="result-image" id="resultImage" src="" alt="Cell image">
+      <div class="result-body">
+        <span class="result-label" id="resultLabel"></span>
+        <div class="conf-wrap"><div class="conf-bar" id="confBar"></div></div>
+        <p class="conf-text" id="confText"></p>
+      </div>
+    </div>
+
+    {% if history %}
+    <section class="history-section">
+      <h2>Recent Analyses</h2>
+      <div class="history-grid">
+        {% for item in history %}
+        <div class="history-item">
+          <img src="/malaria/uploads/{{ item.filename }}" alt="{{ item.label }}">
+          <div class="meta">
+            <span class="tag {{ 'tag-healthy' if item.label == 'HEALTHY' else 'tag-infected' }}">{{ item.label }}</span>
+            {{ item.confidence }}%
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </main>
+
+  <footer>Built by <span>Scott Antwi</span> | Alpha Global Minds</footer>
+
+  <script>
+    const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),
+      fileName=document.getElementById('fileName'),submitBtn=document.getElementById('submitBtn'),
+      spinner=document.getElementById('spinner'),errorMsg=document.getElementById('errorMsg'),
+      resultCard=document.getElementById('resultCard'),resultImage=document.getElementById('resultImage'),
+      resultLabel=document.getElementById('resultLabel'),confBar=document.getElementById('confBar'),
+      confText=document.getElementById('confText');
+
+    ['dragenter','dragover'].forEach(e=>dropZone.addEventListener(e,ev=>{ev.preventDefault();dropZone.classList.add('drag-over')}));
+    ['dragleave','drop'].forEach(e=>dropZone.addEventListener(e,ev=>{ev.preventDefault();dropZone.classList.remove('drag-over')}));
+    dropZone.addEventListener('drop',ev=>{if(ev.dataTransfer.files.length){fileInput.files=ev.dataTransfer.files;onFile()}});
+    fileInput.addEventListener('change',onFile);
+
+    function onFile(){
+      const f=fileInput.files[0];if(!f)return;
+      fileName.textContent=f.name;submitBtn.disabled=false;
+      resultCard.style.display='none';errorMsg.style.display='none';
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit',async e=>{
+      e.preventDefault();if(!fileInput.files[0])return;
+      submitBtn.disabled=true;spinner.style.display='block';
+      resultCard.style.display='none';errorMsg.style.display='none';
+      const fd=new FormData();fd.append('file',fileInput.files[0]);
+      try{
+        const res=await fetch('/malaria/predict',{method:'POST',body:fd});
+        const data=await res.json();spinner.style.display='none';
+        if(data.error){errorMsg.textContent=data.error;errorMsg.style.display='block';submitBtn.disabled=false;return}
+        resultImage.src='/malaria/uploads/'+data.filename;
+        resultLabel.textContent=data.label;
+        resultLabel.className='result-label '+(data.label==='HEALTHY'?'healthy':'infected');
+        confBar.style.width=data.confidence+'%';
+        confBar.style.background=data.label==='HEALTHY'?'var(--accent)':'var(--danger)';
+        confText.textContent='Confidence: '+data.confidence+'%';
+        resultCard.style.display='block';
+        resultCard.scrollIntoView({behavior:'smooth',block:'nearest'});
+        submitBtn.disabled=false;
+      }catch(err){
+        spinner.style.display='none';errorMsg.textContent='Network error — try again.';
+        errorMsg.style.display='block';submitBtn.disabled=false;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div id="welcomeBanner" style="display:none;text-align:center;background:var(--grad);color:#fff;border-radius:var(--radius);padding:30px;margin-bottom:24px;box-shadow:var(--shadow-lg);">
+            <h2 style="font-size:1.6rem;margin-bottom:8px;">🎉 Welcome to ScholarFinder!</h2>
+            <p style="opacity:0.9;">Your account is ready. Let's find your perfect scholarship match!</p>
+        </div>
+        <h2 class="section-title">👋 Hey, {{ user.full_name or user.username }}!</h2>
+        
+        <div class="dash-stats">
+            <div class="dash-stat">
+                <div class="num">{{ stats.bookmarks }}</div>
+                <div class="label">Saved</div>
+            </div>
+            <div class="dash-stat">
+                <div class="num">{{ stats.applied }}</div>
+                <div class="label">Applied</div>
+            </div>
+            <div class="dash-stat">
+                <div class="num">{{ stats.interested }}</div>
+                <div class="label">Interested</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;">
+            <a href="/profile" class="btn btn-secondary btn-sm">✏️ Edit Profile</a>
+            <a href="/scholarships" class="btn btn-secondary btn-sm">🔍 Search Scholarships</a>
+            {% if user.is_admin %}<a href="/admin" class="btn btn-secondary btn-sm">⚙️ Admin</a>{% endif %}
+        </div>
+
+        <!-- Matched Scholarships -->
+        {% if matched %}
+        <h3 style="margin-bottom: 12px;">🎯 Top Matches For You</h3>
+        <div style="margin-bottom: 32px;">
+            {% for s in matched %}
+            <div class="card scholarship-card" style="margin-bottom: 10px;">
+                <h3>{{ s.get('name', s.get('title', 'Scholarship')) }}</h3>
+                <div class="meta">
+                    {% if s.get('country') %}<span>📍 {{ s.country }}</span>{% endif %}
+                    {% if s.get('level') %}<span>📚 {{ s.level }}</span>{% endif %}
+                    {% if s.get('amount') %}<span>💰 {{ s.amount }}</span>{% endif %}
+                    {% if s.get('deadline') %}<span>⏰ {{ s.deadline }}</span>{% endif %}
+                </div>
+                {% if s.get('description') %}
+                <p style="color: var(--text2); font-size: 0.9rem; margin-top: 8px;">{{ s.description[:150] }}{% if s.description|length > 150 %}...{% endif %}</p>
+                {% endif %}
+                <div class="actions">
+                    <button class="btn btn-sm btn-primary bookmark-btn" data-type="scholarship" data-name="{{ s.get('name', s.get('title', '')) }}">📌 Save</button>
+                    {% if s.get('link') or s.get('url') %}
+                    <a href="{{ s.get('link', s.get('url', '#')) }}" target="_blank" class="btn btn-sm btn-secondary">Apply →</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% elif not user.country and not user.field_of_study %}
+        <div class="card" style="text-align: center; padding: 40px;">
+            <p style="font-size: 1.2rem;">🎯 Complete your profile to get matched scholarships!</p>
+            <a href="/profile" class="btn btn-primary" style="margin-top: 16px;">Set Up Profile →</a>
+        </div>
+        {% endif %}
+
+        <!-- Saved Items -->
+        {% if bookmarks %}
+        <h3 style="margin-bottom: 12px;">📌 Your Saved Items</h3>
+        <div>
+            {% for b in bookmarks %}
+            <div class="card" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <strong>{{ b.item_name }}</strong>
+                    <span class="badge {% if b.status == 'applied' %}badge-green{% elif b.status == 'accepted' %}badge-blue{% else %}badge-yellow{% endif %}">{{ b.status }}</span>
+                    <div style="color: var(--text3); font-size: 0.8rem;">{{ b.item_type }} · Saved {{ b.created_at }}</div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                    <button class="btn btn-sm btn-success status-btn" data-id="{{ b.id }}" data-status="applied">✓ Applied</button>
+                    <button class="btn btn-sm btn-danger remove-btn" data-id="{{ b.id }}">✕</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Welcome animation
+if (window.location.search.includes('welcome=1')) {
+    document.getElementById('welcomeBanner').style.display = 'block';
+    setTimeout(() => document.getElementById('welcomeBanner').style.display = 'none', 8000);
+}
+
+document.querySelectorAll('.bookmark-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const res = await fetch('/api/bookmarks', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({type: btn.dataset.type, name: btn.dataset.name})
+        });
+        if (res.ok) { btn.textContent = '✅ Saved'; btn.disabled = true; }
+        else if (res.status === 409) { btn.textContent = '✅ Already saved'; btn.disabled = true; }
+    });
+});
+
+document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        await fetch(`/api/bookmarks/${btn.dataset.id}/status`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({status: btn.dataset.status})
+        });
+        location.reload();
+    });
+});
+
+document.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        await fetch(`/api/bookmarks/${btn.dataset.id}`, {method: 'DELETE'});
+        location.reload();
+    });
+});
+</script>
+{% endblock %}

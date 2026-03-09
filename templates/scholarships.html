@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Scholarships{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">🎯 Scholarship Search</h2>
+        
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+            <input type="text" id="searchInput" class="form-input" style="flex: 1; min-width: 200px;" placeholder="🔍 Search scholarships...">
+            <select id="levelFilter" class="form-input" style="width: auto;">
+                <option value="">All Levels</option>
+                <option value="undergraduate">Undergraduate</option>
+                <option value="masters">Masters</option>
+                <option value="phd">PhD</option>
+            </select>
+        </div>
+
+        <p id="resultsInfo" style="color: var(--text2); margin-bottom: 12px;"></p>
+        <div id="results"></div>
+        <button id="loadMore" class="btn btn-secondary" style="display: none; margin: 20px auto;">Load More</button>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let page = 1;
+const perPage = 20;
+let currentQuery = '';
+let currentLevel = '';
+
+async function search(reset = true) {
+    if (reset) { page = 1; document.getElementById('results').innerHTML = ''; }
+    
+    const q = document.getElementById('searchInput').value;
+    const level = document.getElementById('levelFilter').value;
+    currentQuery = q;
+    currentLevel = level;
+    
+    const params = new URLSearchParams({q, level, page, per_page: perPage});
+    const res = await fetch('/api/scholarships?' + params);
+    const data = await res.json();
+    
+    document.getElementById('resultsInfo').textContent = `${data.total} scholarships found`;
+    
+    const container = document.getElementById('results');
+    data.results.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'card scholarship-card';
+        card.style.marginBottom = '10px';
+        
+        const name = s.name || s.title || 'Scholarship';
+        const country = s.country || '';
+        const level = s.level || '';
+        const amount = s.amount || '';
+        const deadline = s.deadline || '';
+        const desc = s.description || '';
+        const link = s.link || s.url || '';
+        
+        card.innerHTML = `
+            <h3>${name}</h3>
+            <div class="meta">
+                ${country ? '<span>📍 ' + country + '</span>' : ''}
+                ${level ? '<span>📚 ' + level + '</span>' : ''}
+                ${amount ? '<span>💰 ' + amount + '</span>' : ''}
+                ${deadline ? '<span>⏰ ' + deadline + '</span>' : ''}
+            </div>
+            ${desc ? '<p style="color: var(--text2); font-size: 0.9rem; margin-top: 8px;">' + desc.slice(0, 200) + (desc.length > 200 ? '...' : '') + '</p>' : ''}
+            <div class="actions">
+                {% if user %}
+                <button class="btn btn-sm btn-primary bookmark-btn" data-type="scholarship" data-name="${name}">📌 Save</button>
+                {% endif %}
+                ${link ? '<a href="' + link + '" target="_blank" class="btn btn-sm btn-secondary">Apply →</a>' : ''}
+            </div>
+        `;
+        container.appendChild(card);
+    });
+    
+    // Bookmark buttons
+    container.querySelectorAll('.bookmark-btn').forEach(btn => {
+        btn.onclick = async () => {
+            const res = await fetch('/api/bookmarks', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({type: btn.dataset.type, name: btn.dataset.name})
+            });
+            if (res.ok) { btn.textContent = '✅ Saved'; btn.disabled = true; }
+            else if (res.status === 409) { btn.textContent = '✅ Already saved'; btn.disabled = true; }
+        };
+    });
+    
+    document.getElementById('loadMore').style.display = data.total > page * perPage ? 'block' : 'none';
+}
+
+document.getElementById('searchInput').addEventListener('input', debounce(() => search(), 300));
+document.getElementById('levelFilter').addEventListener('change', () => search());
+document.getElementById('loadMore').addEventListener('click', () => { page++; search(false); });
+
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+search();
+</script>
+{% endblock %}

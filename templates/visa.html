@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Visa Guide{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">🛂 Visa Guide</h2>
+        <p style="color:var(--text2);margin-bottom:20px;">Student visa info for 26 countries</p>
+        <input type="text" id="visaSearch" placeholder="🔍 Search by country..." class="form-input" style="max-width:300px;margin-bottom:20px;">
+        <div id="visaGrid"></div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(async () => {
+    const data = await fetch('/api/visa').then(r => r.json());
+    const grid = document.getElementById('visaGrid');
+    function render(list) {
+        grid.innerHTML = list.map(v => `
+            <div class="card" style="margin-bottom:12px;">
+                <h3 style="margin-bottom:8px;">🛂 ${v.country} — ${v.visa_type}</h3>
+                <div class="grid-2" style="margin:12px 0;">
+                    <div style="background:var(--bg2);padding:10px;border-radius:6px;"><div style="font-size:0.75rem;color:var(--text3);text-transform:uppercase;">Processing Time</div><div>⏱️ ${v.processing_time}</div></div>
+                    <div style="background:var(--bg2);padding:10px;border-radius:6px;"><div style="font-size:0.75rem;color:var(--text3);text-transform:uppercase;">Cost</div><div>💰 ${v.cost_estimate}</div></div>
+                </div>
+                <div style="margin:12px 0;"><strong style="font-size:0.9rem;">📋 Required Documents</strong><ul style="margin-top:6px;padding-left:20px;color:var(--text2);font-size:0.9rem;">${(v.documents||[]).map(d => '<li style="margin-bottom:4px;">✓ '+d+'</li>').join('')}</ul></div>
+                ${v.tips ? '<div style="padding:8px;background:rgba(32,178,170,0.08);border-radius:6px;border-left:3px solid var(--accent);font-size:0.85rem;color:var(--text2);">💡 '+v.tips+'</div>' : ''}
+                <div style="margin-top:12px;"><a href="${v.embassy_link}" target="_blank" class="btn btn-sm btn-primary">Embassy Info →</a></div>
+            </div>
+        `).join('') || '<p style="color:var(--text3);">No results found.</p>';
+    }
+    render(data);
+    document.getElementById('visaSearch').addEventListener('input', function() {
+        render(data.filter(v => (v.country+v.visa_type).toLowerCase().includes(this.value.toLowerCase())));
+    });
+})();
+</script>
+{% endblock %}

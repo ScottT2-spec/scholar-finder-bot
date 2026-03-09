@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Test Prep{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">📝 Test Prep</h2>
+        <p style="color:var(--text2);margin-bottom:20px;">IELTS, TOEFL, SAT, GRE, and Duolingo English Test</p>
+        <div id="testGrid"></div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(async () => {
+    const data = await fetch('/api/testprep').then(r => r.json());
+    const grid = document.getElementById('testGrid');
+    const icons = {ielts:'🇬🇧',toefl:'🇺🇸',duolingo:'🦉',sat:'📝',gre:'🎓'};
+    grid.innerHTML = Object.entries(data).map(([key, t]) => `
+        <div class="card" style="margin-bottom:12px;cursor:pointer;" onclick="this.querySelector('.details').style.display=this.querySelector('.details').style.display==='none'?'block':'none'">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <h3>${icons[key]||'📝'} ${key.toUpperCase()} — ${t.full_name}</h3>
+                    <div style="margin-top:6px;font-size:0.85rem;color:var(--text2);">💰 ${t.cost} · 📅 Valid: ${t.validity}</div>
+                </div>
+                <span style="font-size:1.5rem;color:var(--text3);">+</span>
+            </div>
+            <div class="details" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                ${t.types ? '<div style="margin-bottom:12px;"><strong style="color:var(--accent);font-size:0.9rem;">Types</strong><p style="font-size:0.85rem;color:var(--text2);">'+t.types.join(' • ')+'</p></div>' : ''}
+                ${t.format ? '<div style="margin-bottom:12px;"><strong style="color:var(--accent);font-size:0.9rem;">Format</strong>'+Object.entries(t.format).map(([k,v]) => '<div style="display:flex;justify-content:space-between;font-size:0.85rem;padding:3px 0;"><span style="color:var(--text2);">'+k+'</span><span>'+v+'</span></div>').join('')+'</div>' : ''}
+                ${t.scoring ? '<div style="margin-bottom:12px;"><strong style="color:var(--accent);font-size:0.9rem;">Scoring</strong><p style="font-size:0.85rem;color:var(--text2);">'+t.scoring+'</p></div>' : ''}
+                ${t.tips ? '<div style="margin-bottom:12px;"><strong style="color:var(--accent);font-size:0.9rem;">Tips</strong><ul style="padding-left:20px;">'+t.tips.map(tip => '<li style="font-size:0.85rem;color:var(--text2);margin-bottom:4px;">💡 '+tip+'</li>').join('')+'</ul></div>' : ''}
+                ${t.free_prep_resources ? '<div><strong style="color:var(--accent);font-size:0.9rem;">Free Resources</strong><ul style="padding-left:20px;">'+t.free_prep_resources.map(r => '<li style="font-size:0.85rem;color:var(--text2);margin-bottom:4px;">'+r+'</li>').join('')+'</ul></div>' : ''}
+            </div>
+        </div>
+    `).join('');
+})();
+</script>
+{% endblock %}

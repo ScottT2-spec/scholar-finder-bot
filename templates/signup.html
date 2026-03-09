@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Sign Up{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-box">
+        <h1>🎓 Create Account</h1>
+        <p class="sub">Join thousands of students finding opportunities</p>
+        
+        <form method="POST" id="signupForm" enctype="multipart/form-data">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <!-- Profile Picture -->
+            <div class="form-group" style="text-align:center;margin-bottom:24px;">
+                <div id="signupAvatarPreview" style="width:90px;height:90px;border-radius:50%;background:var(--accent-lighter);border:2.5px dashed var(--accent);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:0.2s;margin-bottom:8px;" onclick="document.getElementById('signupAvatarInput').click()">
+                    <span id="signupAvatarIcon" style="font-size:2rem;color:var(--accent);">📷</span>
+                </div>
+                <br>
+                <label for="signupAvatarInput" style="font-size:0.82rem;color:var(--accent);font-weight:600;cursor:pointer;">Tap to add profile photo</label>
+                <input type="file" name="avatar" id="signupAvatarInput" accept="image/*" style="display:none;" onchange="previewSignupAvatar(this)">
+            </div>
+
+            <div class="form-group">
+                <label>Full Name <span class="required">*</span></label>
+                <input type="text" name="full_name" class="form-input" placeholder="Your full name" required>
+            </div>
+            <div class="form-group">
+                <label>Email <span class="required">*</span></label>
+                <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>Username <span class="required">*</span></label>
+                <input type="text" name="username" class="form-input" placeholder="Choose a username" required minlength="3">
+            </div>
+            <div class="form-group">
+                <label>Password <span class="required">*</span></label>
+                <input type="password" name="password" class="form-input" placeholder="At least 6 characters" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label>Country <span class="required">*</span></label>
+                <select name="country" id="countrySelect" class="form-input" required>
+                    <option value="">Select your country</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date of Birth <span class="required">*</span></label>
+                <div style="display:flex;gap:8px;">
+                    <select name="dob_day" id="dobDay" class="form-input" required style="flex:1;"><option value="">DD</option></select>
+                    <select name="dob_month" id="dobMonth" class="form-input" required style="flex:1;"><option value="">MM</option></select>
+                    <select name="dob_year" id="dobYear" class="form-input" required style="flex:1.2;"><option value="">YYYY</option></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>How did you hear about us? <span class="required">*</span></label>
+                <select name="hear_about" id="hearAbout" class="form-input" required>
+                    <option value="">Select an option</option>
+                    <option value="Social Media">Social Media</option>
+                    <option value="Friend Recommended">Friend Recommended</option>
+                    <option value="Google Search">Google Search</option>
+                    <option value="School/Teacher">School/Teacher</option>
+                    <option value="Online Forum">Online Forum</option>
+                    <option value="Blog/Article">Blog/Article</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group" id="friendNameGroup" style="display:none;">
+                <label>Friend's Name</label>
+                <input type="text" name="friend_name" class="form-input" placeholder="Who recommended us?">
+            </div>
+            <div class="form-group">
+                <label>Education Level <span class="required">*</span></label>
+                <select name="education_level" class="form-input" required>
+                    <option value="">Select your level</option>
+                    <option value="high_school">High School</option>
+                    <option value="undergraduate">Undergraduate</option>
+                    <option value="masters">Masters</option>
+                    <option value="phd">PhD</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Field of Interest <span class="required">*</span></label>
+                <input type="text" name="field_of_study" class="form-input" placeholder="e.g. Computer Science, Medicine, Business" required>
+            </div>
+
+            <div class="terms-check">
+                <input type="checkbox" id="termsCheck" name="terms" required>
+                <label for="termsCheck">I agree to the <a href="#" onclick="document.getElementById('termsModal').style.display='flex';return false;">Terms & Conditions</a> and <a href="#" onclick="document.getElementById('termsModal').style.display='flex';return false;">Privacy Policy</a></label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Create Account →</button>
+        </form>
+
+        <div style="text-align:center;margin-top:20px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                <div style="flex:1;height:1px;background:var(--border);"></div>
+                <span style="color:var(--text3);font-size:0.85rem;">or</span>
+                <div style="flex:1;height:1px;background:var(--border);"></div>
+            </div>
+            <a href="/auth/google" class="btn btn-secondary" style="width:100%;justify-content:center;">
+                <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 2.58 9 2.58Z"/></svg>
+                Continue with Google
+            </a>
+        </div>
+
+        <p style="text-align:center;margin-top:16px;color:var(--text2);font-size:0.9rem;">
+            Already have an account? <a href="/login">Login</a>
+        </p>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div id="termsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:999;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:var(--card);border-radius:20px;padding:36px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-lg);">
+        <h2 style="margin-bottom:16px;">📋 Terms & Conditions</h2>
+        <div style="color:var(--text2);font-size:0.9rem;line-height:1.7;">
+            <p><strong>1. Acceptance</strong><br>By creating an account on ScholarFinder, you agree to these terms.</p>
+            <p style="margin-top:12px;"><strong>2. Use of Service</strong><br>ScholarFinder provides scholarship, university, and opportunity information for educational purposes. We do not guarantee the accuracy of third-party scholarship listings.</p>
+            <p style="margin-top:12px;"><strong>3. User Data</strong><br>Your profile information is used to provide personalized scholarship matches. We do not sell your data to third parties.</p>
+            <p style="margin-top:12px;"><strong>4. Content</strong><br>Scholarship and opportunity data is sourced from publicly available information. ScholarFinder is not responsible for changes made by scholarship providers.</p>
+            <p style="margin-top:12px;"><strong>5. Account</strong><br>You are responsible for maintaining the security of your account credentials.</p>
+            <p style="margin-top:12px;"><strong>6. Privacy</strong><br>We collect: email, name, country, education level, and field of study. This data is stored securely and used only for scholarship matching and platform improvement.</p>
+        </div>
+        <button onclick="document.getElementById('termsModal').style.display='none'" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:20px;">I Understand</button>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (DRC)","Congo (Republic)","Costa Rica","Côte d'Ivoire","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","São Tomé and Príncipe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+const sel = document.getElementById('countrySelect');
+countries.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+const dayEl = document.getElementById('dobDay'), monthEl = document.getElementById('dobMonth'), yearEl = document.getElementById('dobYear');
+for (let d = 1; d <= 31; d++) { const o = document.createElement('option'); o.value = String(d).padStart(2,'0'); o.textContent = String(d).padStart(2,'0'); dayEl.appendChild(o); }
+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach((m, i) => { const o = document.createElement('option'); o.value = String(i+1).padStart(2,'0'); o.textContent = m; monthEl.appendChild(o); });
+const yr = new Date().getFullYear();
+for (let y = yr - 10; y >= yr - 50; y--) { const o = document.createElement('option'); o.value = y; o.textContent = y; yearEl.appendChild(o); }
+document.getElementById('hearAbout').addEventListener('change', function() {
+    document.getElementById('friendNameGroup').style.display = this.value === 'Friend Recommended' ? 'block' : 'none';
+});
+function previewSignupAvatar(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('signupAvatarPreview');
+            preview.style.border = '2.5px solid var(--accent)';
+            preview.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;" alt="Preview">';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

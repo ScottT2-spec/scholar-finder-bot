@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Cost of Living{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">💰 Cost of Living</h2>
+        <p style="color:var(--text2);margin-bottom:20px;">Compare monthly living costs across 51 student cities worldwide</p>
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+            <input type="text" id="citySearch" placeholder="🔍 Search cities..." class="form-input" style="max-width:300px;">
+            <button class="btn btn-secondary btn-sm" id="toggleCompare">📊 Compare Two Cities</button>
+        </div>
+        <div id="comparePanel" style="display:none;margin-bottom:20px;" class="card" style="padding:20px;">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;padding:16px;">
+                <select id="city1" class="form-select" style="max-width:200px;"><option value="">City 1</option></select>
+                <strong style="color:var(--accent);">VS</strong>
+                <select id="city2" class="form-select" style="max-width:200px;"><option value="">City 2</option></select>
+            </div>
+            <div id="compareResult"></div>
+        </div>
+        <div class="grid-2" id="costGrid"></div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(async () => {
+    const data = await fetch('/api/cost').then(r => r.json());
+    const grid = document.getElementById('costGrid');
+    const maxRent = Math.max(...data.map(c => c.rent));
+    
+    function renderCards(list) {
+        grid.innerHTML = list.map(c => `
+            <div class="card">
+                <h3 style="margin-bottom:8px;">📍 ${c.city} <span class="badge badge-blue">${c.country}</span></h3>
+                <div style="margin:12px 0;">
+                    ${['rent','food','transport','internet_phone','entertainment'].map(k => {
+                        const labels = {rent:'🏠 Rent',food:'🍔 Food',transport:'🚌 Transport',internet_phone:'📱 Internet',entertainment:'🎭 Fun'};
+                        const pct = (c[k]/maxRent*100).toFixed(0);
+                        return `<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2);">${labels[k]}</span><span>$${c[k]}</span></div><div style="height:6px;background:rgba(255,255,255,0.05);border-radius:3px;"><div style="height:100%;width:${pct}%;background:var(--accent);border-radius:3px;"></div></div></div>`;
+                    }).join('')}
+                </div>
+                <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:10px;font-weight:700;">
+                    <span>Total / month</span><span style="color:var(--accent);font-size:1.1rem;">$${c.total}</span>
+                </div>
+                ${c.tips ? `<div style="margin-top:8px;padding:8px;background:rgba(32,178,170,0.08);border-radius:6px;border-left:3px solid var(--accent);font-size:0.85rem;color:var(--text2);">💡 ${c.tips}</div>` : ''}
+            </div>
+        `).join('');
+    }
+    renderCards(data);
+
+    document.getElementById('citySearch').addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        renderCards(data.filter(c => (c.city+c.country).toLowerCase().includes(q)));
+    });
+
+    // Compare
+    const sel1 = document.getElementById('city1'), sel2 = document.getElementById('city2');
+    data.forEach(c => { sel1.innerHTML += `<option value="${c.city}">${c.city}, ${c.country}</option>`; sel2.innerHTML += `<option value="${c.city}">${c.city}, ${c.country}</option>`; });
+    document.getElementById('toggleCompare').onclick = () => { const p = document.getElementById('comparePanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; };
+    function doCompare() {
+        const c1 = data.find(c => c.city === sel1.value), c2 = data.find(c => c.city === sel2.value);
+        if (!c1 || !c2) return;
+        const diff = c1.total - c2.total;
+        document.getElementById('compareResult').innerHTML = `<div style="text-align:center;padding:12px;font-size:0.95rem;color:var(--text2);">${diff < 0 ? `💡 <strong>${c1.city}</strong> is <strong style="color:#10b981;">$${Math.abs(diff)}/mo cheaper</strong>` : diff > 0 ? `💡 <strong>${c2.city}</strong> is <strong style="color:#10b981;">$${diff}/mo cheaper</strong>` : '💡 Same cost!'}</div>`;
+    }
+    sel1.onchange = sel2.onchange = doCompare;
+})();
+</script>
+{% endblock %}

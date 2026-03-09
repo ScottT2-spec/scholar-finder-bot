@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}School Matcher{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container" style="max-width:700px;">
+        <h2 class="section-title">🎓 School Matcher</h2>
+        <p style="color:var(--text2);margin-bottom:24px;">Enter your grades and preferences to find universities that match your profile.</p>
+        
+        <div class="card">
+            <div class="form-group">
+                <label>Your GPA / Grade <span class="required">*</span></label>
+                <input type="text" id="gpaInput" class="form-input" placeholder="e.g. 3.5/4.0 or A1 or 85%">
+            </div>
+            <div class="form-group">
+                <label>Preferred Country</label>
+                <input type="text" id="countryInput" class="form-input" placeholder="e.g. USA, UK, Canada, Germany">
+            </div>
+            <div class="form-group">
+                <label>Field of Study</label>
+                <input type="text" id="fieldInput" class="form-input" placeholder="e.g. Computer Science, Engineering, Medicine">
+            </div>
+            <div class="form-group">
+                <label>Budget</label>
+                <select id="budgetInput" class="form-input">
+                    <option value="">Any budget</option>
+                    <option value="low">Low (free or minimal tuition)</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High (willing to pay full tuition)</option>
+                </select>
+            </div>
+            <button onclick="matchSchools()" class="btn btn-primary" id="matchBtn">Find My Schools →</button>
+        </div>
+
+        <div id="results" style="display:none;margin-top:24px;"></div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+async function matchSchools() {
+    const gpa = document.getElementById('gpaInput').value;
+    if (!gpa.trim()) return;
+    const btn = document.getElementById('matchBtn');
+    btn.textContent = 'Matching...'; btn.disabled = true;
+    
+    const res = await fetch('/api/tools/match-schools', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+            gpa, country: document.getElementById('countryInput').value,
+            field: document.getElementById('fieldInput').value,
+            budget: document.getElementById('budgetInput').value
+        })
+    });
+    const data = await res.json();
+    btn.textContent = 'Find My Schools →'; btn.disabled = false;
+    
+    const container = document.getElementById('results');
+    if (!data.results.length) {
+        container.innerHTML = '<div class="card" style="text-align:center;padding:30px;"><p style="color:var(--text2);">No matches found. Try broadening your search.</p></div>';
+    } else {
+        container.innerHTML = '<h3 style="margin-bottom:12px;">🏫 ' + data.results.length + ' Schools Matched</h3>' +
+            data.results.map(u => {
+                const chance = u.chance;
+                const badgeClass = chance === 'High' ? 'badge-green' : chance === 'Medium' ? 'badge-yellow' : 'badge-red';
+                const name = u.name || u.university || 'University';
+                return `<div class="card" style="margin-bottom:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <div>
+                            <h3 style="font-size:1rem;margin-bottom:4px;">${name}</h3>
+                            <div style="color:var(--text2);font-size:0.83rem;">
+                                ${u.country ? '📍 '+u.country : ''} ${u.ranking ? ' · 🏆 #'+u.ranking : ''} ${u.tuition ? ' · 💰 '+u.tuition : ''}
+                            </div>
+                        </div>
+                        <span class="badge ${badgeClass}">${chance} Chance</span>
+                    </div>
+                    ${u.website || u.link ? '<a href="'+(u.website||u.link)+'" target="_blank" class="btn btn-sm btn-secondary" style="margin-top:10px;">Visit →</a>' : ''}
+                </div>`;
+            }).join('');
+    }
+    container.style.display = 'block';
+    container.scrollIntoView({behavior:'smooth'});
+}
+</script>
+{% endblock %}

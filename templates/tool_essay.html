@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Essay Rater{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container" style="max-width:700px;">
+        <h2 class="section-title">✍️ Essay Rater</h2>
+        <p style="color:var(--text2);margin-bottom:24px;">Paste your essay below and get instant feedback on structure, voice, and impact.</p>
+        
+        <div class="card">
+            <div class="form-group">
+                <label>Essay Type</label>
+                <select id="essayType" class="form-input">
+                    <option value="personal_statement">Personal Statement</option>
+                    <option value="sop">Statement of Purpose</option>
+                    <option value="motivation">Motivation Letter</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Paste Your Essay <span class="required">*</span></label>
+                <textarea id="essayText" class="form-input" style="min-height:250px;" placeholder="Paste your essay here..."></textarea>
+            </div>
+            <button onclick="rateEssay()" class="btn btn-primary" id="rateBtn">Rate My Essay →</button>
+        </div>
+
+        <div id="results" style="display:none;margin-top:24px;">
+            <div class="card">
+                <div style="text-align:center;margin-bottom:20px;">
+                    <div id="scoreCircle" style="width:100px;height:100px;border-radius:50%;background:var(--grad);display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px;">
+                        <span id="scoreNum" style="color:#fff;font-size:2rem;font-weight:800;"></span>
+                    </div>
+                    <div id="scoreLabel" style="font-size:1.2rem;font-weight:700;"></div>
+                    <div id="wordCount" style="color:var(--text3);font-size:0.85rem;margin-top:4px;"></div>
+                </div>
+                <div id="feedbackList"></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+async function rateEssay() {
+    const essay = document.getElementById('essayText').value;
+    if (!essay.trim()) return;
+    const btn = document.getElementById('rateBtn');
+    btn.textContent = 'Analyzing...'; btn.disabled = true;
+    
+    const res = await fetch('/api/tools/rate-essay', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({essay, type: document.getElementById('essayType').value})
+    });
+    const data = await res.json();
+    btn.textContent = 'Rate My Essay →'; btn.disabled = false;
+    
+    document.getElementById('scoreNum').textContent = data.score;
+    document.getElementById('scoreLabel').textContent = data.label;
+    document.getElementById('scoreLabel').style.color = data.score >= 70 ? 'var(--success)' : data.score >= 50 ? 'var(--warning)' : 'var(--danger)';
+    document.getElementById('wordCount').textContent = `${data.word_count} words · ${data.sentence_count} sentences · ${data.paragraph_count} paragraphs`;
+    
+    const list = document.getElementById('feedbackList');
+    list.innerHTML = data.feedback.map(([icon, text]) =>
+        `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+            <span style="font-size:1.1rem;">${icon}</span>
+            <span style="color:var(--text2);font-size:0.9rem;">${text}</span>
+        </div>`
+    ).join('');
+    
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}
+</script>
+{% endblock %}

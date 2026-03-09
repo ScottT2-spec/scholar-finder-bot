@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block extra_css %}
+<style>
+.avatar-section { text-align: center; margin-bottom: 28px; }
+.avatar-preview {
+    width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+    border: 3px solid var(--accent-light); margin-bottom: 12px;
+    background: var(--accent-lighter); display: inline-flex; align-items: center;
+    justify-content: center; font-size: 2.5rem; color: var(--accent); overflow: hidden;
+}
+.avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-upload-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px;
+    background: var(--accent-lighter); color: var(--accent); border: 1.5px dashed var(--accent);
+    border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    font-family: var(--font); transition: 0.2s;
+}
+.avatar-upload-btn:hover { background: var(--accent-light); }
+</style>
+{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container" style="max-width: 600px;">
+        <h2 class="section-title">👤 Your Profile</h2>
+        <p style="color: var(--text2); margin-bottom: 24px;">Fill in your details to get personalized scholarship matches.</p>
+        
+        <!-- Profile Picture Upload -->
+        <div class="card" style="margin-bottom: 16px;">
+            <div class="avatar-section">
+                <div class="avatar-preview" id="avatarPreview">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar }}" alt="Profile Picture" id="avatarImg">
+                    {% else %}
+                        <span id="avatarPlaceholder">{{ (user.full_name or user.username or '?')[0]|upper }}</span>
+                    {% endif %}
+                </div>
+                <br>
+                <form method="POST" action="/upload-avatar" enctype="multipart/form-data" id="avatarForm">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="file" name="avatar" id="avatarInput" accept="image/*" style="display:none;" onchange="previewAvatar(this)">
+                    <label for="avatarInput" class="avatar-upload-btn">📷 Change Photo</label>
+                    <button type="submit" id="avatarSaveBtn" class="btn btn-sm btn-primary" style="display:none;margin-top:10px;">Save Photo</button>
+                </form>
+            </div>
+        </div>
+
+        <form method="POST">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="card">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="full_name" class="form-input" value="{{ user.full_name or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Country</label>
+                    <input type="text" name="country" class="form-input" placeholder="e.g. Ghana, Nigeria, Kenya" value="{{ user.country or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Education Level</label>
+                    <select name="education_level" class="form-input">
+                        <option value="">Select level</option>
+                        <option value="high_school" {{ 'selected' if user.education_level == 'high_school' }}>High School</option>
+                        <option value="undergraduate" {{ 'selected' if user.education_level == 'undergraduate' }}>Undergraduate</option>
+                        <option value="masters" {{ 'selected' if user.education_level == 'masters' }}>Masters</option>
+                        <option value="phd" {{ 'selected' if user.education_level == 'phd' }}>PhD</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Field of Study</label>
+                    <input type="text" name="field_of_study" class="form-input" placeholder="e.g. Computer Science, Engineering, Medicine" value="{{ user.field_of_study or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>GPA / Grade</label>
+                    <input type="text" name="gpa" class="form-input" placeholder="e.g. 3.5/4.0 or A1" value="{{ user.gpa or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Interests (comma separated)</label>
+                    <input type="text" name="interests" class="form-input" placeholder="e.g. AI, robotics, medicine, business" value="{{ user.interests or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Short Bio</label>
+                    <textarea name="bio" class="form-input" placeholder="Tell us about yourself...">{{ user.bio or '' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Profile</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('avatarPreview');
+            preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
+            document.getElementById('avatarSaveBtn').style.display = 'inline-flex';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

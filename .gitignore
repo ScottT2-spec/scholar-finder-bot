@@ -1,6 +1,10 @@
 users.db
+scholarweb.db
 bot.log
 watchdog.sh
 watchdog.log
 __pycache__/
 *.pyc
+.secret_key
+web.pid
+uploads/

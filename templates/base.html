@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ScholarFinder{% endblock %} — Study Abroad Platform</title>
+    <meta name="description" content="Find 485+ scholarships, 86 universities, and 138 opportunities to study abroad. Free tools: essay rater, resume review, school matcher, visa guides, cost of living comparison.">
+    <meta name="keywords" content="scholarships, study abroad, universities, international students, funding, opportunities, Ghana, Africa, STEM, scholarship finder">
+    <meta name="author" content="Scott Antwi — Alpha Global Minds">
+    <meta name="google-site-verification" content="zzKbvY2042VwsudBL454uiEItDuI7XSbc3sSR61L6GE">
+    <meta property="og:title" content="ScholarFinder — Find Your Perfect Scholarship Match">
+    <meta property="og:description" content="Search 485+ scholarships, 86 universities, and 138 opportunities worldwide. Free tools for students.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://scholarfinder.pythonanywhere.com">
+    <link rel="canonical" href="https://scholarfinder.pythonanywhere.com">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3513801088519525"
+         crossorigin="anonymous"></script>
+
+    <!-- google tag (gtag.js)-->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WEHCPN8TR7"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-WEHCPN8TR7');
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Scott Antwi",
+      "url": "https://scholarfinder.pythonanywhere.com",
+      "jobTitle": "Founder",
+      "description": "Founder and developer of ScholarFinder.",
+      "sameAs": [
+        "https://github.com/ScottT2-spec"
+      ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ScholarFinder",
+      "url": "https://scholarfinder.pythonanywhere.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://scholarfinder.pythonanywhere.com/api/scholarships?q={search_term_string}",
+        "query-input": "required name=search_term_string"}
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+       "@context": "https://schema.org",
+       "@type": "FAQPage",
+       "mainEntity": [
+         {
+            "@type": "Question",
+            "name": "How does the scholarfinder resume rater work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Our AI-powered tool analyzes your resume against top scholarship criteria to provide a compatibility score and improvement suggestion."
+             }
+         },
+         {
+            "@type": "Question",
+            "name": "How can I find international scholarship?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "You can use our platform to filter scholarships by country, field of study, and eligibility requirements to find international opportunities."
+             }
+
+         }
+        ]
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg: #000000;
+            --bg2: #050505;
+            --card: rgba(255, 255, 255, 0.05);
+            --card-hover: rgba(255, 255, 255, 0.08);
+            --accent: #6C63FF;
+            --accent2: #A855F7;
+            --accent-light: rgba(108, 99, 255, 0.1);
+            --accent-lighter: rgba(108, 99, 255, 0.05);
+            --grad: linear-gradient(135deg, #3b82f6, #a855f7);
+            --grad2: linear-gradient(135deg, #a855f7, #8b5cf6);
+            --text: rgba(255, 255, 255, 0.9);
+            --text2: rgba(255, 255, 255, 0.5);
+            --text3: rgba(255, 255, 255, 0.25);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --border: rgba(255, 255, 255, 0.08);
+            --radius: 16px;
+            --radius-sm: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.5);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; overflow-x: hidden; position: relative; }
+        a { color: var(--accent); text-decoration: none; transition: 0.2s; }
+        a:hover { color: var(--accent2); }
+
+        /* Background blobs */
+        .bg-decor { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; }
+        .bg-blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.25; }
+        .bg-blob-1 { width: 700px; height: 700px; background: rgba(59, 130, 246, 0.2); top: -150px; right: -150px; }
+        .bg-blob-2 { width: 600px; height: 600px; background: rgba(168, 85, 247, 0.15); bottom: -120px; left: -120px; }
+        .bg-blob-3 { width: 400px; height: 400px; background: rgba(59, 130, 246, 0.08); top: 40%; left: 50%; }
+
+        /* Top Nav — minimal */
+        .nav {
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border); padding: 0 20px; height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .nav-logo { font-size: 1.2rem; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; letter-spacing: -0.02em; }
+        .nav-right { display: flex; align-items: center; gap: 8px; }
+        .nav-avatar {
+            width: 34px; height: 34px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--accent-light); cursor: pointer; transition: 0.2s;
+            background: var(--accent-lighter); display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 700; color: var(--accent); overflow: hidden; text-decoration: none;
+        }
+        .nav-avatar:hover { border-color: var(--accent); transform: scale(1.05); }
+        .nav-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Hamburger */
+        .hamburger { background: none; border: none; cursor: pointer; padding: 8px; border-radius: 8px; transition: 0.2s; display: flex; flex-direction: column; gap: 4px; }
+        .hamburger:hover { background: var(--accent-lighter); }
+        .hamburger span { display: block; width: 20px; height: 2px; background: var(--text); border-radius: 2px; transition: 0.2s; }
+
+        /* Slide-out menu */
+        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 200; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .menu-overlay.open { opacity: 1; pointer-events: auto; }
+        .slide-menu {
+            position: fixed; top: 0; right: -300px; width: 280px; height: 100vh;
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: -8px 0 40px rgba(0,0,0,0.5);
+            z-index: 201; transition: 0.3s; padding: 24px; display: flex; flex-direction: column;
+            overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+        }
+        .slide-menu.open { right: 0; }
+        .slide-menu .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .slide-menu .menu-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text3); padding: 4px; }
+        .slide-menu .menu-links { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+        .slide-menu .menu-link {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            border-radius: var(--radius-sm); color: var(--text); font-weight: 500; font-size: 0.95rem; transition: 0.2s;
+        }
+        .slide-menu .menu-link:hover { background: var(--accent-lighter); color: var(--accent); }
+        .slide-menu .menu-link .icon { font-size: 1.1rem; width: 24px; text-align: center; }
+        .slide-menu .menu-divider { height: 1px; background: var(--border); margin: 8px 0; }
+        .slide-menu .menu-logout {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            border-radius: var(--radius-sm); color: var(--danger); font-weight: 600;
+            font-size: 0.95rem; transition: 0.2s; margin-top: auto;
+        }
+        .slide-menu .menu-logout:hover { background: var(--danger-bg); }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; border: none; cursor: pointer; transition: 0.25s; text-decoration: none; font-family: var(--font); }
+        .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.4); color: #fff; }
+        .btn-secondary { background: var(--accent-lighter); color: var(--accent); }
+        .btn-secondary:hover { background: var(--accent-light); }
+        .btn-danger { background: var(--danger-bg); color: var(--danger); }
+        .btn-success { background: var(--success-bg); color: var(--success); }
+        .btn-sm { padding: 7px 14px; font-size: 0.82rem; border-radius: 8px; }
+        .btn-ghost { background: transparent; color: var(--text2); }
+        .btn-ghost:hover { background: var(--accent-lighter); color: var(--accent); }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 24px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 6px; color: var(--text); font-size: 0.88rem; font-weight: 600; }
+        .form-group .required { color: var(--danger); }
+        .form-input { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem; font-family: var(--font); transition: 0.3s; }
+        .form-input:focus { outline: none; border-color: rgba(255,255,255,0.3); box-shadow: 0 0 0 3px rgba(255,255,255,0.05); background: rgba(255,255,255,0.08); color: #fff; }
+        .form-input::placeholder { color: var(--text3); }
+        select.form-input { cursor: pointer; }
+        textarea.form-input { resize: vertical; min-height: 90px; }
+
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+
+        .flash { padding: 14px 20px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.92rem; font-weight: 500; }
+        .flash-error { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
+        .flash-success { background: var(--success-bg); color: #059669; border: 1px solid #a7f3d0; }
+
+        /* Hero */
+        .hero { text-align: center; padding: 80px 20px 60px; }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 14px; line-height: 1.15; }
+        .hero h1 .grad-text { background: var(--grad2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text2); font-size: 1.1rem; max-width: 550px; margin: 0 auto 28px; line-height: 1.7; }
+        .hero .stat-row { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin: 32px 0; }
+        .hero .stat-item { text-align: center; background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 22px 30px; min-width: 120px; }
+        .hero .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+        .hero .stat-label { color: var(--text3); font-size: 0.82rem; font-weight: 500; margin-top: 2px; }
+
+        /* Carousel */
+        .carousel-section { padding: 0 16px 48px; overflow: hidden; }
+        .carousel-wrapper { position: relative; max-width: 900px; margin: 0 auto; overflow: hidden; border-radius: var(--radius); box-shadow: var(--shadow-lg); }
+        .carousel-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); width: 100%; }
+        .carousel-slide { min-width: 100%; width: 100%; flex-shrink: 0; position: relative; }
+        .carousel-slide img { width: 100%; height: 320px; object-fit: cover; display: block; }
+        .carousel-label {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: #fff; font-size: 1.1rem; font-weight: 700; padding: 40px 20px 16px;
+            text-align: center; letter-spacing: 0.02em;
+        }
+        .carousel-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 3; }
+        .carousel-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.4); border: 2px solid rgba(255,255,255,0.7); cursor: pointer; transition: 0.3s; padding: 0; }
+        .carousel-dot.active { background: #fff; border-color: #fff; transform: scale(1.2); }
+        @media (max-width: 640px) {
+            .carousel-section { padding: 0 12px 36px; }
+            .carousel-slide img { height: 260px; }
+            .carousel-label { font-size: 0.95rem; padding: 30px 16px 12px; }
+        }
+
+        .section { padding: 48px 0; }
+        .section-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 20px; }
+
+        .scholarship-card { margin-bottom: 12px; }
+        .scholarship-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+        .scholarship-card .meta { color: var(--text2); font-size: 0.83rem; display: flex; gap: 14px; flex-wrap: wrap; }
+        .scholarship-card .actions { margin-top: 12px; display: flex; gap: 8px; }
+
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.73rem; font-weight: 600; }
+        .badge-blue { background: var(--accent-light); color: var(--accent); }
+        .badge-green { background: var(--success-bg); color: var(--success); }
+        .badge-yellow { background: var(--warning-bg); color: var(--warning); }
+        .badge-red { background: var(--danger-bg); color: var(--danger); }
+
+        .dash-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+        .dash-stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; flex: 1; min-width: 140px; text-align: center; box-shadow: var(--shadow-sm); }
+        .dash-stat .num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+        .dash-stat .label { color: var(--text2); font-size: 0.82rem; font-weight: 500; }
+
+        .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 44px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); }
+        .auth-box h1 { text-align: center; margin-bottom: 6px; font-size: 1.6rem; }
+        .auth-box .sub { text-align: center; color: var(--text2); margin-bottom: 28px; font-size: 0.95rem; }
+
+        .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; text-align: center; box-shadow: var(--shadow-sm); transition: 0.3s; }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: #ddd6fe; }
+        .feature-card .icon { font-size: 2.2rem; margin-bottom: 12px; }
+        .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+        .feature-card p { color: var(--text2); font-size: 0.88rem; line-height: 1.5; }
+
+        /* Tool cards */
+        .tool-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); transition: 0.3s; cursor: pointer; text-decoration: none; color: var(--text); display: block; }
+        .tool-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: #ddd6fe; color: var(--text); }
+        .tool-card .tool-icon { font-size: 2rem; margin-bottom: 10px; }
+        .tool-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+        .tool-card p { color: var(--text2); font-size: 0.85rem; }
+
+        /* Terms checkbox */
+        .terms-check { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0; }
+        .terms-check input[type="checkbox"] { margin-top: 4px; accent-color: var(--accent); width: 18px; height: 18px; cursor: pointer; }
+        .terms-check label { font-size: 0.85rem; color: var(--text2); cursor: pointer; }
+
+        /* Confetti canvas */
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+
+        .footer { text-align: center; padding: 36px 20px; border-top: 1px solid var(--border); color: var(--text3); font-size: 0.85rem; }
+        .footer a { color: var(--text2); }
+        .footer a:hover { color: var(--accent); }
+
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 2rem; }
+            .hero .stat-row { gap: 8px; }
+            .hero .stat-item { padding: 14px 16px; min-width: 80px; }
+            .hero .stat-num { font-size: 1.4rem; }
+            .nav { padding: 0 14px; }
+            .bg-blob { opacity: 0.2; }
+            .auth-box { padding: 28px 20px; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="bg-decor">
+        <div class="bg-blob bg-blob-1"></div>
+        <div class="bg-blob bg-blob-2"></div>
+        <div class="bg-blob bg-blob-3"></div>
+    </div>
+
+    <!-- Minimal Nav -->
+    <nav class="nav">
+        <a href="/" class="nav-logo">🎓 ScholarFinder</a>
+        <div class="nav-right">
+            {% if not user %}
+                <a href="/login" class="btn btn-sm btn-ghost">Login</a>
+                <a href="/signup" class="btn btn-sm btn-primary">Sign Up</a>
+            {% else %}
+                <a href="/profile" class="nav-avatar">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar }}" alt="Profile">
+                    {% else %}
+                        {{ (user.full_name or user.username or '?')[0]|upper }}
+                    {% endif %}
+                </a>
+            {% endif %}
+            <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Slide-out Menu -->
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    <div class="slide-menu" id="slideMenu">
+        <div class="menu-header">
+            <span style="font-weight:700;">☰ Menu</span>
+            <button class="menu-close" onclick="toggleMenu()">×</button>
+        </div>
+        <div class="menu-links">
+            {% if user %}
+            <a href="/dashboard" class="menu-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="/profile" class="menu-link"><span class="icon">👤</span> Profile</a>
+            <div class="menu-divider"></div>
+            {% endif %}
+            <a href="/scholarships" class="menu-link"><span class="icon">🎯</span> Scholarships</a>
+            <a href="/universities" class="menu-link"><span class="icon">🏫</span> Universities</a>
+            <a href="/opportunities" class="menu-link"><span class="icon">🚀</span> Opportunities</a>
+            <a href="/cost-of-living" class="menu-link"><span class="icon">💰</span> Cost of Living</a>
+            <a href="/visa-guide" class="menu-link"><span class="icon">🛂</span> Visa Guide</a>
+            <a href="/test-prep" class="menu-link"><span class="icon">📝</span> Test Prep</a>
+            <a href="/faq" class="menu-link"><span class="icon">❓</span> FAQ</a>
+            <div class="menu-divider"></div>
+            <a href="/tools/essay-rater" class="menu-link"><span class="icon">✍️</span> Essay Rater</a>
+            <a href="/tools/school-matcher" class="menu-link"><span class="icon">🎓</span> School Matcher</a>
+            <a href="/tools/resume-review" class="menu-link"><span class="icon">📄</span> Resume Review</a>
+            <a href="/#ai-agents" class="menu-link" onclick="toggleMenu()"><span class="icon">🤖</span> AI Agents</a>
+            <div class="menu-divider"></div>
+            <a href="https://t.me/ScholarFinder_bot" class="menu-link" target="_blank"><span class="icon">📱</span> Telegram Bot</a>
+            <a href="https://github.com/ScottT2-spec" class="menu-link" target="_blank"><span class="icon">💻</span> GitHub</a>
+            {% if user and user.is_admin %}
+            <a href="/admin" class="menu-link"><span class="icon">⚙️</span> Admin</a>
+            {% endif %}
+        </div>
+        {% if user %}
+        <a href="/logout" class="menu-logout"><span class="icon">🚪</span> Logout</a>
+        {% endif %}
+    </div>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container" style="padding-top: 16px;">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 <strong>Scott Antwi</strong> | Alpha Global Minds 🌍</p>
+        <p style="margin-top: 6px;"><a href="https://t.me/ScholarFinder_bot">📱 Telegram Bot</a> · <a href="https://github.com/ScottT2-spec">💻 GitHub</a></p>
+    </footer>
+
+    <!-- Chat Widget -->
+    <div id="chatWidget" style="position:fixed;bottom:24px;right:24px;z-index:150;">
+        <div id="chatWindow" style="display:none;width:360px;max-width:calc(100vw - 40px);height:500px;max-height:70vh;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 16px 48px rgba(0,0,0,0.15);flex-direction:column;overflow:hidden;margin-bottom:12px;">
+            <div style="padding:16px 20px;background:var(--grad);color:#fff;display:flex;justify-content:space-between;align-items:center;border-radius:20px 20px 0 0;">
+                <span style="font-weight:700;font-size:0.95rem;">🎓 ScholarFinder AI</span>
+                <button onclick="toggleChat()" style="background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;">×</button>
+            </div>
+            <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;">
+                <div style="background:var(--accent-lighter);color:var(--text);padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;line-height:1.5;">
+                    Hey! 👋 Ask me about scholarships, universities, test prep, visa guides, or anything else!
+                </div>
+            </div>
+            <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
+                <input id="chatInput" type="text" placeholder="Ask anything..." style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;font-family:var(--font);color:var(--text);background:var(--bg);outline:none;" autocomplete="off">
+                <button onclick="sendChat()" style="background:var(--grad);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;font-family:var(--font);">Send</button>
+            </div>
+        </div>
+        <button id="chatToggle" onclick="toggleChat()" style="width:56px;height:56px;border-radius:50%;background:var(--grad);color:#fff;border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.35);transition:0.3s;display:flex;align-items:center;justify-content:center;margin-left:auto;">💬</button>
+    </div>
+
+    <script>
+    // Menu toggle with scroll lock
+    function toggleMenu() {
+        const overlay = document.getElementById('menuOverlay');
+        const menu = document.getElementById('slideMenu');
+        const isOpen = overlay.classList.contains('open');
+        overlay.classList.toggle('open');
+        menu.classList.toggle('open');
+        // Lock/unlock body scroll when menu is open
+        if (!isOpen) {
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.top = '-' + window.scrollY + 'px';
+            document.body.dataset.scrollY = window.scrollY;
+        } else {
+            const scrollY = document.body.dataset.scrollY || '0';
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.top = '';
+            window.scrollTo(0, parseInt(scrollY));
+        }
+    }
+
+    // Chat
+    let chatOpen = false;
+    function toggleChat() {
+        chatOpen = !chatOpen;
+        document.getElementById('chatWindow').style.display = chatOpen ? 'flex' : 'none';
+        document.getElementById('chatToggle').textContent = chatOpen ? '✕' : '💬';
+        if (chatOpen) document.getElementById('chatInput').focus();
+    }
+    function addMessage(text, isUser) {
+        const c = document.getElementById('chatMessages');
+        const d = document.createElement('div');
+        d.style.cssText = isUser
+            ? 'background:var(--grad);color:#fff;padding:12px 16px;border-radius:14px 14px 4px 14px;font-size:0.88rem;max-width:85%;align-self:flex-end;line-height:1.5;'
+            : 'background:var(--accent-lighter);color:var(--text);padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;line-height:1.5;';
+        d.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+        c.appendChild(d); c.scrollTop = c.scrollHeight;
+    }
+    async function sendChat() {
+        const input = document.getElementById('chatInput');
+        const msg = input.value.trim(); if (!msg) return;
+        input.value = ''; addMessage(msg, true);
+        const t = document.createElement('div');
+        t.id='typing'; t.style.cssText='background:var(--accent-lighter);color:var(--text3);padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;';
+        t.textContent='Thinking...'; document.getElementById('chatMessages').appendChild(t);
+        try {
+            const res = await fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg})});
+            const data = await res.json(); t.remove(); addMessage(data.reply || 'Something went wrong.', false);
+        } catch(e) { t.remove(); addMessage('Connection error.', false); }
+    }
+    document.getElementById('chatInput').addEventListener('keydown', e => { if(e.key==='Enter') sendChat(); });
+
+    // Confetti
+    function fireConfetti() {
+        const canvas = document.createElement('canvas');
+        canvas.id = 'confetti-canvas';
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const pieces = [];
+        const colors = ['#4ade80','#22c55e','#888888','#10b981','#f59e0b','#4361ee','#ff6b6b','#ffd93d'];
+        for (let i = 0; i < 150; i++) {
+            pieces.push({
+                x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
+                w: Math.random() * 10 + 5, h: Math.random() * 6 + 3,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                vx: (Math.random() - 0.5) * 4, vy: Math.random() * 3 + 2,
+                rot: Math.random() * 360, vr: (Math.random() - 0.5) * 10,
+                opacity: 1
+            });
+        }
+        let frame = 0;
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            pieces.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+                if (frame > 120) p.opacity -= 0.01;
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.opacity);
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rot * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+                ctx.restore();
+            });
+            frame++;
+            if (frame < 200) requestAnimationFrame(animate);
+            else canvas.remove();
+        }
+        animate();
+    }
+    // Check if we should fire confetti (set by dashboard on first login)
+    if (window.location.search.includes('welcome=1')) fireConfetti();
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

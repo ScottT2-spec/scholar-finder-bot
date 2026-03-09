@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">⚙️ Admin Control Panel</h2>
+        
+        <!-- Stats Cards -->
+        <div class="dash-stats" id="adminStats">
+            <div class="dash-stat"><div class="num">—</div><div class="label">Loading...</div></div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div style="display:flex;gap:8px;margin:24px 0 16px;flex-wrap:wrap;">
+            <button class="btn btn-primary admin-tab active" data-tab="users">👥 Users</button>
+            <button class="btn btn-secondary admin-tab" data-tab="scholarships">🎯 Scholarships</button>
+            <button class="btn btn-secondary admin-tab" data-tab="opportunities">🚀 Opportunities</button>
+            <button class="btn btn-secondary admin-tab" data-tab="searches">🔍 Searches</button>
+            <button class="btn btn-secondary admin-tab" data-tab="analytics">📊 Analytics</button>
+            <button class="btn btn-secondary admin-tab" data-tab="settings">⚙️ Settings</button>
+        </div>
+
+        <!-- Users Tab -->
+        <div class="admin-panel" id="tab-users">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+                <h3>👥 All Users</h3>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="userSearch" placeholder="Search users..." class="form-input" style="width:200px;">
+                    <button class="btn btn-secondary btn-sm" onclick="exportUsers()">📥 Export CSV</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="admin-table" id="usersTable">
+                    <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Country</th><th>Joined</th><th>Bookmarks</th><th>Actions</th></tr></thead>
+                    <tbody id="usersBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Scholarships Tab -->
+        <div class="admin-panel" id="tab-scholarships" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+                <h3>🎯 Scholarships ({{ stats.scholarships }})</h3>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="scholSearch" placeholder="Search scholarships..." class="form-input" style="width:200px;">
+                </div>
+            </div>
+            <div id="scholList"></div>
+        </div>
+
+        <!-- Opportunities Tab -->
+        <div class="admin-panel" id="tab-opportunities" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+                <h3>🚀 Opportunities ({{ stats.opportunities }})</h3>
+                <input type="text" id="oppSearch" placeholder="Search..." class="form-input" style="width:200px;">
+            </div>
+            <div id="oppList"></div>
+        </div>
+
+        <!-- Searches Tab -->
+        <div class="admin-panel" id="tab-searches" style="display:none;">
+            <h3 style="margin-bottom:16px;">🔍 Search Activity</h3>
+            <div id="searchActivity"></div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div class="admin-panel" id="tab-analytics" style="display:none;">
+            <h3 style="margin-bottom:16px;">📊 Analytics</h3>
+            <div id="analyticsContent"></div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="admin-panel" id="tab-settings" style="display:none;">
+            <h3 style="margin-bottom:16px;">⚙️ Site Settings</h3>
+            <div class="card" style="padding:20px;">
+                <h4 style="margin-bottom:12px;">Data Overview</h4>
+                <div id="dataOverview"></div>
+                <hr style="margin:16px 0;border-color:var(--border);">
+                <h4 style="margin-bottom:12px;">Quick Actions</h4>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary btn-sm" onclick="refreshData()">🔄 Reload Data</button>
+                    <button class="btn btn-secondary btn-sm" onclick="exportAllData()">📥 Export All Data</button>
+                    <button class="btn btn-secondary btn-sm" onclick="clearSearchLog()">🗑️ Clear Search Logs</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.admin-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+.admin-table th, .admin-table td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--border); }
+.admin-table th { background:var(--bg2); font-weight:600; color:var(--text2); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px; position:sticky;top:0; }
+.admin-table tr:hover td { background:rgba(32,178,170,0.05); }
+.table-wrap { max-height:500px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; }
+.admin-tab { font-size:0.85rem !important; padding:8px 16px !important; }
+.admin-tab.active { background:var(--accent) !important; color:#fff !important; border-color:var(--accent) !important; }
+.admin-panel { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.action-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:0.8rem; color:var(--text2); transition:all 0.2s; }
+.action-btn:hover { border-color:var(--accent); color:var(--accent); }
+.action-btn.danger:hover { border-color:#ef4444; color:#ef4444; }
+.schol-item { padding:12px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px; }
+.schol-item:hover { border-color:var(--accent); }
+.badge-sm { display:inline-block; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600; }
+.badge-green { background:rgba(16,185,129,0.15); color:#10b981; }
+.badge-blue { background:rgba(32,178,170,0.15); color:#20b2aa; }
+.badge-orange { background:rgba(245,158,11,0.15); color:#f59e0b; }
+.analytics-card { background:var(--bg2); border-radius:8px; padding:16px; margin-bottom:12px; }
+.analytics-bar { height:8px; border-radius:4px; background:var(--accent); transition:width 0.6s ease; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allUsers = [], allSchols = [], allOpps = [], searchData = {};
+
+// Tab switching
+document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => { t.classList.remove('active'); t.classList.add('btn-secondary'); t.classList.remove('btn-primary'); });
+        tab.classList.add('active', 'btn-primary'); tab.classList.remove('btn-secondary');
+        document.querySelectorAll('.admin-panel').forEach(p => p.style.display = 'none');
+        document.getElementById('tab-' + tab.dataset.tab).style.display = 'block';
+    });
+});
+
+// Load everything
+async function loadAdmin() {
+    const [statsRes, scholRes, oppRes] = await Promise.all([
+        fetch('/api/admin/stats').then(r => r.json()),
+        fetch('/api/scholarships').then(r => r.json()).catch(() => []),
+        fetch('/api/opportunities').then(r => r.json()).catch(() => [])
+    ]);
+
+    searchData = statsRes;
+    allUsers = statsRes.recent_users || [];
+    allSchols = Array.isArray(scholRes) ? scholRes : (scholRes.results || []);
+    allOpps = Array.isArray(oppRes) ? oppRes : (oppRes.results || []);
+
+    // Stats
+    document.getElementById('adminStats').innerHTML = `
+        <div class="dash-stat"><div class="num">${statsRes.total_users}</div><div class="label">Users</div></div>
+        <div class="dash-stat"><div class="num">${statsRes.total_bookmarks}</div><div class="label">Bookmarks</div></div>
+        <div class="dash-stat"><div class="num">${statsRes.total_searches}</div><div class="label">Searches</div></div>
+        <div class="dash-stat"><div class="num">${allSchols.length}</div><div class="label">Scholarships</div></div>
+        <div class="dash-stat"><div class="num">${allOpps.length}</div><div class="label">Opportunities</div></div>
+    `;
+
+    renderUsers(allUsers);
+    renderScholarships(allSchols);
+    renderOpportunities(allOpps);
+    renderSearches(statsRes);
+    renderAnalytics(statsRes);
+    renderSettings();
+}
+
+function renderUsers(users) {
+    const tbody = document.getElementById('usersBody');
+    tbody.innerHTML = users.map((u, i) => `
+        <tr>
+            <td>${i+1}</td>
+            <td><strong>${u.username}</strong></td>
+            <td>${u.email}</td>
+            <td>${u.country || '—'}</td>
+            <td>${u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
+            <td>${u.bookmark_count || 0}</td>
+            <td>
+                <button class="action-btn" onclick="viewUser('${u.email}')">👁️</button>
+                <button class="action-btn danger" onclick="deleteUser('${u.username}')">🗑️</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text3);">No users yet</td></tr>';
+}
+
+function renderScholarships(schols) {
+    const el = document.getElementById('scholList');
+    el.innerHTML = schols.slice(0, 50).map(s => `
+        <div class="schol-item">
+            <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
+                <div>
+                    <strong>${s.name}</strong><br>
+                    <span style="font-size:0.85rem;color:var(--text2);">🏫 ${s.university || '—'} · 📍 ${s.country} · 💰 ${s.funding}</span><br>
+                    <span class="badge-sm badge-blue">${Array.isArray(s.level) ? s.level.join(', ') : s.level}</span>
+                    <span class="badge-sm badge-green">${Array.isArray(s.field) ? s.field.slice(0,2).join(', ') : s.field}</span>
+                </div>
+                <span style="font-size:0.8rem;color:var(--text3);">📅 ${s.deadline}</span>
+            </div>
+        </div>
+    `).join('') + (schols.length > 50 ? `<p style="text-align:center;color:var(--text3);margin-top:12px;">...and ${schols.length - 50} more</p>` : '');
+}
+
+function renderOpportunities(opps) {
+    const el = document.getElementById('oppList');
+    const typeIcons = {internship:'💼', research:'🔬', competition:'🏆', fellowship:'🎖️', summer_school:'☀️', exchange:'🌐'};
+    el.innerHTML = opps.slice(0, 50).map(o => `
+        <div class="schol-item">
+            <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
+                <div>
+                    <strong>${typeIcons[o.type]||'📌'} ${o.name}</strong><br>
+                    <span style="font-size:0.85rem;color:var(--text2);">🏢 ${o.organization} · 📍 ${o.country} · 💰 ${o.funding}</span>
+                </div>
+                <span class="badge-sm badge-orange">${o.type}</span>
+            </div>
+        </div>
+    `).join('') + (opps.length > 50 ? `<p style="text-align:center;color:var(--text3);margin-top:12px;">...and ${opps.length - 50} more</p>` : '');
+}
+
+function renderSearches(data) {
+    const el = document.getElementById('searchActivity');
+    const searches = data.top_searches || [];
+    const maxCnt = searches.length ? searches[0].cnt : 1;
+    el.innerHTML = searches.length ? searches.map(s => `
+        <div class="analytics-card" style="display:flex;align-items:center;gap:12px;">
+            <div style="flex:1;">
+                <div style="margin-bottom:4px;"><strong>"${s.query}"</strong> <span style="color:var(--text3);font-size:0.85rem;">(${s.cnt}x)</span></div>
+                <div style="background:rgba(255,255,255,0.05);border-radius:4px;height:6px;"><div class="analytics-bar" style="width:${(s.cnt/maxCnt*100)}%"></div></div>
+            </div>
+        </div>
+    `).join('') : '<p style="color:var(--text3);">No searches recorded yet.</p>';
+}
+
+function renderAnalytics(data) {
+    const el = document.getElementById('analyticsContent');
+    const signups = data.daily_signups || [];
+    el.innerHTML = `
+        <div class="analytics-card">
+            <h4 style="margin-bottom:12px;">📈 Daily Signups (Last 30 Days)</h4>
+            ${signups.length ? signups.map(d => `
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+                    <span style="min-width:90px;font-size:0.85rem;color:var(--text3);">${d.day}</span>
+                    <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:4px;height:8px;">
+                        <div class="analytics-bar" style="width:${Math.min(d.cnt * 20, 100)}%"></div>
+                    </div>
+                    <span style="font-size:0.85rem;font-weight:600;">${d.cnt}</span>
+                </div>
+            `).join('') : '<p style="color:var(--text3);">No signup data yet.</p>'}
+        </div>
+        <div class="analytics-card">
+            <h4 style="margin-bottom:8px;">📊 Quick Stats</h4>
+            <p style="color:var(--text2);font-size:0.9rem;">
+                Average bookmarks per user: <strong>${data.total_users ? (data.total_bookmarks / data.total_users).toFixed(1) : 0}</strong><br>
+                Total search queries: <strong>${data.total_searches}</strong><br>
+                Unique search terms: <strong>${(data.top_searches || []).length}</strong>
+            </p>
+        </div>
+    `;
+}
+
+function renderSettings() {
+    document.getElementById('dataOverview').innerHTML = `
+        <p style="color:var(--text2);font-size:0.9rem;">
+            📚 Scholarships: <strong>${allSchols.length}</strong><br>
+            🚀 Opportunities: <strong>${allOpps.length}</strong><br>
+            👥 Users: <strong>${searchData.total_users || 0}</strong><br>
+            📌 Bookmarks: <strong>${searchData.total_bookmarks || 0}</strong><br>
+            🔍 Searches: <strong>${searchData.total_searches || 0}</strong>
+        </p>
+    `;
+}
+
+// Search filters
+document.getElementById('userSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    const filtered = allUsers.filter(u => (u.username+u.email+(u.country||'')).toLowerCase().includes(q));
+    renderUsers(filtered);
+});
+document.getElementById('scholSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    const filtered = allSchols.filter(s => (s.name+s.country+s.university+(Array.isArray(s.field)?s.field.join(' '):s.field)).toLowerCase().includes(q));
+    renderScholarships(filtered);
+});
+document.getElementById('oppSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    const filtered = allOpps.filter(o => (o.name+o.organization+o.country+o.type).toLowerCase().includes(q));
+    renderOpportunities(filtered);
+});
+
+// Actions
+function viewUser(email) { alert('User: ' + email); }
+function deleteUser(username) {
+    if (confirm('Delete user "' + username + '"? This cannot be undone.')) {
+        fetch('/api/admin/delete-user', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username}) })
+        .then(r => r.json()).then(d => { if(d.success) { alert('Deleted'); loadAdmin(); } else alert(d.error || 'Failed'); });
+    }
+}
+function exportUsers() {
+    let csv = 'Username,Email,Country,Joined\n';
+    allUsers.forEach(u => csv += `${u.username},${u.email},${u.country||''},${u.created_at||''}\n`);
+    download('users.csv', csv);
+}
+function exportAllData() {
+    const data = { users: allUsers, scholarships_count: allSchols.length, opportunities_count: allOpps.length, searches: searchData };
+    download('scholarfinder_export.json', JSON.stringify(data, null, 2));
+}
+function clearSearchLog() {
+    if (confirm('Clear all search logs?')) {
+        fetch('/api/admin/clear-searches', {method:'POST'}).then(r => r.json()).then(d => { alert(d.message || 'Done'); loadAdmin(); });
+    }
+}
+function refreshData() { loadAdmin(); alert('Data refreshed!'); }
+function download(filename, text) {
+    const el = document.createElement('a');
+    el.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    el.setAttribute('download', filename); el.style.display = 'none';
+    document.body.appendChild(el); el.click(); document.body.removeChild(el);
+}
+
+loadAdmin();
+</script>
+{% endblock %}

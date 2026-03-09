@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Opportunities{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">🚀 Opportunities</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+            <input type="text" id="searchInput" class="form-input" style="flex:1;min-width:200px;" placeholder="🔍 Search opportunities...">
+            <select id="typeFilter" class="form-input" style="width:auto;">
+                <option value="">All Types</option>
+                <option value="internship">💼 Internships</option>
+                <option value="research">🔬 Research</option>
+                <option value="competition">🏆 Competitions</option>
+                <option value="fellowship">🎖️ Fellowships</option>
+                <option value="summer">☀️ Summer</option>
+                <option value="exchange">🌐 Exchanges</option>
+            </select>
+        </div>
+        <p id="resultsInfo" style="color:var(--text2);margin-bottom:12px;"></p>
+        <div id="results"></div>
+        <button id="loadMore" class="btn btn-secondary" style="display:none;margin:20px auto;">Load More</button>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+let page = 1;
+async function search(reset = true) {
+    if (reset) { page = 1; document.getElementById('results').innerHTML = ''; }
+    const q = document.getElementById('searchInput').value;
+    const type = document.getElementById('typeFilter').value;
+    const res = await fetch(`/api/opportunities?q=${encodeURIComponent(q)}&type=${type}&page=${page}&per_page=20`);
+    const data = await res.json();
+    document.getElementById('resultsInfo').textContent = `${data.total} opportunities found`;
+    data.results.forEach(o => {
+        const card = document.createElement('div');
+        card.className = 'card'; card.style.marginBottom = '10px';
+        const name = o.name || o.title || 'Opportunity';
+        card.innerHTML = `<h3>${name}</h3>
+            <div class="meta">
+                ${o.type ? '<span class="badge badge-blue">'+o.type+'</span>' : ''}
+                ${o.country||o.location ? '<span>📍 '+(o.country||o.location)+'</span>' : ''}
+                ${o.deadline ? '<span>⏰ '+o.deadline+'</span>' : ''}
+            </div>
+            ${o.description ? '<p style="color:var(--text2);font-size:0.9rem;margin-top:8px;">'+o.description.slice(0,200)+'</p>' : ''}
+            ${o.link||o.url ? '<a href="'+(o.link||o.url)+'" target="_blank" class="btn btn-sm btn-secondary" style="margin-top:10px;">Learn More →</a>' : ''}`;
+        document.getElementById('results').appendChild(card);
+    });
+    document.getElementById('loadMore').style.display = data.total > page * 20 ? 'block' : 'none';
+}
+document.getElementById('searchInput').addEventListener('input', (function(){let t;return()=>{clearTimeout(t);t=setTimeout(()=>search(),300)}})());
+document.getElementById('typeFilter').addEventListener('change', () => search());
+document.getElementById('loadMore').addEventListener('click', () => { page++; search(false); });
+search();
+</script>
+{% endblock %}

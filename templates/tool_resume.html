@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Resume Review{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container" style="max-width:700px;">
+        <h2 class="section-title">📄 Resume Review</h2>
+        <p style="color:var(--text2);margin-bottom:24px;">Paste your resume text below for instant feedback on structure, impact, and completeness.</p>
+        
+        <div class="card">
+            <div class="form-group">
+                <label>Paste Your Resume <span class="required">*</span></label>
+                <textarea id="resumeText" class="form-input" style="min-height:300px;" placeholder="Paste your resume content here...&#10;&#10;EDUCATION&#10;Your University — Degree&#10;&#10;EXPERIENCE&#10;Job Title — Company&#10;• Achievement 1&#10;• Achievement 2&#10;&#10;SKILLS&#10;Python, JavaScript, etc."></textarea>
+            </div>
+            <button onclick="rateResume()" class="btn btn-primary" id="rateBtn">Review My Resume →</button>
+        </div>
+
+        <div id="results" style="display:none;margin-top:24px;">
+            <div class="card">
+                <div style="text-align:center;margin-bottom:20px;">
+                    <div id="scoreCircle" style="width:100px;height:100px;border-radius:50%;background:var(--grad);display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px;">
+                        <span id="scoreNum" style="color:#fff;font-size:2rem;font-weight:800;"></span>
+                    </div>
+                    <div id="scoreLabel" style="font-size:1.2rem;font-weight:700;"></div>
+                    <div id="wordCount" style="color:var(--text3);font-size:0.85rem;margin-top:4px;"></div>
+                </div>
+                <div id="sectionsFound" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;"></div>
+                <div id="feedbackList"></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+async function rateResume() {
+    const resume = document.getElementById('resumeText').value;
+    if (!resume.trim()) return;
+    const btn = document.getElementById('rateBtn');
+    btn.textContent = 'Analyzing...'; btn.disabled = true;
+    
+    const res = await fetch('/api/tools/rate-resume', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({resume})
+    });
+    const data = await res.json();
+    btn.textContent = 'Review My Resume →'; btn.disabled = false;
+    
+    document.getElementById('scoreNum').textContent = data.score;
+    document.getElementById('scoreLabel').textContent = data.label;
+    document.getElementById('scoreLabel').style.color = data.score >= 70 ? 'var(--success)' : data.score >= 50 ? 'var(--warning)' : 'var(--danger)';
+    document.getElementById('wordCount').textContent = `${data.word_count} words`;
+    
+    document.getElementById('sectionsFound').innerHTML = data.sections_found.map(s =>
+        `<span class="badge badge-green" style="text-transform:capitalize;">${s}</span>`
+    ).join('');
+    
+    const list = document.getElementById('feedbackList');
+    list.innerHTML = data.feedback.map(([icon, text]) =>
+        `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+            <span style="font-size:1.1rem;">${icon}</span>
+            <span style="color:var(--text2);font-size:0.9rem;">${text}</span>
+        </div>`
+    ).join('');
+    
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}
+</script>
+{% endblock %}

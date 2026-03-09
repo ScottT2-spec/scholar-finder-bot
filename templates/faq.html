@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}FAQ{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="container" style="max-width:800px;">
+        <h2 class="section-title">❓ FAQ</h2>
+        <p style="color:var(--text2);margin-bottom:20px;">Quick answers to common questions</p>
+        <input type="text" id="faqSearch" placeholder="🔍 Search questions..." class="form-input" style="margin-bottom:20px;">
+        <div id="faqList"></div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(async () => {
+    const data = await fetch('/api/faq').then(r => r.json());
+    const list = document.getElementById('faqList');
+    function render(items) {
+        list.innerHTML = items.map(f => `
+            <div class="card" style="margin-bottom:8px;cursor:pointer;" onclick="const b=this.querySelector('.answer');b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.toggle').textContent=b.style.display==='none'?'+':'−'">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <strong style="font-size:0.95rem;">${f.question}</strong>
+                    <span class="toggle" style="font-size:1.2rem;color:var(--text3);flex-shrink:0;margin-left:12px;">+</span>
+                </div>
+                <div class="answer" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:0.9rem;color:var(--text2);line-height:1.6;white-space:pre-wrap;">${f.answer}</div>
+            </div>
+        `).join('') || '<p style="color:var(--text3);">No matching questions.</p>';
+    }
+    render(data);
+    document.getElementById('faqSearch').addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        render(data.filter(f => (f.question+f.answer+(f.keywords||[]).join(' ')).toLowerCase().includes(q)));
+    });
+})();
+</script>
+{% endblock %}
