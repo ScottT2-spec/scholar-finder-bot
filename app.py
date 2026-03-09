@@ -28,6 +28,16 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+# Load .env file if present (for local dev)
+_env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+if os.path.exists(_env_path):
+    with open(_env_path) as _ef:
+        for _line in _ef:
+            _line = _line.strip()
+            if _line and not _line.startswith('#') and '=' in _line:
+                _k, _v = _line.split('=', 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
 app = Flask(__name__)
 # Persistent secret key (survives restarts)
 _secret_path = os.path.join(os.path.dirname(__file__), '.secret_key')
@@ -59,7 +69,7 @@ _local_data = os.path.join(os.path.dirname(__file__), 'data')
 _bot_data = os.path.join(os.path.dirname(__file__), '..', 'scholarbot')
 DATA_DIR = _local_data if os.path.isdir(_local_data) else _bot_data
 
-ADMIN_EMAIL = 'scottantwi930@gmail.com'
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'scottantwi930@gmail.com')
 
 # ============================================
 # RATE LIMITING (in-memory)
