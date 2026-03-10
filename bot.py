@@ -189,7 +189,7 @@ init_db()
 
 #
 ADMIN_ID = int(os.environ.get("ADMIN_ID", "0"))
-ADMIN_IDS = [$]  # 
+ADMIN_IDS = [ADMIN_ID] if ADMIN_ID else []
 
 def track_user(update: Update, action: str):
     """Log user activity for stats tracking."""
