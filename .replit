@@ -1,0 +1,8 @@
+run = "python bot.py"
+language = "python3"
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = "python bot.py"
