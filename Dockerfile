@@ -7,4 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "bot.py"]
+RUN chmod +x start.sh
+
+EXPOSE 7860
+
+CMD ["./start.sh"]
