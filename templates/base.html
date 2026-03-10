@@ -396,14 +396,14 @@
 
     <!-- Chat Widget -->
     <div id="chatWidget" style="position:fixed;bottom:24px;right:24px;z-index:150;">
-        <div id="chatWindow" style="display:none;width:360px;max-width:calc(100vw - 40px);height:500px;max-height:70vh;background:var(--card, #1e1e2f);border:2px solid var(--border, #333);border-radius:20px;box-shadow:0 16px 48px rgba(0,0,0,0.5);flex-direction:column;overflow:hidden;margin-bottom:12px;position:relative;z-index:200;">
+        <div id="chatWindow" style="display:none;width:360px;max-width:calc(100vw - 40px);height:500px;max-height:70vh;background:#1a1a2e;border:2px solid #2d2d44;border-radius:20px;box-shadow:0 16px 48px rgba(0,0,0,0.7);flex-direction:column;overflow:hidden;margin-bottom:12px;position:relative;z-index:200;">
             <div style="padding:16px 20px;background:var(--grad);color:#fff;display:flex;justify-content:space-between;align-items:center;border-radius:20px 20px 0 0;">
                 <span style="font-weight:700;font-size:0.95rem;">🎓 ScholarFinder AI</span>
                 <button onclick="toggleChat()" style="background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;">×</button>
             </div>
-            <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;word-wrap:break-word;overflow-wrap:break-word;">
-                <div style="background:var(--accent-lighter);color:var(--text);padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;line-height:1.5;">
-                    Hey! 👋 Ask me about scholarships, universities, test prep, visa guides, or anything else!
+            <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;word-wrap:break-word;overflow-wrap:break-word;background:#1a1a2e;">
+                <div style="background:#2d2d44;color:#e0e0e0;padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;line-height:1.5;flex-shrink:0;">
+                    Hey! 👋 I'm the ScholarFinder AI. Ask me about scholarships, universities, study abroad, or anything else!
                 </div>
             </div>
             <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
@@ -442,9 +442,11 @@
     // Chat
     let chatOpen = false;
     let chatHistory = [
-        {role: 'system', content: `You are ScholarFinder AI — a friendly, knowledgeable assistant on the ScholarFinder platform built by Scott (Alpha Global Minds).
+        {role: 'system', content: `You are the AI assistant for ScholarFinder — a platform built by Scott under Alpha Global Minds (AGM).
 
-You help students (especially from Africa) with:
+About Alpha Global Minds (AGM): A growing brand focused on innovation, technology, and entrepreneurship. Building ideas from Africa with a global vision. ScholarFinder is one of several projects under AGM.
+
+On this platform (ScholarFinder), you help students (especially from Africa) with:
 - Scholarship search and advice
 - University recommendations
 - Study abroad guidance
@@ -455,14 +457,19 @@ You help students (especially from Africa) with:
 - Career and internship advice
 - General questions about studying abroad
 
-Be warm, encouraging, and concise. Use emojis sparingly. Give actionable advice.
+You can also chat about anything — tech, entrepreneurship, career advice, or general questions. Be friendly, warm, and conversational. Not everything is about scholarships.
+
+Be concise. Use emojis sparingly. Give actionable advice.
 
 When users ask about:
-- Personal application review, sensitive documents, or need one-on-one help → Direct them to the Telegram bot: @ScholarFinder_bot
-- Urgent or private matters → Tell them to contact Scott directly on WhatsApp: +233549545063 or email: scottantwi930@gmail.com
-- Specific scholarship deadlines or availability → Remind them to check the Scholarships page for the latest info, or use @ScholarFinder_bot for real-time search
+- Personal application review, sensitive documents, or one-on-one help → Direct them to the Telegram bot: @ScholarFinder_bot
+- Urgent, private, or business-related matters → Contact Scott directly on WhatsApp: +233549545063 or email: scottantwi930@gmail.com
+- Alpha Global Minds projects or collaborations → Direct them to Scott via the contact info above
 
-You can chat about anything — not just scholarships. Be helpful and conversational. But always tie it back to how ScholarFinder can help when relevant.`}
+Contact info:
+- WhatsApp: +233549545063
+- Email: scottantwi930@gmail.com
+- Telegram Bot: @ScholarFinder_bot`}
     ];
 
     function toggleChat() {
@@ -475,8 +482,8 @@ You can chat about anything — not just scholarships. Be helpful and conversati
         const c = document.getElementById('chatMessages');
         const d = document.createElement('div');
         d.style.cssText = isUser
-            ? 'background:var(--grad);color:#fff;padding:12px 16px;border-radius:14px 14px 4px 14px;font-size:0.88rem;max-width:85%;align-self:flex-end;line-height:1.5;flex-shrink:0;word-wrap:break-word;overflow-wrap:break-word;'
-            : 'background:var(--accent-lighter);color:var(--text);padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;line-height:1.5;flex-shrink:0;word-wrap:break-word;overflow-wrap:break-word;';
+            ? 'background:linear-gradient(135deg,#6c3483,#8e44ad);color:#fff;padding:12px 16px;border-radius:14px 14px 4px 14px;font-size:0.88rem;max-width:85%;align-self:flex-end;line-height:1.5;flex-shrink:0;word-wrap:break-word;overflow-wrap:break-word;'
+            : 'background:#2d2d44;color:#e0e0e0;padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;line-height:1.5;flex-shrink:0;word-wrap:break-word;overflow-wrap:break-word;';
         d.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
         c.appendChild(d); c.scrollTop = c.scrollHeight;
     }
@@ -486,7 +493,7 @@ You can chat about anything — not just scholarships. Be helpful and conversati
         input.value = ''; addMessage(msg, true);
         chatHistory.push({role: 'user', content: msg});
         const t = document.createElement('div');
-        t.id='typing'; t.style.cssText='background:var(--accent-lighter);color:var(--text3);padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;flex-shrink:0;';
+        t.id='typing'; t.style.cssText='background:#2d2d44;color:#aaa;padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;flex-shrink:0;';
         t.textContent='Thinking...'; document.getElementById('chatMessages').appendChild(t);
         try {
             const res = await fetch('/api/ai/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages: chatHistory, max_tokens: 1024})});
