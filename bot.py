@@ -1,4 +1,4 @@
-/usr/bin/env python3
+#!/usr/bin/env python3
 """
 ScholarFinder Bot — Complete Study Abroad Assistant
 Built by Scott | Alpha Global Minds
@@ -188,7 +188,7 @@ def init_db():
 init_db()
 
 #
-ADMIN_ID = $
+ADMIN_ID = int(os.environ.get("ADMIN_ID", "0"))
 ADMIN_IDS = [$]  # 
 
 def track_user(update: Update, action: str):
