@@ -4,14 +4,24 @@
 <section class="section">
     <div class="container" style="max-width:700px;">
         <h2 class="section-title">📄 Resume Review</h2>
-        <p style="color:var(--text2);margin-bottom:24px;">Paste your resume text below for instant feedback on structure, impact, and completeness.</p>
+        <p style="color:var(--text2);margin-bottom:24px;">Upload your resume for AI-powered feedback on structure, impact, and completeness.</p>
         
         <div class="card">
             <div class="form-group">
-                <label>Paste Your Resume <span class="required">*</span></label>
-                <textarea id="resumeText" class="form-input" style="min-height:300px;" placeholder="Paste your resume content here...&#10;&#10;EDUCATION&#10;Your University — Degree&#10;&#10;EXPERIENCE&#10;Job Title — Company&#10;• Achievement 1&#10;• Achievement 2&#10;&#10;SKILLS&#10;Python, JavaScript, etc."></textarea>
+                <label>Upload Your Resume <span class="required">*</span></label>
+                <div id="dropZone" onclick="document.getElementById('resumeFile').click()" style="border:2px dashed rgba(255,255,255,0.12);border-radius:16px;padding:48px 24px;text-align:center;cursor:pointer;transition:0.3s;background:rgba(255,255,255,0.02);">
+                    <div style="font-size:2.5rem;margin-bottom:12px;">📎</div>
+                    <div style="font-weight:600;font-size:1rem;margin-bottom:6px;">Tap to upload or drag & drop</div>
+                    <div style="color:var(--text3);font-size:0.82rem;">PDF, DOCX, or TXT (max 5MB)</div>
+                    <div id="fileName" style="color:var(--accent);font-weight:600;margin-top:12px;display:none;"></div>
+                </div>
+                <input type="file" id="resumeFile" accept=".pdf,.docx,.doc,.txt" style="display:none;" onchange="fileSelected(this)">
             </div>
-            <button onclick="rateResume()" class="btn btn-primary" id="rateBtn">Review My Resume →</button>
+            <div id="orDivider" style="text-align:center;color:var(--text3);font-size:0.85rem;margin:16px 0;">— or paste text directly —</div>
+            <div class="form-group">
+                <textarea id="resumeText" class="form-input" style="min-height:150px;" placeholder="Paste your resume content here..."></textarea>
+            </div>
+            <button onclick="rateResume()" class="btn btn-primary" id="rateBtn" style="width:100%;">Review My Resume →</button>
         </div>
 
         <div id="results" style="display:none;margin-top:24px;">
@@ -32,38 +42,88 @@
 {% endblock %}
 {% block scripts %}
 <script>
+let uploadedText = '';
+
+// Drag & drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = 'var(--accent)'; dz.style.background = 'rgba(139,92,246,0.05)'; });
+dz.addEventListener('dragleave', () => { dz.style.borderColor = 'rgba(255,255,255,0.12)'; dz.style.background = 'rgba(255,255,255,0.02)'; });
+dz.addEventListener('drop', e => { e.preventDefault(); dz.style.borderColor = 'rgba(255,255,255,0.12)'; dz.style.background = 'rgba(255,255,255,0.02)'; if (e.dataTransfer.files.length) { document.getElementById('resumeFile').files = e.dataTransfer.files; fileSelected(document.getElementById('resumeFile')); } });
+
+function fileSelected(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const fn = document.getElementById('fileName');
+    fn.textContent = '📄 ' + file.name;
+    fn.style.display = 'block';
+    
+    if (file.name.endsWith('.txt')) {
+        file.text().then(t => { uploadedText = t; });
+    } else {
+        uploadedText = '';  // Will upload to server for extraction
+    }
+}
+
 async function rateResume() {
-    const resume = document.getElementById('resumeText').value;
-    if (!resume.trim()) return;
+    const file = document.getElementById('resumeFile').files[0];
+    const pastedText = document.getElementById('resumeText').value.trim();
+    
+    if (!file && !pastedText) {
+        alert('Please upload a file or paste your resume text.');
+        return;
+    }
+    
     const btn = document.getElementById('rateBtn');
-    btn.textContent = 'Analyzing...'; btn.disabled = true;
+    btn.textContent = 'Analyzing with AI...'; btn.disabled = true;
     
-    const res = await fetch('/api/tools/rate-resume', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({resume})
-    });
-    const data = await res.json();
-    btn.textContent = 'Review My Resume →'; btn.disabled = false;
-    
-    document.getElementById('scoreNum').textContent = data.score;
-    document.getElementById('scoreLabel').textContent = data.label;
-    document.getElementById('scoreLabel').style.color = data.score >= 70 ? 'var(--success)' : data.score >= 50 ? 'var(--warning)' : 'var(--danger)';
-    document.getElementById('wordCount').textContent = `${data.word_count} words`;
-    
-    document.getElementById('sectionsFound').innerHTML = data.sections_found.map(s =>
-        `<span class="badge badge-green" style="text-transform:capitalize;">${s}</span>`
-    ).join('');
-    
-    const list = document.getElementById('feedbackList');
-    list.innerHTML = data.feedback.map(([icon, text]) =>
-        `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
-            <span style="font-size:1.1rem;">${icon}</span>
-            <span style="color:var(--text2);font-size:0.9rem;">${text}</span>
-        </div>`
-    ).join('');
-    
-    document.getElementById('results').style.display = 'block';
-    document.getElementById('results').scrollIntoView({behavior:'smooth'});
+    try {
+        let res;
+        if (file && !pastedText) {
+            // Upload file
+            const formData = new FormData();
+            formData.append('file', file);
+            res = await fetch('/api/tools/rate-resume', {
+                method: 'POST',
+                body: formData
+            });
+        } else {
+            // Use pasted text
+            res = await fetch('/api/tools/rate-resume', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({resume: pastedText || uploadedText})
+            });
+        }
+        
+        const data = await res.json();
+        btn.textContent = 'Review My Resume →'; btn.disabled = false;
+        
+        if (data.error) { alert(data.error); return; }
+        
+        document.getElementById('scoreNum').textContent = data.score + '/10';
+        document.getElementById('scoreLabel').textContent = data.label;
+        document.getElementById('scoreLabel').style.color = data.score >= 7 ? 'var(--success)' : data.score >= 5 ? 'var(--warning)' : 'var(--danger)';
+        document.getElementById('wordCount').textContent = `${data.word_count} words`;
+        
+        const sf = document.getElementById('sectionsFound');
+        sf.innerHTML = (data.sections_found || []).map(s =>
+            `<span class="badge badge-green" style="text-transform:capitalize;">${s}</span>`
+        ).join('');
+        
+        const list = document.getElementById('feedbackList');
+        list.innerHTML = (data.feedback || []).map(([icon, text]) =>
+            `<div style="display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+                <span style="font-size:1.1rem;flex-shrink:0;">${icon}</span>
+                <span style="color:var(--text2);font-size:0.9rem;line-height:1.5;">${text}</span>
+            </div>`
+        ).join('');
+        
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('results').scrollIntoView({behavior:'smooth'});
+    } catch(e) {
+        btn.textContent = 'Review My Resume →'; btn.disabled = false;
+        alert('Something went wrong. Try again.');
+    }
 }
 </script>
 {% endblock %}

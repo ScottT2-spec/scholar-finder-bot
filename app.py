@@ -21,6 +21,16 @@ import secrets
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import (
+
+# Auto-install dependencies
+try:
+    import PyPDF2
+except ImportError:
+    import subprocess
+    subprocess.run(['pip', 'install', '--user', 'PyPDF2', 'python-docx'], capture_output=True)
+    import importlib
+    importlib.invalidate_caches()
+
     Flask, request, jsonify, render_template, redirect,
     url_for, session, flash, g, send_from_directory
 )
@@ -1150,10 +1160,42 @@ def resume_review_page():
 
 @app.route('/api/tools/rate-resume', methods=['POST'])
 def api_rate_resume():
-    data = request.get_json()
-    resume = data.get('resume', '').strip()
+    resume = ''
+    
+    # Handle file upload
+    if 'file' in request.files:
+        file = request.files['file']
+        if file.filename:
+            filename = file.filename.lower()
+            try:
+                if filename.endswith('.txt'):
+                    resume = file.read().decode('utf-8', errors='ignore')
+                elif filename.endswith('.pdf'):
+                    try:
+                        import PyPDF2
+                        reader = PyPDF2.PdfReader(file)
+                        resume = '\n'.join(page.extract_text() or '' for page in reader.pages)
+                    except ImportError:
+                        return jsonify({'error': 'PDF support not available. Please paste your resume text instead.'}), 400
+                elif filename.endswith(('.docx', '.doc')):
+                    try:
+                        import docx
+                        doc = docx.Document(file)
+                        resume = '\n'.join(p.text for p in doc.paragraphs)
+                    except ImportError:
+                        return jsonify({'error': 'DOCX support not available. Please paste your resume text instead.'}), 400
+                else:
+                    return jsonify({'error': 'Unsupported file type. Use PDF, DOCX, or TXT.'}), 400
+            except Exception as e:
+                return jsonify({'error': f'Could not read file: {str(e)}'}), 400
+    else:
+        # Handle JSON text paste
+        data = request.get_json()
+        resume = data.get('resume', '').strip() if data else ''
+    
+    resume = resume.strip()
     if not resume:
-        return jsonify({'error': 'No resume provided'}), 400
+        return jsonify({'error': 'No resume content found. Try pasting the text directly.'}), 400
 
     word_count = len(resume.split())
     
@@ -1785,7 +1827,7 @@ def sitemap():
     from flask import make_response
     base = request.host_url.rstrip('/')
     pages = ['/', '/scholarships', '/universities', '/opportunities', '/cost-of-living',
-             '/visa-guide', '/test-prep', '/faq', '/tools/essay-rater', '/tools/resume-review', '/tools/school-matcher']
+             '/visa-guide', '/test-prep', '/faq', '/tools/essay-rater', '/tools/resume-review']
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for p in pages:
