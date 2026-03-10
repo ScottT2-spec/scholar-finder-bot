@@ -402,19 +402,25 @@
 
     <!-- Chat Widget -->
     <div id="chatWidget" style="position:fixed;bottom:24px;right:24px;z-index:150;">
-        <div id="chatWindow" style="display:none;width:360px;max-width:calc(100vw - 40px);height:500px;max-height:70vh;background:#13111c;border:1.5px solid rgba(139,92,246,0.3);border-radius:20px;box-shadow:0 16px 48px rgba(139,92,246,0.15),0 8px 24px rgba(0,0,0,0.5);flex-direction:column;overflow:hidden;margin-bottom:12px;position:relative;z-index:200;">
-            <div style="padding:16px 20px;background:var(--grad);color:#fff;display:flex;justify-content:space-between;align-items:center;border-radius:20px 20px 0 0;">
-                <span style="font-weight:700;font-size:0.95rem;">🎓 ScholarFinder AI</span>
-                <button onclick="toggleChat()" style="background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;">×</button>
+        <div id="chatWindow" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0a0a12;border:none;border-radius:0;box-shadow:none;flex-direction:column;overflow:hidden;z-index:300;margin:0;">
+            <div style="padding:16px 20px;background:linear-gradient(135deg,#1a1a2e,#13111c);color:#fff;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(139,92,246,0.15);min-height:60px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button onclick="toggleChat()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;font-size:1.1rem;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;">←</button>
+                    <div>
+                        <div style="font-weight:700;font-size:1rem;">🐺 Alpha</div>
+                        <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:1px;">AI Assistant • Online</div>
+                    </div>
+                </div>
+                <div style="font-size:0.75rem;color:rgba(139,92,246,0.8);background:rgba(139,92,246,0.1);padding:4px 12px;border-radius:20px;font-weight:600;">ScholarFinder</div>
             </div>
-            <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;word-wrap:break-word;overflow-wrap:break-word;background:#13111c;">
+            <div id="chatMessages" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;word-wrap:break-word;overflow-wrap:break-word;background:#0a0a12;">
                 <div style="background:linear-gradient(135deg,#1e1636,#2a1f4e);color:#e0e0e0;padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;line-height:1.5;flex-shrink:0;border:1px solid rgba(139,92,246,0.15);">
                     Hey! 👋 I'm Alpha, your ScholarFinder assistant. Ask me about scholarships, universities, study abroad, or anything else!
                 </div>
             </div>
-            <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;">
-                <input id="chatInput" type="text" placeholder="Ask anything..." style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;font-family:var(--font);color:var(--text);background:var(--bg);outline:none;" autocomplete="off">
-                <button onclick="sendChat()" style="background:var(--grad);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;font-family:var(--font);">Send</button>
+            <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:10px;background:#0a0a12;">
+                <input id="chatInput" type="text" placeholder="Ask Alpha anything..." style="flex:1;padding:14px 18px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;font-size:0.95rem;font-family:var(--font);color:#fff;background:rgba(255,255,255,0.04);outline:none;" autocomplete="off">
+                <button onclick="sendChat()" style="background:#fff;color:#000;border:none;border-radius:14px;padding:14px 20px;font-weight:700;cursor:pointer;font-family:var(--font);font-size:0.9rem;transition:0.2s;">Send</button>
             </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;justify-content:flex-end;">
@@ -516,8 +522,9 @@ User is not logged in (guest).
     function toggleChat() {
         chatOpen = !chatOpen;
         document.getElementById('chatWindow').style.display = chatOpen ? 'flex' : 'none';
-        document.getElementById('chatToggle').textContent = chatOpen ? '✕' : '💬';
+        document.getElementById('chatToggle').style.display = chatOpen ? 'none' : 'flex';
         document.getElementById('chatLabel').style.display = chatOpen ? 'none' : 'block';
+        document.body.style.overflow = chatOpen ? 'hidden' : '';
         if (chatOpen) document.getElementById('chatInput').focus();
     }
     function addMessage(text, isUser) {
