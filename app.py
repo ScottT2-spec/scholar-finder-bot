@@ -13,6 +13,7 @@ Features:
 """
 
 import os
+import re
 import json
 import sqlite3
 import hashlib
@@ -57,6 +58,35 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(days=7),
 )
 
+# ============================================
+# SECURITY HEADERS
+# ============================================
+@app.after_request
+def set_security_headers(response):
+    # Prevent clickjacking
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    # Prevent MIME type sniffing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    # XSS protection (legacy browsers)
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    # Referrer policy
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    # Permissions policy
+    response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
+    # Content Security Policy — allow inline styles/scripts (needed for templates) + Groq API
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://images.unsplash.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data: https://images.unsplash.com; "
+        "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com; "
+        "frame-ancestors 'none';"
+    )
+    # Strict Transport Security (HTTPS only)
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
+
 # Webhook secret for scholarship management
 WEBHOOK_SECRET = 'sf_whk_' + hashlib.sha256(app.secret_key.encode()).hexdigest()[:32]
 
@@ -77,16 +107,40 @@ ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'scottantwi930@gmail.com')
 from collections import defaultdict
 import time as _time
 
-_login_attempts = defaultdict(list)  # ip -> [timestamps]
+_login_attempts = defaultdict(list)       # ip -> [timestamps]
+_account_attempts = defaultdict(list)     # email -> [timestamps]
+_ai_requests = defaultdict(list)          # ip -> [timestamps]
 _MAX_LOGIN_ATTEMPTS = 5
-_LOGIN_WINDOW = 300  # 5 minutes
+_LOGIN_WINDOW = 300       # 5 minutes
+_MAX_AI_REQUESTS = 20     # per IP
+_AI_WINDOW = 60           # per minute
 
 def check_rate_limit(ip):
+    """Rate limit by IP for login"""
     now = _time.time()
     _login_attempts[ip] = [t for t in _login_attempts[ip] if now - t < _LOGIN_WINDOW]
     if len(_login_attempts[ip]) >= _MAX_LOGIN_ATTEMPTS:
         return False
     _login_attempts[ip].append(now)
+    return True
+
+def check_account_lockout(login_id):
+    """Rate limit by account (email/username) — prevents distributed brute force"""
+    now = _time.time()
+    key = login_id.lower().strip()
+    _account_attempts[key] = [t for t in _account_attempts[key] if now - t < _LOGIN_WINDOW]
+    if len(_account_attempts[key]) >= _MAX_LOGIN_ATTEMPTS:
+        return False
+    _account_attempts[key].append(now)
+    return True
+
+def check_ai_rate_limit(ip):
+    """Rate limit AI endpoint — prevents quota abuse"""
+    now = _time.time()
+    _ai_requests[ip] = [t for t in _ai_requests[ip] if now - t < _AI_WINDOW]
+    if len(_ai_requests[ip]) >= _MAX_AI_REQUESTS:
+        return False
+    _ai_requests[ip].append(now)
     return True
 
 
@@ -358,12 +412,27 @@ def signup_page():
             flash('All fields are required', 'error')
             return render_template('signup.html')
 
+        # Input length limits — prevent abuse
+        if len(email) > 254 or len(username) > 50 or len(password) > 128 or len(full_name) > 100:
+            flash('Input too long', 'error')
+            return render_template('signup.html')
+
+        # Basic email format check
+        if '@' not in email or '.' not in email.split('@')[-1]:
+            flash('Invalid email address', 'error')
+            return render_template('signup.html')
+
         if len(password) < 6:
             flash('Password must be at least 6 characters', 'error')
             return render_template('signup.html')
 
         if len(username) < 3:
             flash('Username must be at least 3 characters', 'error')
+            return render_template('signup.html')
+
+        # Username format: alphanumeric + underscores only
+        if not re.match(r'^[a-z0-9_]+$', username):
+            flash('Username can only contain letters, numbers, and underscores', 'error')
             return render_template('signup.html')
 
         db = get_db()
@@ -438,10 +507,13 @@ def login_page():
             (login_id, login_id)
         ).fetchone()
 
-        # Rate limiting
+        # Rate limiting — by IP and by account
         client_ip = request.remote_addr or 'unknown'
         if not check_rate_limit(client_ip):
             flash('Too many login attempts. Please wait 5 minutes.', 'error')
+            return render_template('login.html')
+        if not check_account_lockout(login_id):
+            flash('This account is temporarily locked. Please wait 5 minutes.', 'error')
             return render_template('login.html')
 
         if not user or not verify_password(password, user['password_hash'], user['salt']):
@@ -561,18 +633,85 @@ def api_admin_send_email():
     body = data.get('body', '')
     if not to_emails or not subject or not body:
         return jsonify({'error': 'Missing to, subject, or body'}), 400
-    # Store emails in DB for now (actual SMTP can be configured later)
+
+    SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '')
+    SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+    SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+    SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
+
     db = get_db()
     db.execute("""CREATE TABLE IF NOT EXISTS sent_emails (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        to_email TEXT, subject TEXT, body TEXT, sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        to_email TEXT, subject TEXT, body TEXT, status TEXT DEFAULT 'sent',
+        sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )""")
+
     sent = 0
-    for email in to_emails:
-        db.execute('INSERT INTO sent_emails (to_email, subject, body) VALUES (?, ?, ?)', (email, subject, body))
-        sent += 1
+    failed = 0
+
+    if SMTP_EMAIL and SMTP_PASSWORD:
+        try:
+            server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+            server.starttls()
+            server.login(SMTP_EMAIL, SMTP_PASSWORD)
+
+            for email_addr in to_emails:
+                try:
+                    msg = MIMEMultipart()
+                    msg['From'] = f'ScholarFinder <{SMTP_EMAIL}>'
+                    msg['To'] = email_addr
+                    msg['Subject'] = subject
+
+                    # HTML email with styling
+                    html_body = f"""
+                    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+                        <div style="background:linear-gradient(135deg,#6C63FF,#A855F7);padding:20px;border-radius:12px 12px 0 0;text-align:center;">
+                            <h1 style="color:#fff;margin:0;font-size:1.5rem;">🎓 ScholarFinder</h1>
+                        </div>
+                        <div style="background:#f9f9f9;padding:24px;border-radius:0 0 12px 12px;border:1px solid #eee;">
+                            <h2 style="color:#333;margin-top:0;">{subject}</h2>
+                            <div style="color:#555;line-height:1.7;font-size:15px;">{'<br>'.join(body.split(chr(10)))}</div>
+                        </div>
+                        <p style="text-align:center;color:#999;font-size:12px;margin-top:16px;">
+                            ScholarFinder — Your path to global education 🌍<br>
+                            <a href="https://scholarfinder.pythonanywhere.com" style="color:#6C63FF;">Visit ScholarFinder</a>
+                        </p>
+                    </div>"""
+
+                    msg.attach(MIMEText(html_body, 'html'))
+                    server.sendmail(SMTP_EMAIL, email_addr, msg.as_string())
+                    db.execute('INSERT INTO sent_emails (to_email, subject, body, status) VALUES (?,?,?,?)',
+                               (email_addr, subject, body, 'sent'))
+                    sent += 1
+                except Exception:
+                    db.execute('INSERT INTO sent_emails (to_email, subject, body, status) VALUES (?,?,?,?)',
+                               (email_addr, subject, body, 'failed'))
+                    failed += 1
+
+            server.quit()
+        except Exception as e:
+            db.commit()
+            return jsonify({'error': f'SMTP connection failed: {str(e)}'}), 500
+    else:
+        # No SMTP configured — just log
+        for email_addr in to_emails:
+            db.execute('INSERT INTO sent_emails (to_email, subject, body, status) VALUES (?,?,?,?)',
+                       (email_addr, subject, body, 'queued'))
+            sent += 1
+
     db.commit()
-    return jsonify({'success': True, 'sent': sent, 'note': 'Emails queued. Configure SMTP in settings to actually deliver.'})
+    result = {'success': True, 'sent': sent, 'failed': failed}
+    if not SMTP_EMAIL:
+        result['note'] = 'SMTP not configured. Emails logged but not delivered. Add SMTP_EMAIL and SMTP_PASSWORD to .env'
+    return jsonify(result)
+
+@app.route('/api/admin/all-emails')
+@admin_required
+def api_admin_all_emails():
+    """Get all registered user emails for broadcast"""
+    db = get_db()
+    users = db.execute('SELECT email, username, full_name FROM users ORDER BY created_at DESC').fetchall()
+    return jsonify([{'email': u['email'], 'username': u['username'], 'name': u['full_name']} for u in users])
 
 @app.route('/api/admin/users-full')
 @admin_required
@@ -945,175 +1084,64 @@ def api_rate_essay():
     if not essay:
         return jsonify({'error': 'No essay provided'}), 400
 
-    words = essay.split()
-    word_count = len(words)
-    sentences = [s.strip() for s in essay.replace('!', '.').replace('?', '.').split('.') if s.strip()]
-    sentence_count = len(sentences)
-    avg_sentence_len = word_count / max(sentence_count, 1)
-    paragraphs = [p.strip() for p in essay.split('\n\n') if p.strip()]
+    word_count = len(essay.split())
+    
+    system_prompt = f"""You are a strict, professional essay reviewer for scholarship and university applications. 
+Rate this {essay_type.replace('_', ' ')} essay and provide detailed, actionable feedback.
 
-    score = 30  # Base score — strict grading
-    feedback = []
+You MUST respond in this exact JSON format (no markdown, no extra text):
+{{
+    "score": <number 10-95>,
+    "label": "<rating label>",
+    "feedback": [
+        ["<emoji ✅/⚠️/❌/💡>", "<specific feedback point>"],
+        ["<emoji>", "<feedback>"]
+    ]
+}}
 
-    # Word count
-    if essay_type == 'personal_statement':
-        if 500 <= word_count <= 650: score += 15; feedback.append(('✅', 'Word count is perfect for a personal statement'))
-        elif 400 <= word_count < 500: score += 8; feedback.append(('⚠️', f'At {word_count} words, consider expanding slightly (aim for 500-650)'))
-        elif word_count > 650: score += 5; feedback.append(('⚠️', f'At {word_count} words, you might want to trim (aim for 500-650)'))
-        else: feedback.append(('❌', f'At {word_count} words, this is too short for a personal statement (aim for 500-650)'))
-    else:
-        if word_count >= 200: score += 10
-        else: feedback.append(('⚠️', f'At {word_count} words, consider adding more detail'))
+Scoring guidelines (be strict):
+- 85-95: Outstanding, near-perfect (rare)
+- 75-84: Very good, minor improvements needed
+- 60-74: Good but needs work
+- 45-59: Average, significant revision needed
+- Below 45: Weak, major rewrite needed
 
-    # Paragraphs
-    if len(paragraphs) >= 3: score += 10; feedback.append(('✅', f'Good structure with {len(paragraphs)} paragraphs'))
-    elif len(paragraphs) == 1: feedback.append(('❌', 'Break your essay into multiple paragraphs for readability'))
-    else: score += 5; feedback.append(('⚠️', 'Consider adding more paragraphs for better structure'))
+Evaluate: structure, clarity, personal voice, specificity, opening hook, conclusion, clichés, grammar, word choice, impact.
+Give 5-8 feedback points. Be honest and helpful, not flattering."""
 
-    # Sentence variety
-    if 12 <= avg_sentence_len <= 22: score += 8; feedback.append(('✅', 'Good sentence length variety'))
-    elif avg_sentence_len > 25: feedback.append(('⚠️', 'Some sentences are very long — try breaking them up'))
-    elif avg_sentence_len < 10: feedback.append(('⚠️', 'Sentences are quite short — try combining some for flow'))
+    try:
+        import requests as req
+        resp = req.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            json={
+                'model': GROQ_MODEL,
+                'messages': [
+                    {'role': 'system', 'content': system_prompt},
+                    {'role': 'user', 'content': f'Rate this essay ({word_count} words):\n\n{essay[:4000]}'}
+                ],
+                'max_tokens': 1024,
+                'temperature': 0.3
+            },
+            headers={'Authorization': 'Bearer ' + GROQ_API_KEY, 'Content-Type': 'application/json'},
+            timeout=30
+        )
+        result = resp.json()
+        ai_text = result['choices'][0]['message']['content'].strip()
+        # Parse JSON from AI response
+        import json as json_mod
+        # Try to extract JSON if wrapped in markdown
+        if '```' in ai_text:
+            ai_text = ai_text.split('```')[1]
+            if ai_text.startswith('json'):
+                ai_text = ai_text[4:]
+        ai_data = json_mod.loads(ai_text)
+        ai_data['word_count'] = word_count
+        ai_data['sentence_count'] = len([s for s in essay.replace('!','.').replace('?','.').split('.') if s.strip()])
+        ai_data['paragraph_count'] = len([p for p in essay.split('\n\n') if p.strip()])
+        return jsonify(ai_data)
+    except Exception as e:
+        return jsonify({'error': f'AI analysis failed: {str(e)}'}), 500
 
-    # Personal voice
-    personal_words = sum(1 for w in words if w.lower() in ['i', 'my', 'me', 'myself'])
-    if personal_words >= 5: score += 8; feedback.append(('✅', 'Strong personal voice — good use of first person'))
-    else: feedback.append(('⚠️', 'Consider using more personal pronouns (I, my) to make it feel authentic'))
-
-    # Specific details
-    has_numbers = any(w.isdigit() or any(c.isdigit() for c in w) for w in words)
-    if has_numbers: score += 5; feedback.append(('✅', 'Good use of specific numbers/data'))
-    else: feedback.append(('💡', 'Add specific numbers or data to strengthen claims'))
-
-    # Strong verbs
-    strong_verbs = ['built', 'created', 'led', 'designed', 'developed', 'founded', 'organized', 'launched', 'achieved', 'improved', 'managed', 'grew', 'taught', 'researched', 'implemented']
-    used_strong = [v for v in strong_verbs if v in essay.lower()]
-    if len(used_strong) >= 3: score += 7; feedback.append(('✅', f'Great action verbs: {", ".join(used_strong[:5])}'))
-    elif len(used_strong) >= 1: score += 3; feedback.append(('💡', 'Try using more action verbs (built, created, led, designed)'))
-    else: feedback.append(('❌', 'Use strong action verbs to show impact (built, created, led, designed, improved)'))
-
-    # Passive voice check
-    passive_indicators = ['was ', 'were ', 'been ', 'being ']
-    passive_count = sum(essay.lower().count(p) for p in passive_indicators)
-    if passive_count <= 3: score += 5
-    else: feedback.append(('⚠️', f'High passive voice usage ({passive_count} instances) — try active voice'))
-
-    # Opening hook
-    first_sentence = sentences[0] if sentences else ''
-    boring_starts = ['my name is', 'i am writing', 'this essay', 'in this essay', 'i want to']
-    if any(first_sentence.lower().startswith(b) for b in boring_starts):
-        feedback.append(('❌', 'Weak opening — avoid starting with "My name is" or "I am writing". Hook the reader!'))
-    elif len(first_sentence.split()) > 5:
-        score += 5; feedback.append(('✅', 'Good opening sentence'))
-
-    # Penalize generic/cliché language
-    cliches = ['passionate about', 'ever since i was', 'from a young age', 'always wanted', 'dream of', 'make the world a better', 'unique perspective', 'thinking outside the box', 'at the end of the day', 'changed my life forever']
-    cliche_count = sum(1 for c in cliches if c in essay.lower())
-    if cliche_count >= 3: score -= 10; feedback.append(('❌', f'Too many clichés ({cliche_count} found) — be more original'))
-    elif cliche_count >= 1: score -= 5; feedback.append(('⚠️', f'Found {cliche_count} cliché(s) — try to express ideas more originally'))
-    else: score += 3; feedback.append(('✅', 'Good — avoids common clichés'))
-
-    # Penalize repetitive words
-    word_freq = {}
-    for w in words:
-        wl = w.lower().strip('.,!?;:')
-        if len(wl) > 4:
-            word_freq[wl] = word_freq.get(wl, 0) + 1
-    repeated = [(w, c) for w, c in word_freq.items() if c >= 4 and w not in ['their', 'there', 'these', 'those', 'which', 'would', 'could', 'should', 'about', 'other']]
-    if repeated:
-        score -= 5
-        feedback.append(('⚠️', f'Repeated words: {", ".join(w+"("+str(c)+"x)" for w,c in repeated[:3])} — vary your vocabulary'))
-
-    # Penalize lack of conclusion/reflection
-    last_para = paragraphs[-1].lower() if paragraphs else ''
-    conclusion_signals = ['future', 'forward', 'goal', 'aspire', 'hope', 'continue', 'plan', 'commit', 'contribute', 'impact']
-    if any(s in last_para for s in conclusion_signals):
-        score += 3
-    else:
-        feedback.append(('💡', 'Consider ending with a forward-looking statement about your goals'))
-
-    # STRICT CAP: max score is 90 (only world-class essays get close)
-    score = min(90, max(10, score))
-
-    # Stricter rating labels
-    if score >= 85: label = 'Outstanding — Near Perfect'
-    elif score >= 75: label = 'Very Good'
-    elif score >= 65: label = 'Good — Room to Improve'
-    elif score >= 50: label = 'Average — Needs Work'
-    elif score >= 35: label = 'Below Average — Needs Significant Revision'
-    else: label = 'Poor — Major Rewrite Needed'
-
-    return jsonify({
-        'score': score,
-        'label': label,
-        'word_count': word_count,
-        'sentence_count': sentence_count,
-        'paragraph_count': len(paragraphs),
-        'feedback': feedback
-    })
-
-@app.route('/tools/school-matcher', methods=['GET'])
-def school_matcher_page():
-    user = get_current_user()
-    return render_template('tool_school.html', user=user)
-
-@app.route('/api/tools/match-schools', methods=['POST'])
-def api_match_schools():
-    data = request.get_json()
-    gpa = data.get('gpa', '').strip()
-    country_pref = data.get('country', '').lower()
-    field = data.get('field', '').lower()
-    budget = data.get('budget', '').lower()
-
-    universities = get_universities()
-    results = []
-
-    for u in universities:
-        u_str = json.dumps(u).lower()
-        score = 0
-
-        # Country match
-        if country_pref and country_pref in u_str:
-            score += 30
-
-        # Field match
-        if field and field in u_str:
-            score += 25
-
-        # Budget consideration
-        tuition = u_str
-        if budget == 'low' and ('free' in tuition or 'low' in tuition or 'no tuition' in tuition):
-            score += 20
-        elif budget == 'medium' and ('moderate' in tuition or 'medium' in tuition):
-            score += 15
-
-        # Ranking-based GPA matching
-        ranking = u.get('ranking', 999)
-        try:
-            rank_num = int(str(ranking).replace('#', '').replace('+', '').split('-')[0])
-        except (ValueError, TypeError):
-            rank_num = 500
-
-        # GPA matching logic
-        try:
-            gpa_val = float(gpa.split('/')[0]) if '/' in gpa else float(gpa)
-            gpa_scale = float(gpa.split('/')[1]) if '/' in gpa else 4.0
-            gpa_pct = gpa_val / gpa_scale
-        except (ValueError, TypeError):
-            gpa_pct = 0.75  # default
-
-        if gpa_pct >= 0.9 and rank_num <= 50: score += 20
-        elif gpa_pct >= 0.8 and rank_num <= 100: score += 20
-        elif gpa_pct >= 0.7 and rank_num <= 200: score += 20
-        elif gpa_pct >= 0.6: score += 10
-
-        if score > 0:
-            chance = 'High' if gpa_pct >= 0.85 and rank_num > 100 else 'Medium' if gpa_pct >= 0.7 else 'Reach'
-            if rank_num <= 20: chance = 'Reach' if gpa_pct < 0.95 else 'Medium'
-            results.append({**u, 'match_score': score, 'chance': chance})
-
-    results.sort(key=lambda x: x['match_score'], reverse=True)
-    return jsonify({'results': results[:15]})
 
 @app.route('/tools/resume-review', methods=['GET'])
 def resume_review_page():
@@ -1127,96 +1155,183 @@ def api_rate_resume():
     if not resume:
         return jsonify({'error': 'No resume provided'}), 400
 
-    words = resume.split()
-    word_count = len(words)
-    lines = [l.strip() for l in resume.split('\n') if l.strip()]
-    resume_lower = resume.lower()
+    word_count = len(resume.split())
+    
+    system_prompt = """You are a strict, professional resume/CV reviewer for students applying to scholarships, universities, and internships.
+Rate this resume and provide detailed, actionable feedback.
 
-    score = 25  # Strict base
-    feedback = []
+You MUST respond in this exact JSON format (no markdown, no extra text):
+{
+    "score": <number 10-95>,
+    "label": "<rating label>",
+    "sections_found": ["<list of sections found e.g. education, experience, skills>"],
+    "feedback": [
+        ["<emoji ✅/⚠️/❌/💡>", "<specific feedback point>"],
+        ["<emoji>", "<feedback>"]
+    ]
+}
 
-    # Key sections check
-    sections = {
-        'education': ['education', 'university', 'school', 'degree', 'gpa', 'major'],
-        'experience': ['experience', 'work', 'intern', 'job', 'position', 'role'],
-        'skills': ['skills', 'proficient', 'languages', 'tools', 'technologies', 'programming'],
-        'projects': ['project', 'built', 'developed', 'created', 'designed'],
-        'activities': ['activities', 'extracurricular', 'volunteer', 'leadership', 'club', 'organization']
-    }
+Scoring guidelines (be strict):
+- 82-95: Outstanding resume
+- 70-81: Strong, minor polish needed
+- 55-69: Good, needs improvement  
+- 40-54: Average, needs work
+- Below 40: Weak, major revision needed
 
-    found_sections = []
-    for section, keywords in sections.items():
-        if any(k in resume_lower for k in keywords):
-            found_sections.append(section)
-            score += 8
+Evaluate: structure, sections (education/experience/skills/projects), action verbs, quantified achievements, formatting, contact info, links, relevance, conciseness, vague language.
+Give 5-8 feedback points. Be honest and constructive."""
 
-    if len(found_sections) >= 4: feedback.append(('✅', f'Great structure — includes: {", ".join(found_sections)}'))
-    elif len(found_sections) >= 2: feedback.append(('⚠️', f'Found sections: {", ".join(found_sections)}. Consider adding: {", ".join([s for s in sections if s not in found_sections])}'))
-    else: feedback.append(('❌', f'Missing key sections. Include: Education, Experience, Skills, Projects'))
+    try:
+        import requests as req
+        resp = req.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            json={
+                'model': GROQ_MODEL,
+                'messages': [
+                    {'role': 'system', 'content': system_prompt},
+                    {'role': 'user', 'content': f'Rate this resume ({word_count} words):\n\n{resume[:4000]}'}
+                ],
+                'max_tokens': 1024,
+                'temperature': 0.3
+            },
+            headers={'Authorization': 'Bearer ' + GROQ_API_KEY, 'Content-Type': 'application/json'},
+            timeout=30
+        )
+        result = resp.json()
+        ai_text = result['choices'][0]['message']['content'].strip()
+        import json as json_mod
+        if '```' in ai_text:
+            ai_text = ai_text.split('```')[1]
+            if ai_text.startswith('json'):
+                ai_text = ai_text[4:]
+        ai_data = json_mod.loads(ai_text)
+        ai_data['word_count'] = word_count
+        return jsonify(ai_data)
+    except Exception as e:
+        return jsonify({'error': f'AI analysis failed: {str(e)}'}), 500
 
-    # Length
-    if 300 <= word_count <= 700: score += 10; feedback.append(('✅', f'Good length ({word_count} words)'))
-    elif word_count < 200: feedback.append(('❌', f'Too short ({word_count} words) — add more detail'))
-    elif word_count > 800: feedback.append(('⚠️', f'Quite long ({word_count} words) — try to be more concise'))
 
-    # Action verbs
-    action_verbs = ['led', 'managed', 'developed', 'created', 'built', 'designed', 'organized', 'implemented', 'achieved', 'improved', 'grew', 'launched', 'analyzed', 'researched', 'taught', 'coordinated']
-    used = [v for v in action_verbs if v in resume_lower]
-    if len(used) >= 4: score += 10; feedback.append(('✅', f'Strong action verbs: {", ".join(used[:6])}'))
-    elif len(used) >= 1: score += 5; feedback.append(('💡', 'Use more action verbs (led, built, developed, improved, managed)'))
-    else: feedback.append(('❌', 'Start bullet points with strong action verbs'))
 
-    # Quantification
-    import re
-    numbers = re.findall(r'\d+', resume)
-    if len(numbers) >= 5: score += 10; feedback.append(('✅', 'Good quantification — numbers strengthen your claims'))
-    elif len(numbers) >= 2: score += 5; feedback.append(('💡', 'Add more numbers to quantify achievements (e.g., "led team of 10", "increased by 40%")'))
-    else: feedback.append(('❌', 'Quantify your achievements with numbers'))
+# ============================================
+# GOOGLE OAUTH (using Google's OAuth 2.0)
+# ============================================
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
 
-    # Contact info
-    if '@' in resume: score += 3; feedback.append(('✅', 'Email included'))
-    else: feedback.append(('⚠️', 'Add your email address'))
-
-    # Links
-    if 'github' in resume_lower or 'linkedin' in resume_lower or 'http' in resume_lower:
-        score += 5; feedback.append(('✅', 'Good — includes links (GitHub/LinkedIn/portfolio)'))
-    else:
-        feedback.append(('💡', 'Add links to GitHub, LinkedIn, or portfolio'))
-
-    # Penalize weak formatting
-    bullet_count = resume.count('•') + resume.count('-') + resume.count('*')
-    if bullet_count >= 6: score += 5; feedback.append(('✅', 'Good use of bullet points'))
-    elif bullet_count >= 2: score += 2
-    else: feedback.append(('⚠️', 'Use bullet points for achievements — easier to scan'))
-
-    # Penalize vague language
-    vague = ['responsible for', 'helped with', 'worked on', 'assisted in', 'was involved', 'participated in']
-    vague_count = sum(1 for v in vague if v in resume_lower)
-    if vague_count >= 3: score -= 8; feedback.append(('❌', f'Too much vague language ({vague_count} instances) — be specific about what YOU did'))
-    elif vague_count >= 1: score -= 3; feedback.append(('⚠️', 'Replace vague phrases like "responsible for" with action verbs'))
-
-    # STRICT CAP: max 90
-    score = min(90, max(10, score))
-
-    if score >= 82: label = 'Outstanding Resume'
-    elif score >= 70: label = 'Strong — Minor Polish Needed'
-    elif score >= 55: label = 'Good — Needs Improvement'
-    elif score >= 40: label = 'Average — Needs Work'
-    else: label = 'Weak — Major Revision Needed'
-
-    return jsonify({
-        'score': score,
-        'label': label,
-        'word_count': word_count,
-        'sections_found': found_sections,
-        'feedback': feedback
-    })
-
-# Google OAuth placeholder
 @app.route('/auth/google')
 def google_auth():
-    flash('Google login coming soon! Use email signup for now.', 'error')
-    return redirect(url_for('signup_page'))
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        flash('Google login is not configured yet. Use email signup.', 'error')
+        return redirect(url_for('signup_page'))
+
+    # Generate state token for CSRF protection
+    state = secrets.token_hex(16)
+    session['oauth_state'] = state
+
+    redirect_uri = request.host_url.rstrip('/') + '/auth/google/callback'
+    params = {
+        'client_id': GOOGLE_CLIENT_ID,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'state': state,
+        'access_type': 'offline',
+        'prompt': 'select_account'
+    }
+    from urllib.parse import urlencode
+    auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' + urlencode(params)
+    return redirect(auth_url)
+
+@app.route('/auth/google/callback')
+def google_callback():
+    import urllib.parse
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        flash('Google login not configured.', 'error')
+        return redirect(url_for('login_page'))
+
+    # Verify state
+    if request.args.get('state') != session.pop('oauth_state', None):
+        flash('Authentication failed. Please try again.', 'error')
+        return redirect(url_for('login_page'))
+
+    error = request.args.get('error')
+    if error:
+        flash('Google login cancelled.', 'error')
+        return redirect(url_for('login_page'))
+
+    code = request.args.get('code')
+    if not code:
+        flash('Authentication failed.', 'error')
+        return redirect(url_for('login_page'))
+
+    # Exchange code for tokens
+    redirect_uri = request.host_url.rstrip('/') + '/auth/google/callback'
+    try:
+        import requests as req_lib
+        token_resp = req_lib.post('https://oauth2.googleapis.com/token', data={
+            'code': code,
+            'client_id': GOOGLE_CLIENT_ID,
+            'client_secret': GOOGLE_CLIENT_SECRET,
+            'redirect_uri': redirect_uri,
+            'grant_type': 'authorization_code'
+        }, timeout=10)
+        token_data = token_resp.json()
+
+        if 'access_token' not in token_data:
+            flash('Authentication failed.', 'error')
+            return redirect(url_for('login_page'))
+
+        # Get user info
+        user_resp = req_lib.get('https://www.googleapis.com/oauth2/v2/userinfo',
+            headers={'Authorization': 'Bearer ' + token_data['access_token']}, timeout=10)
+        user_info = user_resp.json()
+
+        email = user_info.get('email', '').lower()
+        name = user_info.get('name', '')
+
+        if not email:
+            flash('Could not get email from Google.', 'error')
+            return redirect(url_for('login_page'))
+
+        db = get_db()
+        user = db.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+
+        if user:
+            # Existing user — log them in
+            session['user_id'] = user['id']
+            session.permanent = True
+            db.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (user['id'],))
+            db.commit()
+            return redirect(url_for('dashboard_page'))
+        else:
+            # New user — create account
+            username = email.split('@')[0].lower()
+            # Ensure unique username
+            base_username = re.sub(r'[^a-z0-9]', '', username)[:20]
+            username = base_username
+            counter = 1
+            while db.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone():
+                username = base_username + str(counter)
+                counter += 1
+
+            # Random password (user won't need it — they use Google)
+            pw_hash, salt = hash_password(secrets.token_hex(32))
+            is_admin = 1 if email == ADMIN_EMAIL else 0
+
+            db.execute(
+                'INSERT INTO users (email, username, password_hash, salt, full_name, is_admin) VALUES (?,?,?,?,?,?)',
+                (email, username, pw_hash, salt, name, is_admin)
+            )
+            db.commit()
+            user = db.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone()
+            session['user_id'] = user['id']
+            session.permanent = True
+            flash('Welcome! 🎉 Your account has been created.', 'success')
+            return redirect(url_for('dashboard_page'))
+
+    except Exception as e:
+        flash('Authentication error. Please try again.', 'error')
+        return redirect(url_for('login_page'))
 
 # ============================================
 # AI CHATBOT API
@@ -1683,92 +1798,68 @@ def sitemap():
 # ============================================
 init_db()
 
-init_db()
-
-
-# ─── Malaria Cell Scanner ───
-import joblib
-import numpy as np
-from PIL import Image
-import io, base64
-
-MALARIA_MODEL_PATH = '/home/scholarfinder/malaria-app/malaria_model.pkl'
-MALARIA_IMG_SIZE = 32
-malaria_model = None
-
-try:
-    malaria_model = joblib.load(MALARIA_MODEL_PATH)
-except:
-    pass
-
-@app.route('/malaria')
-def malaria_scanner():
-    return send_from_directory('/home/scholarfinder/malaria-app/templates', 'index.html')
-
-@app.route('/predict', methods=['POST'])
-def malaria_predict():
-    if malaria_model is None:
-        return jsonify({'error': 'Model not loaded'}), 500
-    data = request.get_json()
-    if not data or 'image' not in data:
-        return jsonify({'error': 'No image'}), 400
-    try:
-        image_data = data['image']
-        if ',' in image_data:
-            image_data = image_data.split(',')[1]
-        img = Image.open(io.BytesIO(base64.b64decode(image_data))).convert('RGB').resize((MALARIA_IMG_SIZE, MALARIA_IMG_SIZE))
-        X = (np.array(img, dtype=np.float32) / 255.0).flatten().reshape(1, -1)
-        proba = malaria_model.predict_proba(X)[0]
-        parasitized_prob = float(proba[1])
-        uninfected_prob = float(proba[0])
-        is_malaria = parasitized_prob > 0.5
-        return jsonify({
-            'parasitized': round(parasitized_prob * 100, 1),
-            'uninfected': round(uninfected_prob * 100, 1),
-            'diagnosis': 'Parasitized — Malaria Detected' if is_malaria else 'Uninfected — No Malaria',
-            'confidence': round(max(parasitized_prob, uninfected_prob) * 100, 1),
-            'is_malaria': is_malaria
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 # ============================================
 # AI AGENT PROXY — keeps API key server-side
 # ============================================
-GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')  # Set via environment variable on PythonAnywhere
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 GROQ_MODEL = 'llama-3.3-70b-versatile'
+
+# AI rate limiting
+_ai_requests = defaultdict(list)
+_MAX_AI_REQUESTS = 20
+_AI_WINDOW = 60
+
+def check_ai_rate_limit(ip):
+    now = _time.time()
+    _ai_requests[ip] = [t for t in _ai_requests[ip] if now - t < _AI_WINDOW]
+    if len(_ai_requests[ip]) >= _MAX_AI_REQUESTS:
+        return False
+    _ai_requests[ip].append(now)
+    return True
 
 @app.route('/api/ai/chat', methods=['POST'])
 def api_ai_chat():
     """Proxy AI requests through the server so API key stays hidden"""
+    client_ip = request.remote_addr or 'unknown'
+    if not check_ai_rate_limit(client_ip):
+        return jsonify({'error': 'Too many requests. Please wait a moment.'}), 429
+
+    if not GROQ_API_KEY:
+        return jsonify({'error': 'AI service not configured'}), 503
+
     data = request.get_json()
     if not data or not data.get('messages'):
         return jsonify({'error': 'No messages provided'}), 400
 
     messages = data['messages']
+    if not isinstance(messages, list) or len(messages) > 20:
+        return jsonify({'error': 'Invalid messages'}), 400
+    for msg in messages:
+        if not isinstance(msg, dict) or 'role' not in msg or 'content' not in msg:
+            return jsonify({'error': 'Invalid message format'}), 400
+        if len(msg.get('content', '')) > 10000:
+            return jsonify({'error': 'Message too long'}), 400
+
     max_tokens = min(data.get('max_tokens', 1024), 2500)
 
     try:
-        import urllib.request
-        req_data = json.dumps({
-            'model': GROQ_MODEL,
-            'messages': messages,
-            'max_tokens': max_tokens,
-            'temperature': 0.7
-        }).encode('utf-8')
-
-        req = urllib.request.Request(
+        import requests as _requests
+        resp = _requests.post(
             'https://api.groq.com/openai/v1/chat/completions',
-            data=req_data,
-            headers={
-                'Authorization': 'Bearer ' + GROQ_API_KEY,
-                'Content-Type': 'application/json'
-            }
+            json={
+                'model': GROQ_MODEL,
+                'messages': messages,
+                'max_tokens': max_tokens,
+                'temperature': 0.7
+            },
+            headers={'Authorization': 'Bearer ' + GROQ_API_KEY},
+            timeout=30
         )
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            result = json.loads(resp.read().decode('utf-8'))
-            content = result['choices'][0]['message']['content']
-            return jsonify({'content': content})
+        if resp.status_code != 200:
+            return jsonify({'error': 'AI service error (' + str(resp.status_code) + ')'}), 502
+        result = resp.json()
+        content = result['choices'][0]['message']['content']
+        return jsonify({'content': content})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -1776,5 +1867,3 @@ def api_ai_chat():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
-
-
