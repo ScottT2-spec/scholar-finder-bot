@@ -1087,11 +1087,11 @@ def api_rate_essay():
     word_count = len(essay.split())
     
     system_prompt = f"""You are a strict, professional essay reviewer for scholarship and university applications. 
-Rate this {essay_type.replace('_', ' ')} essay and provide detailed, actionable feedback.
+Rate this {essay_type.replace('_', ' ')} essay on a scale of 1 to 10 and provide detailed, actionable feedback.
 
 You MUST respond in this exact JSON format (no markdown, no extra text):
 {{
-    "score": <number 10-95>,
+    "score": <number 1.0-10.0 (one decimal place)>,
     "label": "<rating label>",
     "feedback": [
         ["<emoji ✅/⚠️/❌/💡>", "<specific feedback point>"],
@@ -1099,12 +1099,12 @@ You MUST respond in this exact JSON format (no markdown, no extra text):
     ]
 }}
 
-Scoring guidelines (be strict):
-- 85-95: Outstanding, near-perfect (rare)
-- 75-84: Very good, minor improvements needed
-- 60-74: Good but needs work
-- 45-59: Average, significant revision needed
-- Below 45: Weak, major rewrite needed
+Scoring guidelines (be strict, use one decimal place):
+- 9.0-10.0: Outstanding, near-perfect (rare)
+- 7.5-8.9: Very good, minor improvements needed
+- 6.0-7.4: Good but needs work
+- 4.5-5.9: Average, significant revision needed
+- Below 4.5: Weak, major rewrite needed
 
 Evaluate: structure, clarity, personal voice, specificity, opening hook, conclusion, clichés, grammar, word choice, impact.
 Give 5-8 feedback points. Be honest and helpful, not flattering."""
@@ -1162,7 +1162,7 @@ Rate this resume and provide detailed, actionable feedback.
 
 You MUST respond in this exact JSON format (no markdown, no extra text):
 {
-    "score": <number 10-95>,
+    "score": <number 1.0-10.0 (one decimal place)>,
     "label": "<rating label>",
     "sections_found": ["<list of sections found e.g. education, experience, skills>"],
     "feedback": [
@@ -1171,12 +1171,12 @@ You MUST respond in this exact JSON format (no markdown, no extra text):
     ]
 }
 
-Scoring guidelines (be strict):
-- 82-95: Outstanding resume
-- 70-81: Strong, minor polish needed
-- 55-69: Good, needs improvement  
-- 40-54: Average, needs work
-- Below 40: Weak, major revision needed
+Scoring guidelines (be strict, use one decimal place):
+- 8.5-10.0: Outstanding resume
+- 7.0-8.4: Strong, minor polish needed
+- 5.5-6.9: Good, needs improvement  
+- 4.0-5.4: Average, needs work
+- Below 4.0: Weak, major revision needed
 
 Evaluate: structure, sections (education/experience/skills/projects), action verbs, quantified achievements, formatting, contact info, links, relevance, conciseness, vague language.
 Give 5-8 feedback points. Be honest and constructive."""
