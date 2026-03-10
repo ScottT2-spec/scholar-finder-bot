@@ -477,7 +477,13 @@ Contact info:
 - Email: scottantwi930@gmail.com
 - Telegram Bot: @ScholarFinder_bot
 
-Current user: {% if user %}{{ user.full_name or user.username }} ({{ user.email }}){% if user.email == "scottantwi930@gmail.com" %} — This is Scott Antwi, the founder of AGM & ScholarFinder. You may address him as the founder.{% endif %}{% else %}Not logged in (guest){% endif %}`}
+{% if user and user.email == "scottantwi930@gmail.com" %}
+The current logged-in user is Scott Antwi (the founder and boss of AGM & ScholarFinder). Greet him warmly as the boss/founder from the very first message. You know who he is — no need for him to introduce himself. Example: "Hey boss! 👋 What's up?" or "Welcome back, Scott! What are we working on?"
+{% elif user %}
+Current logged-in user: {{ user.full_name or user.username }}. Greet them by name if they interact.
+{% else %}
+User is not logged in (guest).
+{% endif %}`}
     ];
 
     function toggleChat() {
