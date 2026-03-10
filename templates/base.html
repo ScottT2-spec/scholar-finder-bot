@@ -289,6 +289,30 @@
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
 
         .footer { text-align: center; padding: 48px 20px; border-top: 1px solid rgba(255,255,255,0.04); color: var(--text3); font-size: 0.85rem; }
+
+        /* Chat fullscreen — responsive */
+        .chat-fullscreen {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%;
+            background: #0a0a12; border: none; border-radius: 0;
+            box-shadow: none; flex-direction: column; overflow: hidden;
+            z-index: 300; margin: 0;
+        }
+        @media (min-width: 768px) {
+            .chat-fullscreen {
+                top: 50%; left: 50%; right: auto; bottom: auto;
+                transform: translate(-50%, -50%);
+                width: 520px; height: 85vh; max-height: 750px;
+                border-radius: 24px;
+                border: 1px solid rgba(139,92,246,0.15);
+                box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 80px rgba(139,92,246,0.08);
+            }
+        }
+        @media (min-width: 1200px) {
+            .chat-fullscreen {
+                width: 600px; height: 80vh; max-height: 800px;
+            }
+        }
         .footer a { color: var(--text2); }
         .footer a:hover { color: var(--accent); }
 
@@ -400,9 +424,12 @@
         ✉️ Email: <a href="mailto:scottantwi930@gmail.com" style="color:#a78bfa;text-decoration:none;font-weight:600;">scottantwi930@gmail.com</a>
     </div>
 
+    <!-- Chat Overlay -->
+    <div id="chatOverlay" onclick="toggleChat()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:299;"></div>
+
     <!-- Chat Widget -->
     <div id="chatWidget" style="position:fixed;bottom:24px;right:24px;z-index:150;">
-        <div id="chatWindow" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100%;height:100%;background:#0a0a12;border:none;border-radius:0;box-shadow:none;flex-direction:column;overflow:hidden;z-index:300;margin:0;">
+        <div id="chatWindow" class="chat-fullscreen" style="display:none;">
             <div style="padding:16px 20px;background:linear-gradient(135deg,#1a1a2e,#13111c);color:#fff;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(139,92,246,0.15);min-height:60px;">
                 <div style="display:flex;align-items:center;gap:12px;">
                     <button onclick="toggleChat()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;font-size:1.1rem;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;">←</button>
@@ -520,16 +547,18 @@ User is not logged in (guest).
     ];
 
     function setChatHeight() {
+        if (!chatOpen || window.innerWidth >= 768) return;
         const cw = document.getElementById('chatWindow');
-        if (cw && chatOpen) {
+        if (cw) {
             cw.style.height = window.innerHeight + 'px';
             setTimeout(() => { document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight; }, 100);
         }
     }
     window.addEventListener('resize', setChatHeight);
     window.visualViewport && window.visualViewport.addEventListener('resize', () => {
+        if (!chatOpen || window.innerWidth >= 768) return;
         const cw = document.getElementById('chatWindow');
-        if (cw && chatOpen) {
+        if (cw) {
             cw.style.height = window.visualViewport.height + 'px';
             cw.style.top = window.visualViewport.offsetTop + 'px';
         }
@@ -538,13 +567,20 @@ User is not logged in (guest).
     function toggleChat() {
         chatOpen = !chatOpen;
         const cw = document.getElementById('chatWindow');
+        const overlay = document.getElementById('chatOverlay');
+        const isMobile = window.innerWidth < 768;
         cw.style.display = chatOpen ? 'flex' : 'none';
-        if (chatOpen) cw.style.height = (window.visualViewport ? window.visualViewport.height : window.innerHeight) + 'px';
+        overlay.style.display = chatOpen && !isMobile ? 'block' : 'none';
+        if (chatOpen && isMobile) {
+            cw.style.height = (window.visualViewport ? window.visualViewport.height : window.innerHeight) + 'px';
+        } else if (chatOpen) {
+            cw.style.height = '';
+        }
         document.getElementById('chatToggle').style.display = chatOpen ? 'none' : 'flex';
         document.getElementById('chatLabel').style.display = chatOpen ? 'none' : 'block';
         document.body.style.overflow = chatOpen ? 'hidden' : '';
-        document.body.style.position = chatOpen ? 'fixed' : '';
-        document.body.style.width = chatOpen ? '100%' : '';
+        document.body.style.position = chatOpen && isMobile ? 'fixed' : '';
+        document.body.style.width = chatOpen && isMobile ? '100%' : '';
         if (chatOpen) {
             document.getElementById('chatInput').focus();
             document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
