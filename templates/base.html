@@ -434,6 +434,30 @@
 
     // Chat
     let chatOpen = false;
+    let chatHistory = [
+        {role: 'system', content: `You are ScholarFinder AI — a friendly, knowledgeable assistant on the ScholarFinder platform built by Scott (Alpha Global Minds).
+
+You help students (especially from Africa) with:
+- Scholarship search and advice
+- University recommendations
+- Study abroad guidance
+- Visa and application tips
+- Test prep (IELTS, TOEFL, SAT, GRE)
+- Essay and SOP writing tips
+- Cost of living comparisons
+- Career and internship advice
+- General questions about studying abroad
+
+Be warm, encouraging, and concise. Use emojis sparingly. Give actionable advice.
+
+When users ask about:
+- Personal application review, sensitive documents, or need one-on-one help → Direct them to the Telegram bot: @ScholarFinder_bot
+- Urgent or private matters → Tell them to contact Scott directly via the Contact section on the website or WhatsApp
+- Specific scholarship deadlines or availability → Remind them to check the Scholarships page for the latest info, or use @ScholarFinder_bot for real-time search
+
+You can chat about anything — not just scholarships. Be helpful and conversational. But always tie it back to how ScholarFinder can help when relevant.`}
+    ];
+
     function toggleChat() {
         chatOpen = !chatOpen;
         document.getElementById('chatWindow').style.display = chatOpen ? 'flex' : 'none';
@@ -453,13 +477,18 @@
         const input = document.getElementById('chatInput');
         const msg = input.value.trim(); if (!msg) return;
         input.value = ''; addMessage(msg, true);
+        chatHistory.push({role: 'user', content: msg});
         const t = document.createElement('div');
         t.id='typing'; t.style.cssText='background:var(--accent-lighter);color:var(--text3);padding:12px 16px;border-radius:14px 14px 14px 4px;font-size:0.88rem;max-width:85%;';
         t.textContent='Thinking...'; document.getElementById('chatMessages').appendChild(t);
         try {
-            const res = await fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg})});
-            const data = await res.json(); t.remove(); addMessage(data.reply || 'Something went wrong.', false);
-        } catch(e) { t.remove(); addMessage('Connection error.', false); }
+            const res = await fetch('/api/ai/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({messages: chatHistory, max_tokens: 1024})});
+            const data = await res.json(); t.remove();
+            const reply = data.content || data.reply || 'Something went wrong.';
+            chatHistory.push({role: 'assistant', content: reply});
+            if (chatHistory.length > 21) chatHistory = [chatHistory[0], ...chatHistory.slice(-20)];
+            addMessage(reply, false);
+        } catch(e) { t.remove(); addMessage('Connection error. Try again!', false); }
     }
     document.getElementById('chatInput').addEventListener('keydown', e => { if(e.key==='Enter') sendChat(); });
 
