@@ -1031,9 +1031,7 @@
     }
 })();
 
-/* ==========================================
-   CHAT WIDGET — Smart FAQ Assistant
-   ========================================== */
+/*    CHAT WIDGET — Smart FAQ Assistant */
 (function() {
     const toggle = document.getElementById('chatToggle');
     const widget = document.getElementById('chatWidget');
@@ -1200,9 +1198,7 @@
     });
 })();
 
-/* ==========================================
-   WELCOME REGISTRATION MODAL
-   ========================================== */
+/*    WELCOME REGISTRATION MODAL */
 (function() {
     // Check if already registered
     if (localStorage.getItem('sf_registered')) return;
