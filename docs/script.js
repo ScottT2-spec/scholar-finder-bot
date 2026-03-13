@@ -1,14 +1,8 @@
-/* ============================================
-   ScholarFinder — Main Script
-   © 2026 Scott Antwi | Alpha Global Minds
-   ============================================ */
+/* scholarfinder main script */
 
 (function () {
     'use strict';
-
-    // ==========================================
-    // DATA STORE
-    // ==========================================
+    // data store
     const DATA = {
         scholarships: [],
         universities: [],
@@ -27,10 +21,7 @@
         universities: PAGE_SIZE,
         opportunities: PAGE_SIZE
     };
-
-    // ==========================================
-    // UTILITIES
-    // ==========================================
+    // utilities
     function debounce(fn, ms) {
         let timer;
         return function (...args) {
@@ -73,10 +64,7 @@
         }
         return 'Other';
     }
-
-    // ==========================================
-    // DATA LOADING
-    // ==========================================
+    // data loading
     async function fetchJSON(path) {
         try {
             const resp = await fetch(path);
@@ -109,10 +97,7 @@
         DATA.testPrep = testPrep || {};
         DATA.essays = essays || {};
     }
-
-    // ==========================================
-    // NAVIGATION
-    // ==========================================
+    // navigation
     function initNavigation() {
         const hamburger = $('#hamburger');
         const navMenu = $('#navMenu');
@@ -173,10 +158,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
-
-    // ==========================================
-    // HERO — Stat Counters
-    // ==========================================
+    // hero — stat counters
     function animateCounters() {
         const counters = $$('.stat-number');
         const observer = new IntersectionObserver((entries) => {
@@ -201,10 +183,7 @@
 
         counters.forEach(c => observer.observe(c));
     }
-
-    // ==========================================
-    // GLOBAL SEARCH
-    // ==========================================
+    // global search
     function initGlobalSearch() {
         const input = $('#globalSearch');
         const clearBtn = $('#searchClear');
@@ -224,10 +203,7 @@
             clearBtn.classList.remove('visible');
         });
     }
-
-    // ==========================================
-    // SCHOLARSHIPS
-    // ==========================================
+    // scholarships
     function populateScholarshipFilters() {
         const fields = new Set();
         const countries = new Set();
@@ -333,10 +309,7 @@
         $('#scholarshipField').addEventListener('change', filterScholarships);
         $('#scholarshipRegion').addEventListener('change', filterScholarships);
     }
-
-    // ==========================================
-    // UNIVERSITIES
-    // ==========================================
+    // universities
     function populateUniversityFilters() {
         const countries = new Set();
         const fields = new Set();
@@ -441,10 +414,7 @@
         $('#universityTuition').addEventListener('change', filterUniversities);
         $('#universityField').addEventListener('change', filterUniversities);
     }
-
-    // ==========================================
-    // OPPORTUNITIES
-    // ==========================================
+    // opportunities
     let currentOppType = '';
 
     function filterOpportunities() {
@@ -523,10 +493,7 @@
             });
         });
     }
-
-    // ==========================================
-    // COST OF LIVING
-    // ==========================================
+    // cost of living
     function renderCostCards(list) {
         const grid = $('#costGrid');
         const maxRent = Math.max(...DATA.cost.map(c => c.rent));
@@ -666,10 +633,7 @@
         sel1.addEventListener('change', updateCompare);
         sel2.addEventListener('change', updateCompare);
     }
-
-    // ==========================================
-    // VISA GUIDE
-    // ==========================================
+    // visa guide
     function renderVisaCards(list) {
         const grid = $('#visaGrid');
 
@@ -720,10 +684,7 @@
             renderVisaCards(filtered);
         }, 300));
     }
-
-    // ==========================================
-    // TEST PREP
-    // ==========================================
+    // test prep
     function initTestPrep() {
         const grid = $('#testPrepGrid');
         const testIcons = { ielts: '🇬🇧', toefl: '🇺🇸', duolingo: '🦉', sat: '📝', gre: '🎓' };
@@ -768,10 +729,7 @@
             </div>`;
         }).join('');
     }
-
-    // ==========================================
-    // ESSAYS
-    // ==========================================
+    // essays
     function initEssays() {
         const tabs = $('#essayTabs');
         const content = $('#essayContent');
@@ -800,10 +758,7 @@
             });
         });
     }
-
-    // ==========================================
-    // FAQ
-    // ==========================================
+    // faq
     function renderFAQ(list) {
         const accordion = $('#faqAccordion');
 
@@ -839,10 +794,7 @@
             renderFAQ(filtered);
         }, 300));
     }
-
-    // ==========================================
-    // INTERSECTION OBSERVER FOR LAZY SECTIONS
-    // ==========================================
+    // intersection observer for lazy sections
     function initLazyLoad() {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -854,13 +806,8 @@
 
         $$('.section').forEach(sec => observer.observe(sec));
     }
-
-    // ==========================================
-    // INIT
-    // ==========================================
-    // ==========================================
-    // TYPEWRITER EFFECT
-    // ==========================================
+    // init
+    // typewriter effect
     function initTypewriter() {
         const messages = [
             "🔍 Search 485+ scholarships across 46 countries",
@@ -909,10 +856,7 @@
         }
         tick();
     }
-
-    // ==========================================
-    // FEATURE CARD NAVIGATION
-    // ==========================================
+    // feature card navigation
     function initFeatureCards() {
         const featureCards = $$('.feature-card');
         const detailSections = $$('.detail-section');
@@ -1009,10 +953,7 @@
 
         console.log('🎓 ScholarFinder loaded — © 2026 Scott Antwi | Alpha Global Minds');
     }
-
-    // ==========================================
-    // IMAGE CAROUSEL
-    // ==========================================
+    // image carousel
     function initCarousel() {
         const track = document.getElementById('carouselTrack');
         const dotsContainer = document.getElementById('carouselDots');
